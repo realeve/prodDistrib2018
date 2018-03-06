@@ -1,4 +1,5 @@
 import * as preHandler from './preHandler';
 
 
-preHandler.init();
+const cartList = preHandler.init();
+console.log(cartList);

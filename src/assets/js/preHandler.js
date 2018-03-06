@@ -4,9 +4,9 @@ import setting from './common/setting';
 const R = require('./common/ramda.min');
 
 let { data } = initData;
+// 滤掉丝印
+// data = R.filter(item => item[3].length)(data)
 
-data = R.map(a => [...a.slice(0, 7), ...a[7].split(' '), ...a.slice(8, a.length)])(data);
-console.log(data)
 // 数据预处理
 const preHandle = () => {
   let uniqCarts = R.compose(R.uniqBy(R.prop(0)), R.filter(R.propEq(3, '印码')))(data)
@@ -55,40 +55,53 @@ let updateMachines = (machines, checkedMachines) => {
   return R.map(handleMachine)(machines);
 }
 
-let step2 = machines => {
+let refreshMachineStatus = (taskList, machines) => {
+  // 已抽取的车号列表
+  let checkedMachines = getMachinesOfCarts(taskList);
+  machines.data = updateMachines(machines.data, checkedMachines);//.filter(item => item.proc != '');
+  return machines;
+}
+
+let checkStep2 = machines => {
+  // 优化前：第2步追加的机台(预计11台)
   let unCheckedMachines = R.compose(R.map(R.prop('machine')), R.reject(R.prop('status')))(machines);
-  console.log('准备抽检这些机台：', unCheckedMachines)
+  console.log(`准备抽检这些机台(${unCheckedMachines.length})：`, unCheckedMachines);
+  // 获取指定设备中班最后一万产品 
+  let findMachine = machine => R.filter(R.whereEq({ 5: machine }))(data);
+  let cartsByMachine = R.map(findMachine, unCheckedMachines);
+  return R.map(R.compose(R.prop(0), R.sort(R.descend(R.prop(8)))))(cartsByMachine);
+}
 
-  // 获取指定设备早班的第一万产品
-  let findMahine = machine => R.filter(R.whereEq({ 5: machine, 4: setting.className }))(data);
-
-  // let findMahine = machine => R.filter(R.whereEq({ 5: machine, 9: setting.firstDay }))(data);
-
-  let getFirstCart = R.compose(R.prop(0), R.sortBy(R.prop(8)), findMahine);
-
-  return R.map(getFirstCart, unCheckedMachines)
+let getUnCheckedMachines = R.compose(R.map(R.prop('machine')), R.reject(R.prop('status')));
+let step2 = (taskList, machines) => {
+  let unCheckedMachines = getUnCheckedMachines(machines.data);
+  while (unCheckedMachines.length) {
+    let appendList = checkStep2(machines.data);
+    taskList = [...taskList, appendList[0]];
+    machines = refreshMachineStatus(taskList, machines);
+    unCheckedMachines = getUnCheckedMachines(machines.data);
+    // console.log(unCheckedMachines);
+    // console.log('还剩', unCheckedMachines.length, '未抽检')
+  }
+  return taskList;
 }
 
 let step3 = machines => {
   // 需要调试
-  let firstChart = R.compose(R.sortWith([R.ascend(R.prop(5)), R.ascend(R.prop(8))]), R.reject(R.whereEq({ 3: '印码' })), R.filter(R.whereEq({ 9: setting.firstDay })))(data);
-  let uniqMachine = R.compose(R.uniq, R.map(R.prop(5)))(firstChart);
-  console.log('周一生产的产品:', firstChart);
+  let lastCart = R.compose(R.reject(R.whereEq({ 3: '印码' })), R.filter(R.whereEq({ 9: setting.firstDay })))(data);
+  let uniqMachine = R.compose(R.uniq, R.map(R.prop(5)))(lastCart);
+  console.log('周一生产的所有产品:', lastCart);
   console.log('以上产品共包含在这些机台中：', uniqMachine);
+  let findMachine = machine => R.filter(R.whereEq({ 5: machine }))(lastCart);
+  let getLastCart = R.compose(R.prop(0), R.sort(R.descend(R.prop(8))), findMachine);
 
-  let findMahine = machine => R.filter(R.whereEq({ 5: machine }))(firstChart);
-  let getFirstCart = R.compose(R.prop(0), R.sortBy(R.prop(8)), findMahine);
-  return R.map(getFirstCart, uniqMachine)
+  // let getFirstCart = R.compose(R.prop(0), R.sortBy(R.prop(8)), findMachine);
+  return R.map(getLastCart, uniqMachine)
 }
 
-let refreshMachineStatus = (taskList, machines) => {
-  // 已抽取的车号列表
-  let checkedMachines = getMachinesOfCarts(taskList);
-  machines.data = updateMachines(machines.data, checkedMachines);
-  return machines;
-}
 
-export const init = () => {
+
+let getCheckedCarts = () => {
   // 处理号码
   let taskInfo = preHandle();
   console.log(taskInfo);
@@ -102,15 +115,18 @@ export const init = () => {
   let taskList = step1(machines, proc);
   console.log('第1步抽检列表:', taskList);
   machines = refreshMachineStatus(taskList, machines);
+  console.log(machines);
 
-  let appendList = step2(machines.data);
-  console.log('第2步追加的机台:', appendList);
-  taskList = [...taskList, ...appendList];
+  let appendList = step2(taskList, machines);
+  console.log(`第2步追加的机台(预计${appendList.length - taskList.length}台):`, appendList.slice(taskList.length, appendList.length));
+
+  taskList = appendList;
   console.log('当前所抽检的车号列表为：', taskList);
   machines = refreshMachineStatus(taskList, machines);
   // 是否已经抽检够对应的数量
   if (taskList.length >= taskInfo.checks) {
-    return taskList.slice(0, taskInfo.checks);
+    return taskList;
+    // return appendList.slice(0, taskInfo.checks);
   }
 
   // 继续按规则3抽检
@@ -123,5 +139,33 @@ export const init = () => {
   if (taskList.length >= taskInfo.checks) {
     return taskList.slice(0, taskInfo.checks);
   }
+}
+
+let convertObj2Array = obj => {
+  const keys = R.keys(obj);
+  return R.map(key => ({ name: key, value: obj[key] }))(keys)
+}
+
+let countMachineCheckInfo = carts => {
+  let cartList = R.map(R.prop(0))(carts);
+  // let cartLog = R.compose(R.uniq, R.map(item => [...item.slice(0, 6), item[10]]), R.filter(item => cartList.includes(item[0])))(data)
+  let cartLog = R.filter(item => cartList.includes(item[0]))(data)
+
+  let className = R.countBy(R.prop(4), cartLog);
+  let machine = R.countBy(R.prop(5), cartLog);
+  let weekDay = R.countBy(R.prop(10), cartLog);
+  return {
+    className: convertObj2Array(className),
+    machine: convertObj2Array(machine),
+    weekDay: convertObj2Array(weekDay),
+    log: R.filter(R.propEq(3, '印码'))(cartLog),
+    cartLog
+  }
+}
+
+export const init = () => {
+  let carts = getCheckedCarts();
+  let count = countMachineCheckInfo(carts);
+  return { carts, count };
 }
 

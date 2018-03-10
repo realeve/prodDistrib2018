@@ -1,5 +1,5 @@
-import * as preHandler from './preHandler';
-import render from './showInDOM';
+import * as preHandler from "./preHandler";
+import render from "./showInDOM";
 
 const cartList = preHandler.init();
 console.log(cartList);

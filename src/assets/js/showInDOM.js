@@ -7,7 +7,7 @@ let cartTbl = cartList => {
     let str = tr.map(td => `<td>${td}</td>`).join('');
     return `<tr>${str}</tr>`;
   })
-  return `<table>
+  return `<table class="table table-bordered table-hover table-responsive">
       <thead><tr>${headerHTML}</tr></thead>
       <tbody>${tbodyHTML}</tbody>
     </table>

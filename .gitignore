@@ -1,10 +1,17 @@
-npm-debug.log
-node_modules
-.project
-.vscode
-.history
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# production
+/dist
+
+# misc
 .DS_Store
-.cache
-dist/
-src/assets/data/
-.cache/*.*
+npm-debug.log*
+
+# umi
+.umi
+.umi-production
+
+public/*.json

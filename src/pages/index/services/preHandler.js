@@ -182,7 +182,6 @@ let countMachineCheckInfo = (carts, data) => {
   let cartList = R.map(R.prop(0))(carts);
   // let cartLog = R.compose(R.uniq, R.map(item => [...item.slice(0, 6), item[10]]), R.filter(item => cartList.includes(item[0])))(data)
   let cartLog = R.filter(item => cartList.includes(item[0]))(data);
-
   let className = R.countBy(R.prop(4), cartLog);
   let machine = R.countBy(R.prop(5), cartLog);
   let weekDay = R.countBy(R.prop(10), cartLog);
@@ -196,8 +195,7 @@ let countMachineCheckInfo = (carts, data) => {
 };
 const init = data => {
   let carts = getCheckedCarts(data);
-
   let count = countMachineCheckInfo(carts.taskList, data);
-  return { ...count, taskInfo: carts.taskInfo };
+  return { ...count, ...carts };
 };
 export default { init };

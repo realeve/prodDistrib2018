@@ -18,12 +18,12 @@ function HeaderMenu({ location }) {
       >
         <Menu.Item key="/">
           <Link to="/">
-            <Icon type="home" />任务发布
+            <Icon type="home" />添加任务
           </Link>
         </Menu.Item>
         <Menu.Item key="/users">
           <Link to="/users">
-            <Icon type="bars" />任务领取
+            <Icon type="bars" />领取任务
           </Link>
         </Menu.Item>
         <Menu.Item key="/report">

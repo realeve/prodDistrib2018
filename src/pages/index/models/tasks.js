@@ -81,20 +81,21 @@ export default {
       let disData = handler.init(
         data.data.map(item => Object.values(item).slice(1))
       );
-      // console.log(disData);
 
       const sampling = {
-        taskInfo: { ...disData.taskInfo, machines: disData.machine.length },
+        taskInfo: {
+          ...disData.taskInfo,
+          machines: disData.machine.length
+        },
         weekDay: disData.weekDay,
         classDis: disData.className
       };
 
-      // console.log(sampling);
-
       let dataSource = [],
         dataClone = [];
       if (data.rows) {
-        dataClone = disData.log.map((item, key) => {
+        // 使用 disData.log 时全部只输出到印码
+        dataClone = disData.taskList.map((item, key) => {
           let col = { key };
           item.forEach((td, idx) => {
             col["col" + idx] = td;

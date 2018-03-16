@@ -16,6 +16,7 @@
     "path-to-regexp": "^2.2.0",
     "pdfmake": "^0.1.36",
     "ramda": "^0.25.0",
+    "rc-tween-one": "^1.7.3",
     "umi": "^1.0.0-0",
     "umi-plugin-dva": "^0.1.5"
   },

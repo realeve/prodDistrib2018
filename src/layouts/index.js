@@ -24,14 +24,14 @@ class Index extends Component {
     switch (pathname) {
       case "/receive":
       case "/users":
-        curPageName = "任务领取";
+        curPageName = "领取任务";
         break;
       case "/report":
         curPageName = "数据报表";
         break;
       case "/":
       default:
-        curPageName = "任务发布";
+        curPageName = "添加任务";
         break;
     }
     this.setState({

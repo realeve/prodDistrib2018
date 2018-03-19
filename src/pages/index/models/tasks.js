@@ -34,7 +34,8 @@ export default {
     refreshTable(state, { payload: dataSource }) {
       return {
         ...state,
-        dataSource
+        dataSource,
+        total: dataSource.length
       };
     },
     setColumns(state, { payload: { dataClone, columns } }) {
@@ -88,7 +89,11 @@ export default {
           machines: disData.machine.length
         },
         weekDay: disData.weekDay,
-        classDis: disData.className
+        classDis: disData.className,
+        save2db: {
+          cartLog: disData.cartLog,
+          machine: disData.machine
+        }
       };
 
       let dataSource = [],

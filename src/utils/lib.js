@@ -1,3 +1,5 @@
+import moment from "moment";
+
 export const searchUrl = "http://10.8.2.133/search#";
 export const apiHost = "http://localhost/DataInterface/Api";
 export const isCartOrReel = str => {
@@ -15,3 +17,6 @@ export const isDateTime = str =>
 export const isNumOrFloat = str => /^\d+(\.)\d+$|^\d+$/.test(str);
 export const isInt = str => /^\d+$/.test(str);
 export const isFloat = str => /^\d+\.\d+$|^\d+$/.test(str);
+
+export const now = () => moment().format("YYYY-MM-DD HH:mm:ss");
+export const weeks = () => moment().weeks();

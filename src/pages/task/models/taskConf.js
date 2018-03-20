@@ -2,20 +2,13 @@ import pathToRegexp from "path-to-regexp";
 import * as db from "../services/table";
 import dateRanges from "../../../utils/ranges";
 
-const namespace = "tableConf";
+const namespace = "taskConf";
 export default {
   namespace,
   state: {
-    tid: "",
     dateRange: []
   },
   reducers: {
-    setTid(state, { payload: tid }) {
-      return {
-        ...state,
-        tid
-      };
-    },
     setDateRange(state, { payload: dateRange }) {
       return {
         ...state,
@@ -24,12 +17,6 @@ export default {
     }
   },
   effects: {
-    *updateTid({ payload: tid }, { put }) {
-      yield put({
-        type: "setTid",
-        payload: tid
-      });
-    },
     *updateDateRange({ payload: dateRange }, { put }) {
       yield put({
         type: "setDateRange",
@@ -40,26 +27,19 @@ export default {
   subscriptions: {
     setup({ dispatch, history }) {
       return history.listen(async ({ pathname, query }) => {
-        const match = pathToRegexp("/").exec(pathname);
+        const match = pathToRegexp("/task").exec(pathname);
 
-        if (match && match[0] === "/") {
-          const tid = 100;
-          dispatch({
-            type: "updateTid",
-            payload: tid
-          });
-          const [tstart, tend] = dateRanges["去年同期"];
+        if (match && match[0] === "/task") {
+          const [tstart, tend] = dateRanges["本周"];
           const [ts, te] = [tstart.format("YYYYMMDD"), tend.format("YYYYMMDD")];
-          const config = db.getQueryConfig({
-            ...query,
-            tid,
-            tstart: ts,
-            tend: te
+
+          let data = await db.getPrintSampleCartlist({ tstart: ts, tend: te });
+
+          dispatch({
+            type: "taskGet/handleTaskData",
+            payload: data
           });
-          await dispatch(config);
-          await dispatch({
-            type: "tasks/handleTaskData"
-          });
+
           dispatch({
             type: "setDateRange",
             payload: [ts, te]

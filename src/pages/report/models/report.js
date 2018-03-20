@@ -1,8 +1,8 @@
 import pathToRegexp from "path-to-regexp";
-import * as db from "../services/tasks";
+import * as db from "../services/report";
 import dateRanges from "../../../utils/ranges";
 
-const namespace = "taskGet";
+const namespace = "report";
 export default {
   namespace,
   state: {
@@ -78,11 +78,11 @@ export default {
         payload: page
       });
     },
-    *handleTaskData(payload, { call, put, select }) {
+    *handleReportData(payload, { call, put, select }) {
       const store = yield select(state => state[namespace]);
       const { pageSize, page, filteredInfo, sortedInfo, dateRange } = store;
 
-      let data = yield call(db.getPrintSampleCartlist, {
+      let data = yield call(db.getPrintSampleMachine, {
         tstart: dateRange[0],
         tend: dateRange[1]
       });
@@ -122,40 +122,13 @@ export default {
           total: data.rows
         }
       });
-    },
-    *checkTask({ payload: { cart_number, keyId } }, { call, select, put }) {
-      const store = yield select(state => state[namespace]);
-      const { dataSource } = store;
-
-      let data = yield call(db.setPrintSampleCartlist, {
-        cart_number
-      });
-      if (data.rows) {
-        yield call(db.setPrintSampleMachine, {
-          cart1: cart_number,
-          cart2: cart_number
-        });
-
-        // let data = R.reject(R.propEq("key", keyId))(dataSource);// 删除
-        let data = dataSource.map(item => {
-          if (item.key === keyId) {
-            item.col7 = 1;
-          }
-          return item;
-        });
-        yield put({
-          type: "refreshTable",
-          payload: data
-        });
-      }
-      return data.rows > 0;
     }
   },
   subscriptions: {
     setup({ dispatch, history }) {
       return history.listen(async ({ pathname, query }) => {
-        const match = pathToRegexp("/task").exec(pathname);
-        if (match && match[0] === "/task") {
+        const match = pathToRegexp("/report").exec(pathname);
+        if (match && match[0] === "/report") {
           const [tstart, tend] = dateRanges["本周"];
           const [ts, te] = [tstart.format("YYYYMMDD"), tend.format("YYYYMMDD")];
 
@@ -166,7 +139,7 @@ export default {
             payload: [ts, te]
           });
           dispatch({
-            type: "handleTaskData"
+            type: "handleReportData"
           });
         }
       });

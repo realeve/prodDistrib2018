@@ -2,9 +2,14 @@ import React from "react";
 import { connect } from "dva";
 import { Table, Pagination, Card, Button, Badge } from "antd";
 import * as lib from "../../../utils/lib.js";
+import * as db from "../services/table";
+import { notification, Icon, Modal } from "antd";
 
 import styles from "./Tasks.less";
 const R = require("ramda");
+
+const confirm = Modal.confirm;
+
 function Tasks({
   dispatch,
   dataSource,
@@ -15,7 +20,8 @@ function Tasks({
   loading,
   filteredInfo,
   columns,
-  sampling
+  sampling,
+  sampleStatus
 }) {
   // 页码更新
   const pageChangeHandler = page => {
@@ -110,6 +116,14 @@ function Tasks({
   //   removeTask(e.key);
   // };
 
+  const openNotification = description => {
+    notification.open({
+      message: "系统提示",
+      description,
+      icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+    });
+  };
+
   const addTasks = e => {
     let exInfo = {
       week_num: lib.weeks(),
@@ -124,14 +138,54 @@ function Tasks({
       exInfo.week_num,
       exInfo.rec_time
     ])(sampling.save2db.cartLog);
-    console.log(insertingData);
 
-    let machines = sampling.save2db.machine.map(({ name, value }) => ({
-      machine_name: name,
-      check_num: value,
-      ...exInfo
-    }));
-    console.log(machines);
+    const keys = "cart_number,gz_no,code_no,proc_name,class_name,machine_name,captain_name,print_date,week_name,prod_name,week_num,rec_time".split(
+      ","
+    );
+
+    insertingData = insertingData.map(carts => {
+      let obj = {};
+      carts.forEach((item, i) => {
+        obj[keys[i]] = item;
+      });
+      return obj;
+    });
+
+    let insertData = async () => {
+      let data = await db.addPrintSampleCartlist(insertingData);
+      if (data.rows) {
+        openNotification("车号列表领取成功");
+      }
+
+      let machines = sampling.save2db.machine.map(({ name, value }) => ({
+        machine_name: name,
+        check_num: value,
+        ...exInfo
+      }));
+      data = await db.addPrintSampleMachine(machines);
+      if (data.rows) {
+        openNotification("机台信息添加成功");
+      }
+
+      dispatch({
+        type: "tasks/setSampleStatus",
+        payload: total
+      });
+    };
+
+    if (!sampleStatus) {
+      insertData();
+      return;
+    }
+
+    confirm({
+      title: "系统提示",
+      content: `本周你已经添加了 ${sampleStatus} 车产品，建议不要重复领取，是否继续？`,
+      maskClosable: true,
+      onOk: async () => {
+        insertData();
+      }
+    });
   };
 
   const distColumn = () => {

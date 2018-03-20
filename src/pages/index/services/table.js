@@ -1,11 +1,12 @@
 // import request from "../../../utils/request";
-import axios from "axios";
+import request from "axios";
+import { axios } from "../../../utils/axios";
 import * as lib from "../../../utils/lib";
 const R = require("ramda");
 
 export const fetchData = async ({ url, params }) => {
   // await axios({ url, params }).then(res => res.data);
-  let data = await axios("/public/init.json").then(res => res.data);
+  let data = await request("/public/init.json").then(res => res.data);
   data.data = R.map(
     item =>
       item[3].length
@@ -135,3 +136,47 @@ export const getQueryConfig = ({ tid, tstart, tend }) => ({
     }
   }
 });
+
+/**
+*   @database: { 质量管理数据库 }
+*   @desc:     { 批量插入机台列表 } 
+	以下参数在建立过程中与系统保留字段冲突，已自动替换:
+	@desc:批量插入数据时，约定使用二维数组values参数，格式为[[machine_name,check_num,week_num,sample_num,rec_time ]]，数组的每一项表示一条数据
+*/
+export const addPrintSampleMachine = async values =>
+  await axios({
+    method: "post",
+    data: {
+      values,
+      id: 53,
+      nonce: "2bfaf3357e"
+    }
+  }).then(res => res);
+
+/**
+*   @database: { 质量管理数据库 }
+*   @desc:     { 批量插入抽样车号列表 } 
+	以下参数在建立过程中与系统保留字段冲突，已自动替换:
+	@desc:批量插入数据时，约定使用二维数组values参数，格式为[[cart_number,gz_no,code_no,proc_name,class_name,machine_name,captain_name,print_date,week_name,prod_name,week_num,rec_time,status ]]，数组的每一项表示一条数据
+*/
+export const addPrintSampleCartlist = async values =>
+  await axios({
+    method: "post",
+    data: {
+      values,
+      id: 52,
+      nonce: "ecf47927ee"
+    }
+  }).then(res => res);
+
+/**
+*   @database: { 质量管理数据库 }
+*   @desc:     { 已领取车号数 } 
+  
+    const { week_num } = params;
+*/
+export const getPrintSampleCartlist = async params =>
+  await axios({
+    url: "/54/40614909a0.json",
+    params
+  }).then(res => res.data);

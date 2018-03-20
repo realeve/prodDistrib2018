@@ -1,5 +1,6 @@
 import * as db from "../services/table";
 import handler from "../services/preHandler";
+import * as lib from "../../../utils/lib";
 const R = require("ramda");
 
 const namespace = "tasks";
@@ -13,7 +14,8 @@ export default {
     total: null,
     page: 1,
     pageSize: 15,
-    sampling: {}
+    sampling: {},
+    sampleStatus: 0
   },
   reducers: {
     save(state, { payload: { dataSrc, dataSource, total } }) {
@@ -49,6 +51,12 @@ export default {
       return {
         ...state,
         sampling
+      };
+    },
+    setSampleStatus(state, { payload: sampleStatus }) {
+      return {
+        ...state,
+        sampleStatus
       };
     }
   },
@@ -135,6 +143,12 @@ export default {
       yield put({
         type: "setSampling",
         payload: sampling
+      });
+
+      data = yield call(db.getPrintSampleCartlist, { week_num: lib.weeks() });
+      yield put({
+        type: "setSampleStatus",
+        payload: parseInt(data[0].nums, 10)
       });
     }
   }

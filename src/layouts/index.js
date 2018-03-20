@@ -22,8 +22,7 @@ class Index extends Component {
     const { pathname } = this.props.location;
     let curPageName;
     switch (pathname) {
-      case "/receive":
-      case "/users":
+      case "/task":
         curPageName = "领取任务";
         break;
       case "/report":

@@ -1,4 +1,6 @@
-import * as db from "../services/table";
+import pathToRegexp from "path-to-regexp";
+import * as db from "../services/tasks";
+import dateRanges from "../../../utils/ranges";
 
 const namespace = "taskGet";
 export default {
@@ -10,7 +12,9 @@ export default {
     columns: [],
     total: null,
     page: 1,
-    pageSize: 15
+    pageSize: 15,
+    dateRange: []
+    // loading: false
   },
   reducers: {
     save(state, { payload: { dataSrc, dataSource, total } }) {
@@ -41,9 +45,27 @@ export default {
         dataSource,
         total: dataSource.length
       };
+    },
+    setDateRange(state, { payload: dateRange }) {
+      return {
+        ...state,
+        dateRange
+      };
     }
+    // setLoading(state, { payload, loading }) {
+    //   return {
+    //     ...state,
+    //     loading
+    //   };
+    // }
   },
   effects: {
+    *updateDateRange({ payload: dateRange }, { put }) {
+      yield put({
+        type: "setDateRange",
+        payload: dateRange
+      });
+    },
     *changePageSize({ payload: pageSize }, { put, select }) {
       yield put({
         type: "setPageSize",
@@ -51,7 +73,7 @@ export default {
       });
     },
     *changePage({ payload: page }, { put, select }) {
-      const store = yield select(state => state.taskGet);
+      const store = yield select(state => state[namespace]);
       const { pageSize, dataClone } = store;
       const dataSource = db.getPageData({ data: dataClone, page, pageSize });
 
@@ -64,9 +86,15 @@ export default {
         payload: page
       });
     },
-    *handleTaskData({ payload: data }, { call, put, select }) {
-      const store = yield select(state => state.taskGet);
-      const { pageSize, page, filteredInfo, sortedInfo } = store;
+    *handleTaskData(payload, { call, put, select }) {
+      const store = yield select(state => state[namespace]);
+      const { pageSize, page, filteredInfo, sortedInfo, dateRange } = store;
+
+      let data = yield call(db.getPrintSampleCartlist, {
+        tstart: dateRange[0],
+        tend: dateRange[1]
+      });
+
       let dataSource = [],
         dataClone = [];
       if (data.rows) {
@@ -100,6 +128,54 @@ export default {
           dataSrc: data,
           dataSource,
           total: data.rows
+        }
+      });
+    },
+    *checkTask({ payload: { cart_number, keyId } }, { call, select, put }) {
+      const store = yield select(state => state[namespace]);
+      const { dataSource } = store;
+
+      let data = yield call(db.setPrintSampleCartlist, {
+        cart_number
+      });
+      if (data.rows) {
+        yield call(db.setPrintSampleMachine, {
+          cart1: cart_number,
+          cart2: cart_number
+        });
+
+        // let data = R.reject(R.propEq("key", keyId))(dataSource);// 删除
+        let data = dataSource.map(item => {
+          if (item.key === keyId) {
+            item.col7 = 1;
+          }
+          return item;
+        });
+        yield put({
+          type: "refreshTable",
+          payload: data
+        });
+      }
+      return data.rows > 0;
+    }
+  },
+  subscriptions: {
+    setup({ dispatch, history }) {
+      return history.listen(async ({ pathname, query }) => {
+        const match = pathToRegexp("/task").exec(pathname);
+        if (match && match[0] === "/task") {
+          const [tstart, tend] = dateRanges["本周"];
+          const [ts, te] = [tstart.format("YYYYMMDD"), tend.format("YYYYMMDD")];
+
+          // let data = await db.getPrintSampleCartlist({ tstart: ts, tend: te });
+
+          await dispatch({
+            type: "updateDateRange",
+            payload: [ts, te]
+          });
+          dispatch({
+            type: "handleTaskData"
+          });
         }
       });
     }

@@ -21,14 +21,14 @@ function HeaderMenu({ location }) {
             <Icon type="home" />添加任务
           </Link>
         </Menu.Item>
-        <Menu.Item key="/users">
-          <Link to="/users">
+        <Menu.Item key="/task">
+          <Link to="/task">
             <Icon type="bars" />领取任务
           </Link>
         </Menu.Item>
         <Menu.Item key="/report">
           <Link to="/report">
-            <Icon type="frown-circle" />数据报表
+            <Icon type="area-chart" />数据报表
           </Link>
         </Menu.Item>
       </Menu>

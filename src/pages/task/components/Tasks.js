@@ -1,14 +1,13 @@
 import React from "react";
 import { connect } from "dva";
-import { Table, Pagination, Card, Button, Badge } from "antd";
-import * as lib from "../../../utils/lib.js";
-import * as db from "../services/table";
-import { notification, Icon, Modal } from "antd";
-
+import { Table, Pagination, Card, Button, message, DatePicker } from "antd";
+import moment from "moment";
+import "moment/locale/zh-cn";
 import styles from "./Tasks.less";
-const R = require("ramda");
-
-const confirm = Modal.confirm;
+import dateRanges from "../../../utils/ranges";
+import * as lib from "../../../utils/lib";
+const RangePicker = DatePicker.RangePicker;
+moment.locale("zh-cn");
 
 function Tasks({
   dispatch,
@@ -19,12 +18,22 @@ function Tasks({
   pageSize,
   loading,
   filteredInfo,
-  columns
+  columns,
+  dateRange
 }) {
+  const onDateChange = async (dates, dateStrings) => {
+    await dispatch({
+      type: "taskGet/setDateRange",
+      payload: dateStrings
+    });
+    dispatch({
+      type: "taskGet/handleTaskData"
+    });
+  };
   // 页码更新
   const pageChangeHandler = page => {
     dispatch({
-      type: "tasks/changePage",
+      type: "taskGet/changePage",
       payload: page
     });
   };
@@ -33,7 +42,7 @@ function Tasks({
   const onShowSizeChange = async (current, nextPageSize) => {
     let newPage = Math.floor(pageSize * current / nextPageSize);
     await dispatch({
-      type: "tasks/changePageSize",
+      type: "taskGet/changePageSize",
       payload: nextPageSize
     });
     reloadData(newPage);
@@ -41,42 +50,32 @@ function Tasks({
 
   const reloadData = (newPage = 1) => {
     dispatch({
-      type: "tasks/changePage",
+      type: "taskGet/changePage",
       payload: newPage
     });
   };
 
-  const removeTask = keyId => {
-    let data = R.reject(R.propEq("key", keyId))(dataSource);
-    dispatch({
-      type: "taskGet/refreshTable",
-      payload: data
+  const addTask = async e => {
+    const cart_number = e.col0;
+    let isSuccess = await dispatch({
+      type: "taskGet/checkTask",
+      payload: { cart_number, keyId: e.key }
     });
+    if (isSuccess) {
+      message.success("产品成功领取");
+    }
   };
 
-  const addTask = e => {
-    const cartNumber = e.col0;
-    console.log(cartNumber);
-    console.log("添加该信息至数据库,成功后清除信息");
-    removeTask(e.key);
-  };
-
-  const openNotification = description => {
-    notification.open({
-      message: "系统提示",
-      description,
-      icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
-    });
-  };
   const distColumn = () => {
     if (columns.length) {
+      columns[6].render = text => `第${text}周`;
       columns[7].render = (text, record) =>
         text === "0" ? (
           <Button type="primary" onClick={addTask.bind(null, record)}>
             添加任务
           </Button>
         ) : (
-          ""
+          "已领取"
         );
     }
     return columns;
@@ -85,7 +84,24 @@ function Tasks({
   return (
     <div className={styles.container}>
       <Card
-        loading={loading}
+        title={
+          <div className={styles.header}>
+            <div className={styles.title}>
+              {dataSrc.title}(第 {lib.weeks()} 周)
+            </div>
+            <div className={styles.dateRange}>
+              <RangePicker
+                ranges={dateRanges}
+                format="YYYYMMDD"
+                onChange={onDateChange}
+                defaultValue={[moment(dateRange[0]), moment(dateRange[1])]}
+                locale={{
+                  rangePlaceholder: ["开始日期", "结束日期"]
+                }}
+              />
+            </div>
+          </div>
+        }
         style={{ width: "100%", marginTop: "30px" }}
         bodyStyle={{ padding: "0px 0px 12px 0px" }}
       >

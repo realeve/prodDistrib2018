@@ -22,6 +22,10 @@ function Tables({ dispatch, tid, dateRange, title, columns, data, loading }) {
     const [tstart, tend] = dateStrings;
     await dispatch(db.getQueryConfig({ tid, tstart, tend }));
     await dispatch({
+      type: "tasks/fetchSampledData",
+      payload: { tstart, tend }
+    });
+    await dispatch({
       type: "tasks/handleTaskData"
     });
     dispatch({

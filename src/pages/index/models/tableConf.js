@@ -48,7 +48,7 @@ export default {
             type: "updateTid",
             payload: tid
           });
-          const [tstart, tend] = dateRanges["去年同期"];
+          const [tstart, tend] = dateRanges["本周"];
           const [ts, te] = [tstart.format("YYYYMMDD"), tend.format("YYYYMMDD")];
           const config = db.getQueryConfig({
             ...query,
@@ -57,6 +57,11 @@ export default {
             tend: te
           });
           await dispatch(config);
+          await dispatch({
+            type: "tasks/fetchSampledData",
+            payload: { tstart: ts, tend: te }
+          });
+
           await dispatch({
             type: "tasks/handleTaskData"
           });

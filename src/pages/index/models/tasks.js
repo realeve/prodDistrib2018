@@ -15,7 +15,8 @@ export default {
     page: 1,
     pageSize: 15,
     sampling: {},
-    sampleStatus: 0
+    sampleStatus: 0,
+    sampledCarts: []
   },
   reducers: {
     save(state, { payload: { dataSrc, dataSource, total } }) {
@@ -58,6 +59,12 @@ export default {
         ...state,
         sampleStatus
       };
+    },
+    setSampledCarts(state, { payload: sampledCarts }) {
+      return {
+        ...state,
+        sampledCarts
+      };
     }
   },
   effects: {
@@ -79,6 +86,14 @@ export default {
       yield put({
         type: "setPage",
         payload: page
+      });
+    },
+    *fetchSampledData({ payload: { tstart, tend } }, { call, put, select }) {
+      let data = yield call(db.getSampledCartlist, { tstart, tend });
+      let carts = R.compose(R.uniq(), R.map(R.prop(0)))(data.data);
+      yield put({
+        type: "setSampledCarts",
+        payload: carts
       });
     },
     *handleTaskData({ payload }, { call, put, select }) {

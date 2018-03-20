@@ -180,3 +180,15 @@ export const getPrintSampleCartlist = async params =>
     url: "/54/40614909a0.json",
     params
   }).then(res => res.data);
+
+/**
+*   @database: { 质量管理数据库 }
+*   @desc:     { 已领取车号列表 } 
+  
+    const { tstart, tend } = params;
+*/
+export const getSampledCartlist = async params =>
+  await axios({
+    url: "/55/38989f6661/array.json",
+    params
+  }).then(res => res);

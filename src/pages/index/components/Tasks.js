@@ -21,7 +21,8 @@ function Tasks({
   filteredInfo,
   columns,
   sampling,
-  sampleStatus
+  sampleStatus,
+  sampledCarts
 }) {
   // 页码更新
   const pageChangeHandler = page => {
@@ -90,32 +91,6 @@ function Tasks({
     );
   };
 
-  // const removeTask = keyId => {
-  //   let data = R.reject(R.propEq("key", keyId))(dataSource);
-  //   dispatch({
-  //     type: "tasks/refreshTable",
-  //     payload: data
-  //   });
-  // };
-
-  // const addTask = e => {
-  //   // console.log(e);
-  //   const cartNumber = e.col0;
-  //   let insertingData = R.compose(
-  //     R.map(item => [
-  //       ...R.slice(0, 7, item),
-  //       item[7] + " " + item[8],
-  //       item[9],
-  //       item[11]
-  //     ]),
-  //     R.map(R.compose(R.slice(1, Infinity), R.values)),
-  //     R.filter(R.propEq("col0", cartNumber))
-  //   )(dataSrc.data);
-  //   console.log(insertingData);
-  //   console.log("添加该信息至数据库,成功后清除信息");
-  //   removeTask(e.key);
-  // };
-
   const openNotification = description => {
     notification.open({
       message: "系统提示",
@@ -150,6 +125,16 @@ function Tasks({
       });
       return obj;
     });
+
+    if (sampledCarts.length) {
+      insertingData = insertingData.filter(
+        item => !sampledCarts.includes(item.cart_number)
+      );
+    }
+    if (insertingData.length === 0) {
+      openNotification("车号列表已经领取，不再重复领取");
+      return;
+    }
 
     let insertData = async () => {
       let data = await db.addPrintSampleCartlist(insertingData);

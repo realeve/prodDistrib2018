@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50720
 File Encoding         : 65001
 
-Date: 2018-03-20 22:51:17
+Date: 2018-03-21 10:35:02
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -73,7 +73,7 @@ CREATE TABLE `sys_database` (
 -- ----------------------------
 INSERT INTO `sys_database` VALUES ('1', '接口管理', 'db1', 'mysql', '127.0.0.1', 'root', 'root', '3306', 'api_quality');
 INSERT INTO `sys_database` VALUES ('2', '质量管理数据库', 'db2', 'mssql', '127.0.0.1', 'sa', '123', '1433', 'notacheck_db');
-INSERT INTO `sys_database` VALUES ('3', 'oracle测试', 'db4', 'orcl', '127.0.0.1', 'orcl', 'orcl', '1521', 'ORCL');
+INSERT INTO `sys_database` VALUES ('3', '机台作业系统', 'db4', 'orcl', '127.0.0.1', 'orcl', 'orcl', '1521', 'ORCL');
 INSERT INTO `sys_database` VALUES ('4', 'mssql测试', 'db3', 'mssql', '127.0.0.1', 'sa', '123', '1433', 'api');
 
 -- ----------------------------

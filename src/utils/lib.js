@@ -1,7 +1,8 @@
 import moment from "moment";
+import { host } from "./axios";
 
 export const searchUrl = "http://10.8.2.133/search#";
-export const apiHost = "http://localhost/DataInterface/Api";
+export const apiHost = host;
 export const isCartOrReel = str => {
   const rules = {
     cart: /^[1-9]\d{3}[A-Za-z]\d{3}$/,

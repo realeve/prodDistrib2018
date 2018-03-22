@@ -21,7 +21,7 @@ const isFilterColumn = (data, key) => {
   return { uniqColumn, filters: isValid };
 };
 
-export function handleColumns({ dataSrc, sortedInfo, filteredInfo }) {
+export function handleColumns({ dataSrc, sortedInfo }) {
   let { data, header, rows } = dataSrc;
   let showURL = typeof data !== "undefined" && rows > 0;
   if (!rows || rows === 0) {
@@ -57,16 +57,16 @@ export function handleColumns({ dataSrc, sortedInfo, filteredInfo }) {
       return item;
     }
 
-    let fInfo = isFilterColumn(data, key);
+    // let fInfo = isFilterColumn(data, key);
 
-    if (filteredInfo && fInfo.filters) {
-      item.filters = fInfo.uniqColumn.map(text => ({
-        text,
-        value: text
-      }));
-      item.onFilter = (value, record) => record[key].includes(value);
-      item.filteredValue = filteredInfo[key] || null;
-    }
+    // if (filteredInfo && fInfo.filters) {
+    //   item.filters = fInfo.uniqColumn.map(text => ({
+    //     text,
+    //     value: text
+    //   }));
+    //   item.onFilter = (value, record) => record[key].includes(value);
+    //   item.filteredValue = filteredInfo[key] || null;
+    // }
     return item;
   });
   return column;

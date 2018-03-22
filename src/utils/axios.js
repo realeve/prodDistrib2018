@@ -1,6 +1,12 @@
 import http from "axios";
 import qs from "qs";
 
+let DEV = false;
+
+export let host = DEV
+  ? "http://localhost:90/api/"
+  : "http://10.8.1.25:100/api/";
+
 // 判断数据类型，对于FormData使用 typeof 方法会得到 object;
 let getType = data =>
   Object.prototype.toString
@@ -18,7 +24,6 @@ const loadUserInfo = function() {
     org: ""
   };
   let user = window.localStorage.getItem("user");
-  // let user = {user:"abc",fullname:"full name",token:"fake token"};
   if (user == null) {
     return {
       token: ""
@@ -27,10 +32,6 @@ const loadUserInfo = function() {
   user = JSON.parse(user);
   window.g_axios.token = user.token;
 
-  //   userInfo.name = user.user;
-  //   userInfo.fullname = user.fullname;
-  // return user;
-
   let extraInfo = atob(user.token.split(".")[1]);
   userInfo.uid = JSON.parse(extraInfo).extra.uid;
 
@@ -38,7 +39,6 @@ const loadUserInfo = function() {
 };
 
 let refreshNoncer = async () => {
-  // let refUrl = location.href.split('?')[0].split('#')[0];
   // 此时可将引用url链接作为 url 参数请求登录，作为强校验；
   // 本部分涉及用户名和密码，用户需自行在服务端用curl申请得到token，勿放置在前端;
   let url = window.g_axios.host + "authorize.json?user=develop&psw=111111";
@@ -56,7 +56,7 @@ const saveToken = () => {
 export let axios = async option => {
   if (!window.g_axios) {
     window.g_axios = {
-      host: "http://localhost:90/api/",
+      host,
       token: ""
     };
   }

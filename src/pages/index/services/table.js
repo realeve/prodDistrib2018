@@ -1,12 +1,24 @@
 // import request from "../../../utils/request";
-import request from "axios";
+// import request from "axios";
 import { axios } from "../../../utils/axios";
 import * as lib from "../../../utils/lib";
 const R = require("ramda");
 
+/**
+*   @database: { 接口管理 }
+*   @desc:     { 产品抽检车号原始记录 } 
+  
+    const { tstart, tend, tstart2, tend2 } = params;
+*/
+const getVIEWCARTFINDER = async params =>
+  await axios({
+    url: "/69/9e2d18889f/array.json",
+    params
+  }).then(res => res);
+
 export const fetchData = async ({ url, params }) => {
-  // await axios({ url, params }).then(res => res.data);
-  let data = await request("/public/init.json").then(res => res.data);
+  // let data = await request("/public/init.json").then(res => res.data);
+  let data = await getVIEWCARTFINDER(params);
   data.data = R.map(
     item =>
       item[3].length
@@ -41,8 +53,9 @@ export function handleColumns({ dataSrc, sortedInfo, filteredInfo }) {
   if (!rows || rows === 0) {
     return [];
   }
-  let column = header.map((item, i) => {
+  let column = header.map((title, i) => {
     let key = "col" + i;
+    let item = { title };
     item.dataIndex = key;
     // item.key = key;
 
@@ -120,12 +133,13 @@ export function handleSort({ dataClone, field, order }) {
 export const getPageData = ({ data, page, pageSize }) =>
   data.slice((page - 1) * pageSize, page * pageSize);
 
-export const getQueryConfig = ({ tid, tstart, tend }) => ({
+// tid,
+export const getQueryConfig = ({ tstart, tend }) => ({
   type: "table/fetchAPIData",
   payload: {
     url: lib.apiHost,
     params: {
-      ID: tid,
+      // ID: tid,
       cache: 10,
       tstart,
       tend,

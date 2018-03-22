@@ -102,8 +102,8 @@ export default {
       }
       let columns = yield call(db.handleColumns, {
         dataSrc: data,
-        filteredInfo: filteredInfo || {},
-        sortedInfo: sortedInfo || {}
+        // filteredInfo: {},
+        sortedInfo: {}
       });
 
       yield put({

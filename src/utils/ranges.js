@@ -1,5 +1,5 @@
 import moment from "moment";
-
+moment.locale("zh-cn");
 export default {
   去年: [
     moment()

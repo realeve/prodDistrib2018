@@ -1,6 +1,14 @@
 import React from "react";
 import { connect } from "dva";
-import { Table, Pagination, Card, Button, message, DatePicker } from "antd";
+import {
+  Table,
+  Pagination,
+  Card,
+  Button,
+  message,
+  DatePicker,
+  Badge
+} from "antd";
 import moment from "moment";
 import "moment/locale/zh-cn";
 import styles from "./Tasks.less";
@@ -68,10 +76,15 @@ function Tasks({
 
   const distColumn = () => {
     if (columns.length) {
-      columns[6].render = text => `第${text}周`;
-      columns[7].render = (text, record) =>
+      columns[5].render = text => `第${text}周`;
+      columns[3].render = (text, record) =>
+        text === "是" ? <Badge status="success" text={text} /> : text;
+      columns[6].render = (text, record) =>
         text === "0" ? (
-          <Button type="primary" onClick={addTask.bind(null, record)}>
+          <Button
+            type={record.col3 === "是" ? "primary" : "default"}
+            onClick={addTask.bind(null, record)}
+          >
             添加任务
           </Button>
         ) : (

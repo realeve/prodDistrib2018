@@ -37,8 +37,8 @@ export default {
     refreshTable(state, { payload: dataSource }) {
       return {
         ...state,
-        dataSource,
-        total: dataSource.length
+        dataSource
+        // total: dataSource.length
       };
     },
     setColumns(state, { payload: { dataClone, columns } }) {

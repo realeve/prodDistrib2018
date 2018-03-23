@@ -194,88 +194,23 @@ let countMachineCheckInfo = (carts, data) => {
   };
 };
 
-let getMachinesByProcName = (prodName, machines, remainedCarts) => {
-  // 先按车号整理生产信息
-  remainedCarts = R.filter(R.propEq(11, prodName))(remainedCarts);
-  let filtedCarts = R.compose(R.uniq, R.map(R.prop(0)))(remainedCarts);
-
-  // 待抽机台
-  let pMachineList = R.compose(
-    R.uniq,
-    R.map(R.prop(2)),
-    R.filter(R.propEq(0, prodName))
-  )(machines);
-  console.log(prodName, "，该品种待抽检以下机台:", pMachineList);
-
-  filtedCarts = R.map(cart => {
-    // 产品权重
-    let uniqNums = 0;
-    let machines = R.compose(
-      R.uniq,
-      R.map(R.prop(5)),
-      R.filter(R.propEq(0, cart))
-    )(remainedCarts);
-
-    R.forEach(machine => {
-      if (pMachineList.includes(machine)) {
-        uniqNums++;
-      }
-    })(machines);
-    return { cart, uniqNums, machines };
-  })(filtedCarts);
-  filtedCarts = R.sort((b, a) => a.uniqNums - b.uniqNums)(filtedCarts);
-  console.log(filtedCarts);
-  return filtedCarts.length ? filtedCarts[0] : false;
-};
-
 const init = (data, sampledMachines, sampledCarts) => {
-  console.log(sampledCarts, sampledMachines);
-
+  console.log("准备排活", data, sampledMachines, sampledCarts);
   let rejectArrByIdx = (arr, idx) =>
     R.reject(item => R.contains(R.prop(idx)(item), arr));
 
-  // 过滤已抽取的车号列表
   let remainedCarts = rejectArrByIdx(sampledCarts, 0)(data);
 
-  // 筛选出尚未抽取的机台详情
-  let taskMachineList = R.compose(
+  console.log(remainedCarts);
+
+  // R.reject(item => R.contains(R.prop(5)(item), sampledMachines))
+  let unSampledCarts = R.compose(
     R.uniq,
     R.map(R.props([11, 3, 5])),
     rejectArrByIdx(sampledMachines, 5)
   )(remainedCarts);
-  console.log(taskMachineList);
+  console.log(unSampledCarts);
 
-  let prodList = R.compose(R.uniq, R.map(R.prop(0)))(taskMachineList);
-  console.log(prodList);
-
-  // 方案3：周一第一万必抽，其它按车号最少,实际抽取16车
-
-  // 方案2：按车号最少，实际抽取12车
-  R.forEach(prodName => {
-    let unSampledCarts = R.filter(R.propEq(0, prodName))(taskMachineList);
-    while (unSampledCarts.length) {
-      // 开始抽样
-      let newSampleCart = getMachinesByProcName(
-        prodName,
-        unSampledCarts,
-        remainedCarts
-      );
-
-      console.log(newSampleCart);
-      if (newSampleCart) {
-        sampledCarts = R.uniq(sampledCarts.concat(newSampleCart.cart));
-        sampledMachines = R.uniq(
-          sampledMachines.concat(newSampleCart.machines)
-        );
-        unSampledCarts = R.reject(item =>
-          newSampleCart.machines.includes(item[2])
-        )(unSampledCarts);
-        console.log(sampledCarts, sampledMachines, unSampledCarts);
-      }
-    }
-  })(prodList);
-
-  // 方案1：按风险最低 ———— 码后核查共生产275车产品，按4%抽样将抽取11车产品 实际抽取20车
   let carts = getCheckedCarts(data);
   let count = countMachineCheckInfo(carts.taskList, data);
   return { ...count, ...carts };

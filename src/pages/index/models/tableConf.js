@@ -66,7 +66,10 @@ export default {
             type: "tasks/fetchSampledData",
             payload: { tstart: ts, tend: te }
           });
-
+          await dispatch({
+            type: "tasks/fetchSampledMachines",
+            payload: { tstart: ts, tend: te }
+          });
           await dispatch({
             type: "tasks/handleTaskData"
           });

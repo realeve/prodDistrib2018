@@ -85,7 +85,7 @@ function Tasks({
             type={record.col3 === "是" ? "primary" : "default"}
             onClick={addTask.bind(null, record)}
           >
-            添加任务
+            领取本车
           </Button>
         ) : (
           "已领取"

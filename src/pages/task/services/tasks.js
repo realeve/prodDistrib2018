@@ -2,25 +2,6 @@ import { axios } from "../../../utils/axios";
 import * as lib from "../../../utils/lib";
 const R = require("ramda");
 
-const isFilterColumn = (data, key) => {
-  let isValid = true;
-  const handleItem = item => {
-    if (isValid) {
-      item = item.trim();
-      let isNum = lib.isNumOrFloat(item);
-      let isTime = lib.isDateTime(item);
-      if (isNum || isTime) {
-        isValid = false;
-      }
-    }
-  };
-
-  let uniqColumn = R.compose(R.uniq, R.map(R.prop(key)))(data);
-  R.map(handleItem)(uniqColumn);
-
-  return { uniqColumn, filters: isValid };
-};
-
 export function handleColumns({ dataSrc, sortedInfo }) {
   let { data, header, rows } = dataSrc;
   let showURL = typeof data !== "undefined" && rows > 0;

@@ -80,7 +80,7 @@ export default {
     },
     *handleTaskData(payload, { call, put, select }) {
       const store = yield select(state => state[namespace]);
-      const { pageSize, page, filteredInfo, sortedInfo, dateRange } = store;
+      const { pageSize, page, dateRange } = store;
 
       let data = yield call(db.getPrintSampleCartlist, {
         tstart: dateRange[0],
@@ -130,6 +130,7 @@ export default {
       let data = yield call(db.setPrintSampleCartlist, {
         cart_number
       });
+
       if (data.rows) {
         yield call(db.setPrintSampleMachine, {
           cart1: cart_number,
@@ -139,7 +140,7 @@ export default {
         // let data = R.reject(R.propEq("key", keyId))(dataSource);// 删除
         let data = dataSource.map(item => {
           if (item.key === keyId) {
-            item.col7 = 1;
+            item.col6 = 1;
           }
           return item;
         });

@@ -16,7 +16,8 @@ export default {
     pageSize: 15,
     sampling: {},
     sampleStatus: 0,
-    sampledCarts: []
+    sampledCarts: [],
+    sampledMachines: []
   },
   reducers: {
     save(state, { payload: { dataSrc, dataSource, total } }) {
@@ -65,6 +66,12 @@ export default {
         ...state,
         sampledCarts
       };
+    },
+    setSampledMachines(state, { payload: sampledMachines }) {
+      return {
+        ...state,
+        sampledMachines
+      };
     }
   },
   effects: {
@@ -90,20 +97,43 @@ export default {
     },
     *fetchSampledData({ payload: { tstart, tend } }, { call, put, select }) {
       let data = yield call(db.getSampledCartlist, { tstart, tend });
-      let carts = R.compose(R.uniq(), R.map(R.prop(0)))(data.data);
+      let carts = R.compose(
+        R.uniq(),
+        R.map(R.prop(0)),
+        R.filter(R.propEq(6, "1"))
+      )(data.data);
       yield put({
         type: "setSampledCarts",
         payload: carts
+      });
+    },
+    // 对尚未抽检的设备单独统计
+    *fetchSampledMachines(
+      { payload: { tstart, tend } },
+      { call, put, select }
+    ) {
+      let data = yield call(db.getPrintSampleMachine, { tstart, tend });
+
+      let sampledMachines = R.compose(
+        R.map(R.prop(0)),
+        R.filter(R.propEq(3, "0"))
+      )(data.data);
+      yield put({
+        type: "setSampledMachines",
+        payload: sampledMachines
       });
     },
     *handleTaskData({ payload }, { call, put, select }) {
       const store = yield select(state => state.tasks);
       let { dataSrc: data, columns } = yield select(state => state.table);
 
-      const { pageSize, page } = store;
+      const { pageSize, page, sampledMachines, sampledCarts } = store;
 
+      // 自动排活
       let disData = handler.init(
-        data.data.map(item => Object.values(item).slice(1))
+        data.data.map(item => Object.values(item).slice(1)),
+        sampledMachines,
+        sampledCarts
       );
 
       const sampling = {

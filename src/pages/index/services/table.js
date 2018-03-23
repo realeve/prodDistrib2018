@@ -206,3 +206,15 @@ export const getSampledCartlist = async params =>
     url: "/55/38989f6661/array.json",
     params
   }).then(res => res);
+
+/**
+*   @database: { 质量管理数据库 }
+*   @desc:     { 各机台产品抽检情况 } 
+  
+    const { tstart, tend } = params;
+*/
+export const getPrintSampleMachine = async params =>
+  await axios({
+    url: "/58/0695d9575b/array.json",
+    params
+  }).then(res => res);

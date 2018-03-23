@@ -26,6 +26,10 @@ function Tables({ dispatch, tid, dateRange, title, columns, data, loading }) {
       payload: { tstart, tend }
     });
     await dispatch({
+      type: "tasks/fetchSampledMachines",
+      payload: { tstart, tend }
+    });
+    await dispatch({
       type: "tasks/handleTaskData"
     });
     dispatch({

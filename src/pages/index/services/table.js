@@ -19,11 +19,8 @@ const getVIEWCARTFINDER = async params =>
 export const fetchData = async ({ url, params }) => {
   // let data = await request("/public/init.json").then(res => res.data);
   let data = await getVIEWCARTFINDER(params);
-  data.data = R.map(
-    item =>
-      item[3].length
-        ? item
-        : [...item.slice(0, 3), "丝印", ...item.slice(4, item.length)]
+  data.data = R.map(item =>
+    R.update(3, R.equals(R.nth(3, item), "") ? "丝印" : R.nth(3, item))(item)
   )(data.data);
   return data;
 };

@@ -1,6 +1,4 @@
-// import request from "../../../utils/request";
-// import request from "axios";
-import { axios } from "../../../utils/axios";
+import { axios, DEV } from "../../../utils/axios";
 import * as lib from "../../../utils/lib";
 const R = require("ramda");
 
@@ -12,12 +10,13 @@ const R = require("ramda");
 */
 const getVIEWCARTFINDER = async params =>
   await axios({
-    url: "/69/9e2d18889f/array.json",
+    url: DEV
+      ? "http://localhost:8000/public/40614909a0.json"
+      : "/69/9e2d18889f/array.json",
     params
   }).then(res => res);
 
 export const fetchData = async ({ url, params }) => {
-  // let data = await request("/public/init.json").then(res => res.data);
   let data = await getVIEWCARTFINDER(params);
   data.data = R.map(item =>
     R.update(3, R.equals(R.nth(3, item), "") ? "丝印" : R.nth(3, item))(item)
@@ -188,7 +187,9 @@ export const addPrintSampleCartlist = async values =>
 */
 export const getPrintSampleCartlist = async params =>
   await axios({
-    url: "/54/40614909a0.json",
+    url: DEV
+      ? "http://localhost:8000/public/40614909a0.json"
+      : "/54/40614909a0.json",
     params
   }).then(res => res.data);
 
@@ -200,7 +201,9 @@ export const getPrintSampleCartlist = async params =>
 */
 export const getSampledCartlist = async params =>
   await axios({
-    url: "/55/38989f6661/array.json",
+    url: DEV
+      ? "http://localhost:8000/public/38989f6661.json"
+      : "/55/38989f6661/array.json",
     params
   }).then(res => res);
 
@@ -212,6 +215,8 @@ export const getSampledCartlist = async params =>
 */
 export const getPrintSampleMachine = async params =>
   await axios({
-    url: "/58/0695d9575b/array.json",
+    url: DEV
+      ? "http://localhost:8000/public/0695d9575b.json"
+      : "/58/0695d9575b/array.json",
     params
   }).then(res => res);

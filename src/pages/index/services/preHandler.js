@@ -129,12 +129,7 @@ let step3 = (machines, data) => {
   return R.map(getLastCart, uniqMachine);
 };
 
-let getCheckedCarts = data => {
-  // 处理号码
-  let taskInfo = preHandle(data);
-  taskInfo.percent = setting.percent;
-  // console.log(taskInfo);
-
+let getCheckedCarts = (data, taskInfo) => {
   // 非重复机台
   let machines = handleMachines(data);
   // console.log("本周产品共涉及以下机台：", machines);
@@ -156,7 +151,7 @@ let getCheckedCarts = data => {
   machines = refreshMachineStatus(taskList, machines, data);
   // 是否已经抽检够对应的数量
   if (taskList.length >= taskInfo.checks) {
-    return { taskList, taskInfo };
+    return taskList;
     // return appendList.slice(0, taskInfo.checks);
   }
 
@@ -168,9 +163,9 @@ let getCheckedCarts = data => {
   machines = refreshMachineStatus(taskList, machines, data);
   // 是否已经抽检够对应的数量
   if (taskList.length >= taskInfo.checks) {
-    return { taskList: taskList.slice(0, taskInfo.checks), taskInfo };
+    return taskList.slice(0, taskInfo.checks);
   }
-  return { taskList, taskInfo };
+  return taskList;
 };
 
 let convertObj2Array = obj => {
@@ -178,8 +173,7 @@ let convertObj2Array = obj => {
   return R.map(key => ({ name: key, value: obj[key] }))(keys);
 };
 
-let countMachineCheckInfo = (carts, data) => {
-  let cartList = R.map(R.prop(0))(carts);
+let countMachineCheckInfo = (cartList, data) => {
   // let cartLog = R.compose(R.uniq, R.map(item => [...item.slice(0, 6), item[10]]), R.filter(item => cartList.includes(item[0])))(data)
   let cartLog = R.filter(item => cartList.includes(item[0]))(data);
   let className = R.countBy(R.prop(4), cartLog);
@@ -198,15 +192,14 @@ let getMachinesByProcName = (prodName, machines, remainedCarts) => {
   // 先按车号整理生产信息
   remainedCarts = R.filter(R.propEq(11, prodName))(remainedCarts);
   let filtedCarts = R.compose(R.uniq, R.map(R.prop(0)))(remainedCarts);
-
   // 待抽机台
   let pMachineList = R.compose(
     R.uniq,
     R.map(R.prop(2)),
     R.filter(R.propEq(0, prodName))
   )(machines);
-  console.log(prodName, "，该品种待抽检以下机台:", pMachineList);
-
+  // console.log(remainedCarts);
+  // let codeCarts = R.filter(R.propEq(3, "印码"))(remainedCarts);
   filtedCarts = R.map(cart => {
     // 产品权重
     let uniqNums = 0;
@@ -221,16 +214,49 @@ let getMachinesByProcName = (prodName, machines, remainedCarts) => {
         uniqNums++;
       }
     })(machines);
-    return { cart, uniqNums, machines };
+    // let cartInfo = R.find(R.propEq(0, cart))(codeCarts);
+    return {
+      cart,
+      uniqNums,
+      machines
+      // cartInfo: {
+      //   week: cartInfo[10],
+      //   dateTime: parseInt(cartInfo[8].replace(/:/g, ""), 10)
+      // }
+    };
   })(filtedCarts);
+  // 按权重逆序
   filtedCarts = R.sort((b, a) => a.uniqNums - b.uniqNums)(filtedCarts);
+
+  // 加入印码周一的优先级，导致多抽1万
+  // let maxUniqNums = filtedCarts[0].uniqNums;
+  // filtedCarts = R.filter(R.propEq("uniqNums", maxUniqNums))(filtedCarts);
+
+  // // 是否周一
+  // let mondayData = R.filter(R.pathEq(["cartInfo", "week"], "1"))(filtedCarts);
+  // if (mondayData.length) {
+  //   // 按生产时间降序
+  //   filtedCarts = R.sort((a, b) => a.cartInfo.dateTime - b.cartInfo.dateTime)(
+  //     filtedCarts
+  //   );
+  // } else {
+  //   // 按生产时间逆序
+  //   filtedCarts = R.sort((b, a) => a.cartInfo.dateTime - b.cartInfo.dateTime)(
+  //     filtedCarts
+  //   );
+  // }
+  // 按生产时间降序
+  // filtedCarts = R.sort((a, b) => a.cartInfo.dateTime - b.cartInfo.dateTime)(
+  //   filtedCarts
+  // );
+
+  R.sortBy(R.compose(R.toLower, R.prop("name")));
+  console.log("按时间排序：");
   console.log(filtedCarts);
   return filtedCarts.length ? filtedCarts[0] : false;
 };
 
-const init = (data, sampledMachines, sampledCarts) => {
-  console.log(sampledCarts, sampledMachines);
-
+const sampleByLessCarts = (data, sampledMachines, sampledCarts) => {
   let rejectArrByIdx = (arr, idx) =>
     R.reject(item => R.contains(R.prop(idx)(item), arr));
 
@@ -243,10 +269,10 @@ const init = (data, sampledMachines, sampledCarts) => {
     R.map(R.props([11, 3, 5])),
     rejectArrByIdx(sampledMachines, 5)
   )(remainedCarts);
-  console.log(taskMachineList);
+  // console.log(taskMachineList);
 
   let prodList = R.compose(R.uniq, R.map(R.prop(0)))(taskMachineList);
-  console.log(prodList);
+  // console.log(prodList);
 
   // 方案3：周一第一万必抽，其它按车号最少,实际抽取16车
 
@@ -255,13 +281,14 @@ const init = (data, sampledMachines, sampledCarts) => {
     let unSampledCarts = R.filter(R.propEq(0, prodName))(taskMachineList);
     while (unSampledCarts.length) {
       // 开始抽样
+
       let newSampleCart = getMachinesByProcName(
         prodName,
         unSampledCarts,
         remainedCarts
       );
 
-      console.log(newSampleCart);
+      // console.log(newSampleCart);
       if (newSampleCart) {
         sampledCarts = R.uniq(sampledCarts.concat(newSampleCart.cart));
         sampledMachines = R.uniq(
@@ -270,14 +297,44 @@ const init = (data, sampledMachines, sampledCarts) => {
         unSampledCarts = R.reject(item =>
           newSampleCart.machines.includes(item[2])
         )(unSampledCarts);
+        console.log("sampling:");
         console.log(sampledCarts, sampledMachines, unSampledCarts);
       }
     }
   })(prodList);
 
+  return sampledCarts;
+};
+
+const getUnionCarts = carts => {
+  let cartList = R.compose(R.uniq, R.map(R.prop(0)))(carts);
+  let newCarts = R.map(item => R.find(R.propEq(0, item))(carts))(cartList);
+  // console.log(newCarts);
+  return newCarts;
+};
+
+const init = (data, sampledMachines, sampledCarts) => {
+  // 任务量
+  let taskInfo = preHandle(data);
+  taskInfo.percent = setting.percent;
+  console.log(taskInfo);
+  let taskList, sCarts;
+
+  // 使用历史数据
+  // sampleByLessCarts(data, sampledMachines, sampledCarts);
+
+  // 文案2：效率优先，同时不使用历史数据
+  sCarts = sampleByLessCarts(data, [], []);
+  console.log(sCarts);
+
   // 方案1：按风险最低 ———— 码后核查共生产275车产品，按4%抽样将抽取11车产品 实际抽取20车
-  let carts = getCheckedCarts(data);
-  let count = countMachineCheckInfo(carts.taskList, data);
-  return { ...count, ...carts };
+  // taskList = getCheckedCarts(data, taskInfo);
+  // console.log(taskList);
+  // sCarts = R.map(R.prop(0))(taskList);
+
+  // 数据汇总
+  let count = countMachineCheckInfo(sCarts, data);
+  taskList = getUnionCarts(count.log);
+  return { ...count, taskList, taskInfo };
 };
 export default { init };

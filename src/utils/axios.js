@@ -1,7 +1,7 @@
 import http from "axios";
 import qs from "qs";
 
-let DEV = false;
+export let DEV = true;
 
 export let host = DEV
   ? "http://localhost:90/api/"
@@ -31,7 +31,6 @@ const loadUserInfo = function() {
   }
   user = JSON.parse(user);
   window.g_axios.token = user.token;
-
   let extraInfo = atob(user.token.split(".")[1]);
   userInfo.uid = JSON.parse(extraInfo).extra.uid;
 

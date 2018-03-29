@@ -102,9 +102,9 @@ export default {
     },
     *handleReportData(payload, { call, put, select }) {
       const store = yield select(state => state[namespace]);
-      const { pageSize, page, filteredInfo, sortedInfo, dateRange } = store;
+      const { pageSize, page, dateRange } = store;
 
-      let data = yield call(db.getPrintSampleMachine, {
+      let data = yield call(db.getPrintAbnormalList, {
         tstart: dateRange[0],
         tend: dateRange[1]
       });
@@ -124,8 +124,8 @@ export default {
       }
       let columns = yield call(db.handleColumns, {
         dataSrc: data,
-        filteredInfo: filteredInfo || {},
-        sortedInfo: sortedInfo || {}
+        filteredInfo: {},
+        sortedInfo: {}
       });
 
       yield put({

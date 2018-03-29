@@ -33,7 +33,7 @@ export function handleColumns({ dataSrc, sortedInfo }) {
         return <a {...attrs}>{text}</a>;
       };
       return item;
-    } else if (lib.isInt(tdValue)) {
+    } else if (lib.isInt(tdValue) && !lib.isDateTime(tdValue)) {
       item.render = text => parseInt(text, 10).toLocaleString();
       return item;
     }

@@ -52,21 +52,21 @@ export function handleColumns({ dataSrc, sortedInfo, filteredInfo }) {
         return <a {...attrs}>{text}</a>;
       };
       return item;
-    } else if (lib.isInt(tdValue)) {
+    } else if (lib.isInt(tdValue) && !lib.isDateTime(tdValue)) {
       item.render = text => parseInt(text, 10).toLocaleString();
       return item;
     }
 
-    let fInfo = isFilterColumn(data, key);
+    // let fInfo = isFilterColumn(data, key);
 
-    if (filteredInfo && fInfo.filters) {
-      item.filters = fInfo.uniqColumn.map(text => ({
-        text,
-        value: text
-      }));
-      item.onFilter = (value, record) => record[key].includes(value);
-      item.filteredValue = filteredInfo[key] || null;
-    }
+    // if (filteredInfo && fInfo.filters) {
+    //   item.filters = fInfo.uniqColumn.map(text => ({
+    //     text,
+    //     value: text
+    //   }));
+    //   item.onFilter = (value, record) => record[key].includes(value);
+    //   item.filteredValue = filteredInfo[key] || null;
+    // }
     return item;
   });
   return column;
@@ -147,4 +147,14 @@ export const getProduct = async () =>
 export const getPrintAbnormalProd = async () =>
   await axios({
     url: "/72/2b853fe9ed.json"
+  }).then(res => res);
+
+/**
+*   @database: { 质量信息系统 }
+*   @desc:     { 异常产品车号列表 } 
+  
+*/
+export const getPrintAbnormalList = async () =>
+  await axios({
+    url: "/73/2dcf6571e6/array.json"
   }).then(res => res);

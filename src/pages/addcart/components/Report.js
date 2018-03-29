@@ -55,27 +55,13 @@ function Addcart({
     });
   };
 
-  const distColumn = () => {
-    if (columns.length) {
-      columns[2].render = text => `第${text}周`;
-      columns[3].render = text => (
-        <Badge
-          showZero
-          count={parseInt(text, 10)}
-          style={{ backgroundColor: text === "0" ? "#f5222d" : "#52c41a" }}
-        />
-      );
-    }
-    return columns;
-  };
-
   return (
     <div className={styles.container}>
       <Card
         title={
           <div className={styles.header}>
             <div className={styles.title}>
-              {dataSrc.title}(第 {lib.weeks()} 周)
+              {dataSrc.title}({dateRange[0]} 至 {dateRange[1]})
             </div>
             <div className={styles.dateRange}>
               <RangePicker
@@ -95,7 +81,7 @@ function Addcart({
       >
         <Table
           loading={loading}
-          columns={distColumn()}
+          columns={columns}
           dataSource={dataSource}
           rowKey="key"
           pagination={false}

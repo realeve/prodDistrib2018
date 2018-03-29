@@ -21,3 +21,5 @@ export const isFloat = str => /^\d+\.\d+$|^\d+$/.test(str);
 
 export const now = () => moment().format("YYYY-MM-DD HH:mm:ss");
 export const weeks = () => moment().weeks();
+
+export const ymd = () => moment().format("YYYYMMDD");

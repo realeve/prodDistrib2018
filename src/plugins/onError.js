@@ -11,7 +11,7 @@ export default {
       description: `${
         Reflect.has(data, "token") ? data.token : err.message
       } \n\rurl:${data.url}`,
-      icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+      icon: <Icon type="warning" style={{ color: "#108ee9" }} />
     });
 
     if (data.status === 401) {

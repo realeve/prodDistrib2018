@@ -31,6 +31,11 @@ function HeaderMenu({ location }) {
             <Icon type="area-chart" />数据报表
           </Link>
         </Menu.Item>
+        <Menu.Item key="/addcart">
+          <Link to="/addcart">
+            <Icon type="area-chart" />异常品
+          </Link>
+        </Menu.Item>
       </Menu>
     </Header>
   );

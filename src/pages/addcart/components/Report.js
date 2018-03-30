@@ -1,11 +1,11 @@
 import React from "react";
 import { connect } from "dva";
-import { Table, Pagination, Card, DatePicker, Badge } from "antd";
+import { Table, Pagination, Card, DatePicker } from "antd";
 import moment from "moment";
 import "moment/locale/zh-cn";
 import styles from "./Report.less";
 import dateRanges from "../../../utils/ranges";
-import * as lib from "../../../utils/lib";
+// import * as lib from "../../../utils/lib";
 const RangePicker = DatePicker.RangePicker;
 moment.locale("zh-cn");
 

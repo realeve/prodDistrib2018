@@ -36,6 +36,11 @@ function HeaderMenu({ location }) {
             <Icon type="area-chart" />异常品
           </Link>
         </Menu.Item>
+        <Menu.Item key="/newproc">
+          <Link to="/newproc">
+            <Icon type="area-chart" />四新计划
+          </Link>
+        </Menu.Item>
       </Menu>
     </Header>
   );

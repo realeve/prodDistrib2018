@@ -1,9 +1,9 @@
 import pathToRegexp from "path-to-regexp";
-import * as db from "../services/Addcart";
+import * as db from "../services/Newproc";
 import dateRanges from "../../../utils/ranges";
 const R = require("ramda");
 
-const namespace = "addcart";
+const namespace = "newproc";
 export default {
   namespace,
   state: {
@@ -160,10 +160,27 @@ export default {
       });
     },
     *getProc(payload, { put, select, call }) {
-      let proc = yield call(db.getPrintAbnormalProd);
+      // let proc = yield call(db.getPrintAbnormalProd);
+      // yield put({
+      //   type: "setProc",
+      //   payload: proc.data
+      // });
       yield put({
         type: "setProc",
-        payload: proc.data
+        payload: [
+          {
+            proc_name: "新设备"
+          },
+          {
+            proc_name: "新工艺"
+          },
+          {
+            proc_name: "新技术"
+          },
+          {
+            proc_name: "新产品"
+          }
+        ]
       });
     }
   },

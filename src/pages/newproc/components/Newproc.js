@@ -10,11 +10,18 @@ import {
   Icon,
   message,
   Row,
-  Col
+  Col,
+  DatePicker,
+  Radio
 } from "antd";
+
+import moment from "moment";
+import "moment/locale/zh-cn";
 
 import styles from "./Report.less";
 import * as lib from "../../../utils/lib";
+const { RangePicker } = DatePicker;
+moment.locale("zh-cn");
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -29,6 +36,10 @@ const formTailLayout = {
 };
 
 class DynamicRule extends React.Component {
+  state = {
+    dateType: "0"
+  };
+
   submit = () => {
     this.props.form.validateFields(err => {
       if (err) {
@@ -48,73 +59,73 @@ class DynamicRule extends React.Component {
 
       // 重载报表数据
       this.props.dispatch({
-        type: "addcart/handleReportData"
+        type: "newproc/handleReportData"
       });
     });
   };
 
-  // handleSubmit = e => {
-  //   e.preventDefault();
-  //   this.props.form.validateFields((err, values) => {
-  //     if (!err) {
-  //       console.log("Received values of form: ", values);
-  //     }
-  //   });
-  // };
-
-  // onChange={this.handleSelectChange}
-  // handleSelectChange = value => {
-  //   console.log(value);
-  // };
-
-  convertCart = e => {
-    e.preventDefault();
-    let val = e.target.value.toUpperCase().trim();
-    e.target.value = val;
+  machineChange = v => {
+    console.log(v);
+    message.success("机台改变时读取近期印刷的品种");
 
     let { setFieldsValue } = this.props.form;
 
     setFieldsValue({
-      prod_id: val[2]
+      prod_id: "4"
     });
+  };
 
-    if (val.length === 8) {
-      message.success("获取车号信息，冠字，机台");
-      setFieldsValue({
-        machine_name: "接线印码机"
-      });
-    }
+  handleDateType = e => {
+    const dateType = e.target.value;
+    this.setState({ dateType });
+    let { setFieldsValue } = this.props.form;
+    let today = moment();
+    let nextHalfMonth = moment().add(15, "days");
+    setFieldsValue({
+      rec_date: dateType === "0" ? today : [today, nextHalfMonth]
+    });
   };
 
   render() {
     const { getFieldDecorator } = this.props.form;
-    //  onSubmit={this.handleSubmit}
+    const { dateType } = this.state;
+
     return (
+      // onSubmit={this.handleSubmit}
       <Form>
         <Row>
           <Col span={12}>
-            <FormItem {...formItemLayout} label="车号">
-              {getFieldDecorator("cart_number", {
-                rules: [
-                  {
-                    required: true,
-                    message: "车号信息必须填写",
-                    pattern: /^\d{4}[A-Z]\d{3}$/
-                  }
-                ]
+            <FormItem {...formItemLayout} label="机台">
+              {getFieldDecorator("machine_name", {
+                rules: [{ required: true, message: "请选择机台" }]
               })(
-                <Input
-                  placeholder="请输入异常品车号"
-                  onChange={this.convertCart}
-                />
+                <Select placeholder="请选择机台" onChange={this.machineChange}>
+                  {this.props.machines.map(item => (
+                    <Option value={item} key={item}>
+                      {item}
+                    </Option>
+                  ))}
+                </Select>
               )}
             </FormItem>
-
-            <FormItem {...formItemLayout} label="问题分类">
-              {getFieldDecorator("proc_name", {
-                rules: [{ required: true, message: "请选择问题分类" }]
+            <FormItem {...formItemLayout} label="品种">
+              {getFieldDecorator("prod_id", {
+                rules: [{ required: true, message: "请选择品种" }]
               })(
-                <Select placeholder="请选择问题分类">
+                <Select placeholder="请选择品种">
+                  {this.props.productList.map(({ name, value }) => (
+                    <Option value={value} key={value}>
+                      {name}
+                    </Option>
+                  ))}
+                </Select>
+              )}
+            </FormItem>
+            <FormItem {...formItemLayout} label="分类">
+              {getFieldDecorator("proc_name", {
+                rules: [{ required: true, message: "请选择分类" }]
+              })(
+                <Select placeholder="请选择分类">
                   {this.props.procList.map(({ proc_name }) => (
                     <Option value={proc_name} key={proc_name}>
                       {proc_name}
@@ -128,11 +139,37 @@ class DynamicRule extends React.Component {
                 rules: [
                   {
                     required: true,
-                    message: "请输入异常原因说明"
+                    message: "请输入原因说明"
                   }
                 ]
               })(<Input.TextArea rows={3} placeholder="请输入异常原因说明" />)}
             </FormItem>
+          </Col>
+
+          <Col span={12}>
+            <FormItem {...formItemLayout} label="产品范围">
+              <Radio.Group value={dateType} onChange={this.handleDateType}>
+                <Radio.Button value="0">从某天起</Radio.Button>
+                <Radio.Button value="1">时间段</Radio.Button>
+              </Radio.Group>
+            </FormItem>
+
+            <FormItem
+              {...formItemLayout}
+              label="时间选择"
+              extra={dateType === "0" ? "从某天起的产品" : "某段时间内所有产品"}
+            >
+              {getFieldDecorator("rec_date", {
+                rules: [{ required: true, message: "请选择产品处理时间" }]
+              })(
+                dateType === "0" ? (
+                  <DatePicker placeholder="开始时间" />
+                ) : (
+                  <RangePicker placeholder="时间范围" />
+                )
+              )}
+            </FormItem>
+
             <FormItem
               {...formItemLayout}
               label="工艺流程"
@@ -168,34 +205,6 @@ class DynamicRule extends React.Component {
               </Button>
             </FormItem>
           </Col>
-          <Col span={12}>
-            <FormItem {...formItemLayout} label="品种">
-              {getFieldDecorator("prod_id", {
-                rules: [{ required: true, message: "请选择品种" }]
-              })(
-                <Select placeholder="请选择品种">
-                  {this.props.productList.map(({ name, value }) => (
-                    <Option value={value} key={value}>
-                      {name}
-                    </Option>
-                  ))}
-                </Select>
-              )}
-            </FormItem>
-            <FormItem {...formItemLayout} label="机台">
-              {getFieldDecorator("machine_name", {
-                rules: [{ required: true, message: "请选择机台" }]
-              })(
-                <Select placeholder="请选择机台">
-                  {this.props.machines.map(item => (
-                    <Option value={item} key={item}>
-                      {item}
-                    </Option>
-                  ))}
-                </Select>
-              )}
-            </FormItem>
-          </Col>
         </Row>
       </Form>
     );
@@ -204,7 +213,7 @@ class DynamicRule extends React.Component {
 
 const WrappedDynamicRule = Form.create()(DynamicRule);
 
-function Addcart({ dispatch, loading, machines, productList, procList }) {
+function newproc({ dispatch, loading, machines, productList, procList }) {
   return (
     <div className={styles.container}>
       <Card
@@ -225,9 +234,9 @@ function Addcart({ dispatch, loading, machines, productList, procList }) {
 
 function mapStateToProps(state) {
   return {
-    loading: state.loading.models.addcart,
-    ...state.addcart
+    loading: state.loading.models.newproc,
+    ...state.newproc
   };
 }
 
-export default connect(mapStateToProps)(Addcart);
+export default connect(mapStateToProps)(newproc);

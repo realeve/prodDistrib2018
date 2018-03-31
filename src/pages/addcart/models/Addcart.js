@@ -104,7 +104,7 @@ export default {
       const store = yield select(state => state[namespace]);
       const { pageSize, page, dateRange } = store;
 
-      let data = yield call(db.getPrintAbnormalList, {
+      let data = yield call(db.getViewPrintAbnormalProd, {
         tstart: dateRange[0],
         tend: dateRange[1]
       });

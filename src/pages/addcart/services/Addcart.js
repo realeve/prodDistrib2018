@@ -134,8 +134,22 @@ export const getPrintAbnormalProd = async () =>
 *   @database: { 质量信息系统 }
 *   @desc:     { 异常产品车号列表 } 
   
+    const { tstart, tend } = params;
 */
-export const getPrintAbnormalList = async () =>
+export const getViewPrintAbnormalProd = async params =>
   await axios({
-    url: "/73/2dcf6571e6/array.json"
+    url: "/73/2dcf6571e6/array.json",
+    params
+  }).then(res => res);
+
+/**
+*   @database: { 质量信息系统 }
+*   @desc:     { 添加异常品 } 
+  
+    const { prod_id, cart_number, rec_date, machine_name, proc_name, reason, proc_stream } = params;
+*/
+export const addPrintAbnormalProd = async params =>
+  await axios({
+    url: "/77/d9072e2900.json",
+    params
   }).then(res => res);

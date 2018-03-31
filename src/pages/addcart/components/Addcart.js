@@ -16,6 +16,8 @@ import {
 import styles from "./Report.less";
 import * as lib from "../../../utils/lib";
 
+import * as db from "../services/Addcart";
+
 const FormItem = Form.Item;
 const Option = Select.Option;
 
@@ -29,6 +31,30 @@ const formTailLayout = {
 };
 
 class DynamicRule extends React.Component {
+  insertData = async data => {
+    let res = await db.addPrintAbnormalProd(data);
+    if (!res.rows) {
+      notification.error({
+        message: "系统错误",
+        description: "数据插入失败，请联系管理员",
+        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+      });
+      return;
+    }
+    notification.open({
+      message: "系统提示",
+      description: "数据插入成功",
+      icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+    });
+
+    this.props.form.resetFields();
+
+    // 重载报表数据
+    this.props.dispatch({
+      type: "addcart/handleReportData"
+    });
+  };
+
   submit = () => {
     this.props.form.validateFields(err => {
       if (err) {
@@ -38,34 +64,9 @@ class DynamicRule extends React.Component {
       data.rec_date = lib.ymd();
 
       console.log(data);
-      notification.open({
-        message: "系统提示",
-        description: "数据插入成功",
-        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
-      });
-
-      this.props.form.resetFields();
-
-      // 重载报表数据
-      this.props.dispatch({
-        type: "addcart/handleReportData"
-      });
+      this.insertData(data);
     });
   };
-
-  // handleSubmit = e => {
-  //   e.preventDefault();
-  //   this.props.form.validateFields((err, values) => {
-  //     if (!err) {
-  //       console.log("Received values of form: ", values);
-  //     }
-  //   });
-  // };
-
-  // onChange={this.handleSelectChange}
-  // handleSelectChange = value => {
-  //   console.log(value);
-  // };
 
   convertCart = e => {
     e.preventDefault();
@@ -88,7 +89,7 @@ class DynamicRule extends React.Component {
 
   render() {
     const { getFieldDecorator } = this.props.form;
-    //  onSubmit={this.handleSubmit}
+
     return (
       <Form>
         <Row>

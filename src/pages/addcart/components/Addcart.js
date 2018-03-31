@@ -81,6 +81,10 @@ class DynamicRule extends React.Component {
 
     if (val.length === 8) {
       message.success("获取车号信息，冠字，机台");
+      console.log(
+        "此处添加机台信息，以Input输入汉字的方式进行，从机台作业系统中查询最近一次生产状态中的设备信息"
+      );
+
       setFieldsValue({
         machine_name: "接线印码机"
       });

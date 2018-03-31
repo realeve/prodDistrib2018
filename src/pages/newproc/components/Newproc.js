@@ -35,9 +35,12 @@ const formTailLayout = {
   wrapperCol: { span: 18, offset: 6 }
 };
 
+const R = require("ramda");
+
 class DynamicRule extends React.Component {
   state = {
-    date_type: "0"
+    date_type: "0",
+    procTipInfo: ""
   };
 
   submit = () => {
@@ -46,8 +49,16 @@ class DynamicRule extends React.Component {
         return;
       }
       let data = this.props.form.getFieldsValue();
-      data.rec_date = lib.ymd();
       data.date_type = this.state.date_type;
+      if (data.date_type === "0") {
+        data.rec_date1 = moment(data.rec_date).format("YYYY-MM-DD");
+      } else {
+        data.rec_date1 = moment(data.rec_date[0]).format("YYYY-MM-DD");
+        data.rec_date2 = moment(data.rec_date[1]).format("YYYY-MM-DD");
+      }
+      data.rec_time = lib.now();
+
+      Reflect.deleteProperty(data, "rec_date");
 
       console.log(data);
       notification.open({
@@ -84,7 +95,7 @@ class DynamicRule extends React.Component {
     });
   };
 
-  handledate_type = e => {
+  handleDateType = e => {
     const date_type = e.target.value;
     this.setState({ date_type });
     let { setFieldsValue } = this.props.form;
@@ -93,6 +104,25 @@ class DynamicRule extends React.Component {
     setFieldsValue({
       rec_date: date_type === "0" ? today : [today, nextHalfMonth]
     });
+  };
+
+  handleProcName = v => {
+    let { setFieldsValue } = this.props.form;
+    let procTipInfo = "";
+    switch (v) {
+      case "新设备":
+        procTipInfo = "根据工艺规定" + v;
+        setFieldsValue({
+          num1: 24,
+          proc_stream1: "0",
+          num2: 0,
+          proc_stream2: "2"
+        });
+        break;
+      default:
+        break;
+    }
+    this.setState({ procTipInfo });
   };
 
   Procprocess = () => {
@@ -180,7 +210,7 @@ class DynamicRule extends React.Component {
 
   render() {
     const { getFieldDecorator } = this.props.form;
-    const { date_type } = this.state;
+    const { date_type, procTipInfo } = this.state;
 
     return (
       // onSubmit={this.handleSubmit}
@@ -213,11 +243,11 @@ class DynamicRule extends React.Component {
                 </Select>
               )}
             </FormItem>
-            <FormItem {...formItemLayout} label="分类">
+            <FormItem {...formItemLayout} label="分类" extra={procTipInfo}>
               {getFieldDecorator("proc_name", {
                 rules: [{ required: true, message: "请选择分类" }]
               })(
-                <Select placeholder="请选择分类">
+                <Select placeholder="请选择分类" onChange={this.handleProcName}>
                   {this.props.procList.map(({ proc_name }) => (
                     <Option value={proc_name} key={proc_name}>
                       {proc_name}
@@ -226,6 +256,7 @@ class DynamicRule extends React.Component {
                 </Select>
               )}
             </FormItem>
+
             <FormItem {...formItemLayout} label="原因说明">
               {getFieldDecorator("reason", {
                 rules: [
@@ -240,7 +271,7 @@ class DynamicRule extends React.Component {
 
           <Col span={16}>
             <FormItem {...formItemLayout} label="产品范围">
-              <Radio.Group value={date_type} onChange={this.handledate_type}>
+              <Radio.Group value={date_type} onChange={this.handleDateType}>
                 <Radio.Button value="0">从某天起</Radio.Button>
                 <Radio.Button value="1">时间段</Radio.Button>
               </Radio.Group>

@@ -9,7 +9,7 @@ const { Header } = Layout;
 function HeaderMenu({ location }) {
   return (
     <Header className={styles.header}>
-      <div className={styles.logo}>Flow</div>
+      <div className={styles.logo}>ProdDist</div>
       <Menu
         selectedKeys={[location.pathname]}
         mode="horizontal"

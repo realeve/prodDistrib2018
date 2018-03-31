@@ -132,10 +132,36 @@ export const getPrintAbnormalProd = async () =>
 
 /**
 *   @database: { 质量信息系统 }
-*   @desc:     { 异常产品车号列表 } 
+*   @desc:     { 四新计划列表 } 
   
+    const { tstart, tend } = params;
 */
-export const getPrintAbnormalList = async () =>
+export const getViewPrintNewprocPlan = async params =>
   await axios({
-    url: "/73/2dcf6571e6/array.json"
+    url: "/75/6ac934ad66/array.json",
+    params
+  }).then(res => res);
+
+/**
+*   @database: { 质量信息系统 }
+*   @desc:     { 按开始时间插入四新计划 } 
+  
+    const { date_type, machine_name, proc_name, prod_id, reason, num1, num2, proc_stream1, proc_stream2, rec_date1, rec_date2, rec_time } = params;
+*/
+export const addPrintNewprocPlan1 = async params =>
+  await axios({
+    url: "/74/05807b4c13.json",
+    params
+  }).then(res => res);
+
+/**
+*   @database: { 质量信息系统 }
+*   @desc:     { 按时间范围插入四新计划 } 
+  
+    const { date_type, machine_name, proc_name, prod_id, reason, proc_stream1, rec_date1, rec_date2, rec_time } = params;
+*/
+export const addPrintNewprocPlan2 = async params =>
+  await axios({
+    url: "/76/1335f12ee9.json",
+    params
   }).then(res => res);

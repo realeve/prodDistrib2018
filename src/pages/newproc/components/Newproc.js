@@ -17,6 +17,7 @@ import {
 
 import moment from "moment";
 import "moment/locale/zh-cn";
+import * as db from "../services/Newproc";
 
 import styles from "./Report.less";
 import * as lib from "../../../utils/lib";
@@ -35,12 +36,55 @@ const formTailLayout = {
   wrapperCol: { span: 18, offset: 6 }
 };
 
-const R = require("ramda");
-
 class DynamicRule extends React.Component {
   state = {
     date_type: "0",
     procTipInfo: ""
+  };
+
+  insertData = async () => {
+    let data = this.getInsertedData();
+    let insertRes;
+    if (data.date_type === "0") {
+      insertRes = await db.addPrintNewprocPlan1(data);
+    } else {
+      insertRes = await db.addPrintNewprocPlan2(data);
+    }
+    if (!insertRes.rows) {
+      notification.error({
+        message: "系统错误",
+        description: "数据插入失败，请联系管理员",
+        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+      });
+      return;
+    }
+
+    notification.open({
+      message: "系统提示",
+      description: "数据插入成功",
+      icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+    });
+
+    this.props.form.resetFields();
+
+    // 重载报表数据
+    this.props.dispatch({
+      type: "newproc/handleReportData"
+    });
+  };
+
+  getInsertedData = () => {
+    let data = this.props.form.getFieldsValue();
+    data.date_type = this.state.date_type;
+    if (data.date_type === "0") {
+      data.rec_date1 = moment(data.rec_date).format("YYYY-MM-DD");
+    } else {
+      data.rec_date1 = moment(data.rec_date[0]).format("YYYY-MM-DD");
+      data.rec_date2 = moment(data.rec_date[1]).format("YYYY-MM-DD");
+    }
+    data.rec_time = lib.now();
+    Reflect.deleteProperty(data, "rec_date");
+    return data;
   };
 
   submit = () => {
@@ -48,31 +92,7 @@ class DynamicRule extends React.Component {
       if (err) {
         return;
       }
-      let data = this.props.form.getFieldsValue();
-      data.date_type = this.state.date_type;
-      if (data.date_type === "0") {
-        data.rec_date1 = moment(data.rec_date).format("YYYY-MM-DD");
-      } else {
-        data.rec_date1 = moment(data.rec_date[0]).format("YYYY-MM-DD");
-        data.rec_date2 = moment(data.rec_date[1]).format("YYYY-MM-DD");
-      }
-      data.rec_time = lib.now();
-
-      Reflect.deleteProperty(data, "rec_date");
-
-      console.log(data);
-      notification.open({
-        message: "系统提示",
-        description: "数据插入成功",
-        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
-      });
-
-      this.props.form.resetFields();
-
-      // 重载报表数据
-      this.props.dispatch({
-        type: "newproc/handleReportData"
-      });
+      this.insertData();
     });
   };
 
@@ -125,6 +145,14 @@ class DynamicRule extends React.Component {
     this.setState({ procTipInfo });
   };
 
+  ProcList = (
+    <Select placeholder="请选择产品工艺流程">
+      <Option value="0">8位清分机全检</Option>
+      <Option value="1">人工拉号</Option>
+      <Option value="2">系统自动分配</Option>
+    </Select>
+  );
+
   Procprocess = () => {
     const { date_type } = this.state;
     const { getFieldDecorator } = this.props.form;
@@ -147,13 +175,7 @@ class DynamicRule extends React.Component {
         >
           {getFieldDecorator("proc_stream1", {
             rules: [{ required: true, message: "请选择产品工艺流程" }]
-          })(
-            <Select placeholder="请选择产品工艺流程">
-              <Option value="0">8位清分机全检</Option>
-              <Option value="1">人工拉号</Option>
-              <Option value="2">系统自动分配</Option>
-            </Select>
-          )}
+          })(this.ProcList)}
         </FormItem>
       );
     }
@@ -170,14 +192,6 @@ class DynamicRule extends React.Component {
       wrapperCol: { span: 11 }
     };
 
-    const ProcList = (
-      <Select placeholder="请选择产品工艺流程">
-        <Option value="0">8位清分机全检</Option>
-        <Option value="1">人工拉号</Option>
-        <Option value="2">系统自动分配</Option>
-      </Select>
-    );
-
     return (
       <>
         <div className={styles.inlineForm}>
@@ -189,7 +203,7 @@ class DynamicRule extends React.Component {
           <FormItem {...formStyle1} extra="推荐选择8位清分机全检">
             {getFieldDecorator("proc_stream1", {
               rules: [{ required: true, message: "请选择产品工艺流程" }]
-            })(ProcList)}
+            })(this.ProcList)}
           </FormItem>
         </div>
         <div className={styles.inlineForm}>
@@ -201,7 +215,7 @@ class DynamicRule extends React.Component {
           <FormItem {...formStyle1} extra="推荐选择系统自动分配">
             {getFieldDecorator("proc_stream2", {
               rules: [{ required: true, message: "请选择产品工艺流程" }]
-            })(ProcList)}
+            })(this.ProcList)}
           </FormItem>
         </div>
       </>

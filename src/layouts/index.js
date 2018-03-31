@@ -10,25 +10,28 @@ import { Layout, Breadcrumb, BackTop } from "antd";
 const { Content, Footer } = Layout;
 
 class Index extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      curPageName: ""
-    };
-  }
+  state = {
+    curPageName: ""
+  };
 
   // 组件加载前更新菜单ID
-  componentWillMount() {
-    const { pathname } = this.props.location;
+  handleBreadName(newProps) {
+    const { pathname } = newProps.location;
     let curPageName;
-    switch (pathname) {
-      case "/task":
+    switch (pathname.slice(1)) {
+      case "task":
         curPageName = "领取任务";
         break;
-      case "/report":
+      case "report":
         curPageName = "数据报表";
         break;
-      case "/":
+      case "addcart":
+        curPageName = "异常品";
+        break;
+      case "newproc":
+        curPageName = "四新计划";
+        break;
+      case "":
       default:
         curPageName = "添加任务";
         break;
@@ -36,6 +39,15 @@ class Index extends Component {
     this.setState({
       curPageName
     });
+  }
+
+  componentWillReceiveProps(newProps) {
+    this.handleBreadName(newProps);
+  }
+
+  componentWillMount() {
+    this.handleBreadName(this.props);
+    document.title = "YC产品工艺分流计划系统";
   }
 
   render() {

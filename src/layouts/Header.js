@@ -9,7 +9,7 @@ const { Header } = Layout;
 function HeaderMenu({ location }) {
   return (
     <Header className={styles.header}>
-      <div className={styles.logo}>大张抽检车号自动分配</div>
+      <div className={styles.logo}>Flow</div>
       <Menu
         selectedKeys={[location.pathname]}
         mode="horizontal"
@@ -33,12 +33,12 @@ function HeaderMenu({ location }) {
         </Menu.Item>
         <Menu.Item key="/addcart">
           <Link to="/addcart">
-            <Icon type="area-chart" />异常品
+            <Icon type="exclamation-circle-o" />异常品
           </Link>
         </Menu.Item>
         <Menu.Item key="/newproc">
           <Link to="/newproc">
-            <Icon type="area-chart" />四新计划
+            <Icon type="clock-circle-o" />四新计划
           </Link>
         </Menu.Item>
       </Menu>

@@ -179,6 +179,9 @@ export default {
           },
           {
             proc_name: "新产品"
+          },
+          {
+            proc_name: "其它"
           }
         ]
       });

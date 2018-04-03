@@ -21,6 +21,7 @@ import * as db from "../services/Newproc";
 
 import styles from "./Report.less";
 import * as lib from "../../../utils/lib";
+
 const { RangePicker } = DatePicker;
 moment.locale("zh-cn");
 
@@ -38,16 +39,16 @@ const formTailLayout = {
 
 class DynamicRule extends React.Component {
   state = {
-    date_type: "0",
+    date_type: 0,
     procTipInfo: ""
   };
 
   insertData = async () => {
     let data = this.getInsertedData();
     let insertRes;
-    if (data.date_type === "0") {
+    if (data.date_type === 0) {
       insertRes = await db.addPrintNewprocPlan1(data);
-    } else {
+    } else if (data.date_type === 1) {
       insertRes = await db.addPrintNewprocPlan2(data);
     }
     if (!insertRes.rows) {
@@ -75,15 +76,18 @@ class DynamicRule extends React.Component {
 
   getInsertedData = () => {
     let data = this.props.form.getFieldsValue();
-    data.date_type = this.state.date_type;
-    if (data.date_type === "0") {
-      data.rec_date1 = moment(data.rec_date).format("YYYY-MM-DD");
-    } else {
-      data.rec_date1 = moment(data.rec_date[0]).format("YYYY-MM-DD");
-      data.rec_date2 = moment(data.rec_date[1]).format("YYYY-MM-DD");
+    if (data.date_type < 2) {
+      data.date_type = this.state.date_type;
+      if (data.date_type === 0) {
+        data.rec_date1 = moment(data.rec_date).format("YYYY-MM-DD");
+      } else {
+        data.rec_date1 = moment(data.rec_date[0]).format("YYYY-MM-DD");
+        data.rec_date2 = moment(data.rec_date[1]).format("YYYY-MM-DD");
+      }
+      data.rec_time = lib.now();
+      Reflect.deleteProperty(data, "rec_date");
     }
-    data.rec_time = lib.now();
-    Reflect.deleteProperty(data, "rec_date");
+
     return data;
   };
 
@@ -119,14 +123,20 @@ class DynamicRule extends React.Component {
     const date_type = e.target.value;
     this.setState({ date_type });
     let { setFieldsValue } = this.props.form;
-    let today = moment();
-    let nextHalfMonth = moment().add(15, "days");
-    setFieldsValue({
-      rec_date: date_type === "0" ? today : [today, nextHalfMonth]
-    });
+
+    if (date_type !== 2) {
+      let today = moment();
+      let nextHalfMonth = moment().add(15, "days");
+      setFieldsValue({
+        rec_date: date_type === 0 ? today : [today, nextHalfMonth]
+      });
+    }
   };
 
   handleProcName = v => {
+    if (this.state.date_type === 2) {
+      return;
+    }
     let { setFieldsValue } = this.props.form;
     let procTipInfo = "";
     switch (v) {
@@ -153,97 +163,178 @@ class DynamicRule extends React.Component {
     </Select>
   );
 
+  ProcStream = (
+    <FormItem
+      labelCol={{ span: 6 }}
+      wrapperCol={{ span: 8 }}
+      label="工艺流程"
+      extra={
+        <label>
+          推荐选择 <span className={styles.bold}>8位清分机全检</span>，当不能确定最终流程时选择<span
+            className={styles.bold}
+          >
+            系统自动分配
+          </span>.
+        </label>
+      }
+    >
+      {this.props.form.getFieldDecorator("proc_stream1", {
+        rules: [{ required: true, message: "请选择产品工艺流程" }]
+      })(this.ProcList)}
+    </FormItem>
+  );
+
   Procprocess = () => {
     const { date_type } = this.state;
     const { getFieldDecorator } = this.props.form;
 
-    if (date_type === "1") {
+    if (date_type === 1) {
+      return this.ProcStream;
+    } else if (date_type === 0) {
+      const formStyle1 = {
+        className: styles.item,
+        labelCol: { span: 4 },
+        wrapperCol: { span: 12 },
+        label: "万产品"
+      };
+      const formStyle2 = {
+        className: styles.item,
+        labelCol: { span: 12 },
+        wrapperCol: { span: 11 }
+      };
+
       return (
-        <FormItem
-          labelCol={{ span: 6 }}
-          wrapperCol={{ span: 8 }}
-          label="工艺流程"
-          extra={
-            <label>
-              推荐选择 <span className={styles.bold}>8位清分机全检</span>，当不能确定最终流程时选择<span
-                className={styles.bold}
-              >
-                系统自动分配
-              </span>.
-            </label>
-          }
-        >
-          {getFieldDecorator("proc_stream1", {
-            rules: [{ required: true, message: "请选择产品工艺流程" }]
-          })(this.ProcList)}
-        </FormItem>
+        <>
+          <div className={styles.inlineForm}>
+            <FormItem {...formStyle2} label="前">
+              {getFieldDecorator("num1", {
+                rules: [{ required: date_type < 2, message: "请输入产品数量" }]
+              })(<Input />)}
+            </FormItem>
+            <FormItem {...formStyle1} extra="推荐选择8位清分机全检">
+              {getFieldDecorator("proc_stream1", {
+                rules: [
+                  { required: date_type < 2, message: "请选择产品工艺流程" }
+                ]
+              })(this.ProcList)}
+            </FormItem>
+          </div>
+          <div className={styles.inlineForm}>
+            <FormItem {...formStyle2} label="后">
+              {getFieldDecorator("num2", {
+                rules: [{ required: date_type < 2, message: "请输入产品数量" }]
+              })(<Input />)}
+            </FormItem>
+            <FormItem {...formStyle1} extra="推荐选择系统自动分配">
+              {getFieldDecorator("proc_stream2", {
+                rules: [
+                  { required: date_type < 2, message: "请选择产品工艺流程" }
+                ]
+              })(this.ProcList)}
+            </FormItem>
+          </div>
+        </>
       );
     }
+
+    return null;
+  };
+
+  render() {
+    const { getFieldDecorator } = this.props.form;
+    const { procTipInfo, date_type } = this.state;
+
+    let extraInfo = "";
+    switch (date_type) {
+      case 0:
+        extraInfo = "从某天起的产品";
+        break;
+      case 1:
+        extraInfo = "某段时间内所有产品";
+        break;
+      default:
+        extraInfo = "某品种冠字号段，跨冠字请按两条信息添加。";
+        break;
+    }
+
+    let dateClass = date_type < 2 ? styles.show : styles.hide;
+    let gzClass = date_type === 2 ? styles.show : styles.hide;
+
+    const DateInfo = (
+      <FormItem className={dateClass} {...formItemLayout} label="时间选择">
+        {getFieldDecorator("rec_date", {
+          rules: [{ required: date_type < 2, message: "请选择产品处理时间" }]
+        })(
+          date_type === 0 ? (
+            <DatePicker placeholder="开始时间" />
+          ) : (
+            <RangePicker placeholder="时间范围" />
+          )
+        )}
+      </FormItem>
+    );
 
     const formStyle1 = {
       className: styles.item,
       labelCol: { span: 4 },
       wrapperCol: { span: 12 },
-      label: "万产品"
+      label: "至"
     };
     const formStyle2 = {
       className: styles.item,
       labelCol: { span: 12 },
       wrapperCol: { span: 11 }
     };
-
-    return (
-      <>
+    const GZInfo = (
+      <div className={gzClass}>
+        <FormItem
+          labelCol={{ span: 6 }}
+          wrapperCol={{ span: 12 }}
+          label="字母信息"
+          extra="请输入冠字号段的字母部分，如AA、A*A、A**A、A***A"
+        >
+          {getFieldDecorator("alphaNum", {
+            rules: [{ required: date_type > 1, message: "冠字号段必须输入" }]
+          })(<Input placeholder="请输入冠字字母" />)}
+        </FormItem>
         <div className={styles.inlineForm}>
-          <FormItem {...formStyle2} label="前">
+          <FormItem {...formStyle2} label="开始号段">
             {getFieldDecorator("num1", {
-              rules: [{ required: true, message: "请输入产品数量" }]
+              rules: [{ required: date_type > 1, message: "冠字号必须输入" }]
             })(<Input />)}
           </FormItem>
-          <FormItem {...formStyle1} extra="推荐选择8位清分机全检">
-            {getFieldDecorator("proc_stream1", {
-              rules: [{ required: true, message: "请选择产品工艺流程" }]
-            })(this.ProcList)}
-          </FormItem>
-        </div>
-        <div className={styles.inlineForm}>
-          <FormItem {...formStyle2} label="后">
+          <FormItem {...formStyle1} label="结束号段">
             {getFieldDecorator("num2", {
-              rules: [{ required: true, message: "请输入产品数量" }]
+              rules: [{ required: date_type > 1, message: "冠字号必须输入" }]
             })(<Input />)}
           </FormItem>
-          <FormItem {...formStyle1} extra="推荐选择系统自动分配">
-            {getFieldDecorator("proc_stream2", {
-              rules: [{ required: true, message: "请选择产品工艺流程" }]
-            })(this.ProcList)}
-          </FormItem>
         </div>
-      </>
+        {this.ProcStream}
+      </div>
     );
-  };
-
-  render() {
-    const { getFieldDecorator } = this.props.form;
-    const { date_type, procTipInfo } = this.state;
 
     return (
-      // onSubmit={this.handleSubmit}
-      <Form className={styles.project}>
+      <Form>
         <Row>
           <Col span={8}>
-            <FormItem {...formItemLayout} label="机台">
-              {getFieldDecorator("machine_name", {
-                rules: [{ required: true, message: "请选择机台" }]
-              })(
-                <Select placeholder="请选择机台" onChange={this.machineChange}>
-                  {this.props.machines.map(item => (
-                    <Option value={item} key={item}>
-                      {item}
-                    </Option>
-                  ))}
-                </Select>
-              )}
-            </FormItem>
+            {date_type < 2 ? (
+              <FormItem {...formItemLayout} label="机台">
+                {getFieldDecorator("machine_name", {
+                  rules: [{ required: date_type < 2, message: "请选择机台" }]
+                })(
+                  <Select
+                    placeholder="请选择机台"
+                    onChange={this.machineChange}
+                  >
+                    {this.props.machines.map(item => (
+                      <Option value={item} key={item}>
+                        {item}
+                      </Option>
+                    ))}
+                  </Select>
+                )}
+              </FormItem>
+            ) : null}
             <FormItem {...formItemLayout} label="品种">
               {getFieldDecorator("prod_id", {
                 rules: [{ required: true, message: "请选择品种" }]
@@ -284,31 +375,22 @@ class DynamicRule extends React.Component {
           </Col>
 
           <Col span={16}>
-            <FormItem {...formItemLayout} label="产品范围">
-              <Radio.Group value={date_type} onChange={this.handleDateType}>
-                <Radio.Button value="0">从某天起</Radio.Button>
-                <Radio.Button value="1">时间段</Radio.Button>
-              </Radio.Group>
-            </FormItem>
-
             <FormItem
               {...formItemLayout}
-              label="时间选择"
-              extra={
-                date_type === "0" ? "从某天起的产品" : "某段时间内所有产品"
-              }
+              label="产品范围"
+              className={styles.radioButton}
+              extra={extraInfo}
             >
-              {getFieldDecorator("rec_date", {
-                rules: [{ required: true, message: "请选择产品处理时间" }]
-              })(
-                date_type === "0" ? (
-                  <DatePicker placeholder="开始时间" />
-                ) : (
-                  <RangePicker placeholder="时间范围" />
-                )
-              )}
+              <Radio.Group value={date_type} onChange={this.handleDateType}>
+                <Radio.Button value={0}>从某天起</Radio.Button>
+                <Radio.Button value={1}>时间段</Radio.Button>
+                <Radio.Button value={2}>冠字号段</Radio.Button>
+              </Radio.Group>
             </FormItem>
+            {GZInfo}
+            {DateInfo}
 
+            {/* {date_type === 2 ? GZInfo : DateInfo} */}
             {this.Procprocess()}
 
             <FormItem {...formTailLayout}>

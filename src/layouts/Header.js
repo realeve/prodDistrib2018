@@ -5,6 +5,7 @@ import { Layout } from "antd";
 import styles from "./header.less";
 
 const { Header } = Layout;
+const SubMenu = Menu.SubMenu;
 
 function HeaderMenu({ location }) {
   return (
@@ -16,21 +17,30 @@ function HeaderMenu({ location }) {
         theme="dark"
         className={styles.menu}
       >
-        <Menu.Item key="/">
-          <Link to="/">
-            <Icon type="home" />添加任务
-          </Link>
-        </Menu.Item>
-        <Menu.Item key="/task">
-          <Link to="/task">
-            <Icon type="bars" />领取任务
-          </Link>
-        </Menu.Item>
-        <Menu.Item key="/report">
-          <Link to="/report">
-            <Icon type="area-chart" />数据报表
-          </Link>
-        </Menu.Item>
+        <SubMenu
+          title={
+            <span>
+              <Icon type="calculator" />自动排活 <Icon type="down" />
+            </span>
+          }
+        >
+          <Menu.Item key="/">
+            <Link to="/">
+              <Icon type="home" />添加任务
+            </Link>
+          </Menu.Item>
+          <Menu.Item key="/task">
+            <Link to="/task">
+              <Icon type="bars" />领取任务
+            </Link>
+          </Menu.Item>
+          <Menu.Item key="/report">
+            <Link to="/report">
+              <Icon type="area-chart" />数据报表
+            </Link>
+          </Menu.Item>
+        </SubMenu>
+
         <Menu.Item key="/addcart">
           <Link to="/addcart">
             <Icon type="exclamation-circle-o" />异常品
@@ -41,6 +51,24 @@ function HeaderMenu({ location }) {
             <Icon type="clock-circle-o" />四新计划
           </Link>
         </Menu.Item>
+        <SubMenu
+          title={
+            <span>
+              <Icon type="eye-o" />机检弱项通知 <Icon type="down" />
+            </span>
+          }
+        >
+          <Menu.Item key="/prodinfo">
+            <Link to="/prodinfo">
+              <Icon type="close-circle-o" />连续废通知
+            </Link>
+          </Menu.Item>
+          <Menu.Item key="/weak">
+            <Link to="/weak">
+              <Icon type="eye-o" />机检弱项
+            </Link>
+          </Menu.Item>
+        </SubMenu>
       </Menu>
     </Header>
   );

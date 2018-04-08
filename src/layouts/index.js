@@ -47,7 +47,7 @@ class Index extends Component {
 
   componentWillMount() {
     this.handleBreadName(this.props);
-    document.title = "YC产品工艺分流计划系统";
+    document.title = "印钞产品工艺流转计划跟踪系统";
   }
 
   render() {

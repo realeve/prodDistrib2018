@@ -1,11 +1,12 @@
 import http from "axios";
 import qs from "qs";
 
-export let DEV = true;
+export let DEV = false;
 
 export let host = DEV
   ? "http://localhost:90/api/"
   : "http://10.8.1.25:100/api/";
+export let uploadHost = DEV ? "//localhost/upload/" : "//localhost/upload/";
 
 // 判断数据类型，对于FormData使用 typeof 方法会得到 object;
 let getType = data =>

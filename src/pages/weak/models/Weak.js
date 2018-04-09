@@ -5,7 +5,9 @@ const namespace = "weak";
 export default {
   namespace,
   state: {
-    productList: []
+    productList: [],
+    imgUrl: "",
+    fileList: []
   },
   reducers: {
     setProduct(state, { payload: productList }) {
@@ -13,10 +15,22 @@ export default {
         ...state,
         productList
       };
+    },
+    setImgUrl(state, { payload: imgUrl }) {
+      return {
+        ...state,
+        imgUrl
+      };
+    },
+    setFileList(state, { payload: fileList }) {
+      return {
+        ...state,
+        fileList
+      };
     }
   },
   effects: {
-    *getProducts(payload, { put, select, call }) {
+    *getProducts(payload, { put, call }) {
       let products = yield call(db.getProduct);
       yield put({
         type: "setProduct",

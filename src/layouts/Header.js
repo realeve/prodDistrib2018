@@ -68,6 +68,11 @@ function HeaderMenu({ location }) {
               <Icon type="eye-o" />机检弱项
             </Link>
           </Menu.Item>
+          <Menu.Item key="/weaklist">
+            <Link to="/weaklist">
+              <Icon type="eye-o" />机检弱项报告
+            </Link>
+          </Menu.Item>
         </SubMenu>
       </Menu>
     </Header>

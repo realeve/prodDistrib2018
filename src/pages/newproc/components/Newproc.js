@@ -172,34 +172,34 @@ class DynamicRule extends React.Component {
     </Select>
   );
 
-  ProcStream = (
-    <FormItem
-      labelCol={{ span: 6 }}
-      wrapperCol={{ span: 8 }}
-      label="工艺流程"
-      extra={
-        <label>
-          推荐选择 <span className={styles.bold}>8位清分机全检</span>，当不能确定最终流程时选择<span
-            className={styles.bold}
-          >
-            系统自动分配
-          </span>.
-        </label>
-      }
-    >
-      {this.props.form.getFieldDecorator("proc_stream1", {
-        rules: [{ required: true, message: "请选择产品工艺流程" }]
-      })(this.ProcList)}
-    </FormItem>
-  );
-
   Procprocess = () => {
     const { date_type } = this.state;
     const { getFieldDecorator } = this.props.form;
 
     if (date_type === 1) {
-      return this.ProcStream;
-    } else if (date_type === 0) {
+      return (
+        <FormItem
+          labelCol={{ span: 6 }}
+          wrapperCol={{ span: 8 }}
+          label="工艺流程"
+          extra={
+            <label>
+              推荐选择 <span className={styles.bold}>8位清分机全检</span>，当不能确定最终流程时选择<span
+                className={styles.bold}
+              >
+                系统自动分配.
+              </span>
+            </label>
+          }
+        >
+          {this.props.form.getFieldDecorator("proc_stream1", {
+            rules: [{ required: true, message: "请选择产品工艺流程" }]
+          })(this.ProcList)}
+        </FormItem>
+      );
+    }
+
+    if (date_type === 0) {
       const formStyle1 = {
         className: styles.item,
         labelCol: { span: 4 },
@@ -246,8 +246,84 @@ class DynamicRule extends React.Component {
       );
     }
 
-    return null;
+    // return this.GZInfo();
+    const formStyle1 = {
+      className: styles.item,
+      labelCol: { span: 4 },
+      wrapperCol: { span: 12 },
+      label: "至"
+    };
+    const formStyle2 = {
+      className: styles.item,
+      labelCol: { span: 12 },
+      wrapperCol: { span: 11 }
+    };
+
+    let gzClass = date_type === 2 ? styles.show : styles.hide;
+
+    return (
+      <div className={gzClass}>
+        <FormItem
+          labelCol={{ span: 6 }}
+          wrapperCol={{ span: 12 }}
+          label="字母信息"
+          extra="请输入冠字号段的字母部分，如AA、A*A、A**A、A***A"
+        >
+          {getFieldDecorator("alphaNum", {
+            rules: [{ required: date_type > 1, message: "冠字号段必须输入" }]
+          })(<Input placeholder="请输入冠字字母" />)}
+        </FormItem>
+        <div className={styles.inlineForm}>
+          <FormItem {...formStyle2} label="开始号段">
+            {getFieldDecorator("num1", {
+              rules: [
+                {
+                  required: date_type > 1,
+                  message: "冠字号必须输入",
+                  pattern: /^\d{4}$/
+                }
+              ]
+            })(<Input />)}
+          </FormItem>
+          <FormItem {...formStyle1} label="结束号段">
+            {getFieldDecorator("num2", {
+              rules: [
+                {
+                  required: date_type > 1,
+                  message: "冠字号必须输入",
+                  pattern: /^\d{4}$/
+                }
+              ]
+            })(<Input />)}
+          </FormItem>
+        </div>
+        <FormItem
+          labelCol={{ span: 6 }}
+          wrapperCol={{ span: 8 }}
+          label="工艺流程"
+          extra={
+            <label>
+              推荐选择 <span className={styles.bold}>8位清分机全检</span>，当不能确定最终流程时选择<span
+                className={styles.bold}
+              >
+                系统自动分配.
+              </span>
+            </label>
+          }
+        >
+          {this.props.form.getFieldDecorator("proc_stream1", {
+            rules: [{ required: true, message: "请选择产品工艺流程" }]
+          })(this.ProcList)}
+        </FormItem>
+      </div>
+    );
   };
+
+  // GZInfo = () => {
+  //   const { getFieldDecorator } = this.props.form;
+  //   const { date_type } = this.state;
+
+  // };
 
   render() {
     const { getFieldDecorator } = this.props.form;
@@ -267,7 +343,6 @@ class DynamicRule extends React.Component {
     }
 
     let dateClass = date_type < 2 ? styles.show : styles.hide;
-    let gzClass = date_type === 2 ? styles.show : styles.hide;
 
     const DateInfo = (
       <FormItem className={dateClass} {...formItemLayout} label="时间选择">
@@ -281,45 +356,6 @@ class DynamicRule extends React.Component {
           )
         )}
       </FormItem>
-    );
-
-    const formStyle1 = {
-      className: styles.item,
-      labelCol: { span: 4 },
-      wrapperCol: { span: 12 },
-      label: "至"
-    };
-    const formStyle2 = {
-      className: styles.item,
-      labelCol: { span: 12 },
-      wrapperCol: { span: 11 }
-    };
-    const GZInfo = (
-      <div className={gzClass}>
-        <FormItem
-          labelCol={{ span: 6 }}
-          wrapperCol={{ span: 12 }}
-          label="字母信息"
-          extra="请输入冠字号段的字母部分，如AA、A*A、A**A、A***A"
-        >
-          {getFieldDecorator("alphaNum", {
-            rules: [{ required: date_type > 1, message: "冠字号段必须输入" }]
-          })(<Input placeholder="请输入冠字字母" />)}
-        </FormItem>
-        <div className={styles.inlineForm}>
-          <FormItem {...formStyle2} label="开始号段">
-            {getFieldDecorator("num1", {
-              rules: [{ required: date_type > 1, message: "冠字号必须输入" }]
-            })(<Input />)}
-          </FormItem>
-          <FormItem {...formStyle1} label="结束号段">
-            {getFieldDecorator("num2", {
-              rules: [{ required: date_type > 1, message: "冠字号必须输入" }]
-            })(<Input />)}
-          </FormItem>
-        </div>
-        {this.ProcStream}
-      </div>
     );
 
     return (
@@ -396,10 +432,9 @@ class DynamicRule extends React.Component {
                 <Radio.Button value={2}>冠字号段</Radio.Button>
               </Radio.Group>
             </FormItem>
-            {GZInfo}
+
             {DateInfo}
 
-            {/* {date_type === 2 ? GZInfo : DateInfo} */}
             {this.Procprocess()}
 
             <FormItem {...formTailLayout}>

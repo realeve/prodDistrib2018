@@ -107,7 +107,7 @@ class DynamicRule extends React.Component {
 
   // 重置所有数据
   reset = () => {
-    this.chearData();
+    this.clearData();
     this.props.form.resetFields();
   };
 

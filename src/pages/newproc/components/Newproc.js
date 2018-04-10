@@ -27,6 +27,7 @@ moment.locale("zh-cn");
 
 const FormItem = Form.Item;
 const Option = Select.Option;
+const R = require("ramda");
 
 const formItemLayout = {
   labelCol: { span: 6 },
@@ -45,13 +46,17 @@ class DynamicRule extends React.Component {
 
   insertData = async () => {
     let data = this.getInsertedData();
+
     let insertRes;
     if (data.date_type === 0) {
       insertRes = await db.addPrintNewprocPlan1(data);
     } else if (data.date_type === 1) {
       insertRes = await db.addPrintNewprocPlan2(data);
     }
-    if (!insertRes.rows) {
+
+    console.log(insertRes);
+
+    if (R.isNil(insertRes) || !insertRes.rows) {
       notification.error({
         message: "系统错误",
         description: "数据插入失败，请联系管理员",
@@ -76,6 +81,9 @@ class DynamicRule extends React.Component {
 
   getInsertedData = () => {
     let data = this.props.form.getFieldsValue();
+    const { date_type } = this.state;
+    data.date_type = date_type;
+
     if (data.date_type < 2) {
       data.date_type = this.state.date_type;
       if (data.date_type === 0) {
@@ -86,6 +94,7 @@ class DynamicRule extends React.Component {
       }
       data.rec_time = lib.now();
       Reflect.deleteProperty(data, "rec_date");
+      Reflect.deleteProperty(data, "alphaNum");
     }
 
     return data;

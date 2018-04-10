@@ -95,36 +95,24 @@ export const getProduct = async () =>
 
 /**
 *   @database: { 机台作业 }
-*   @desc:     { 冠字查车号 } 
+*   @desc:     { 车号信息查询 } 
   
-    const { prod, alpha, start, end, alpha2, start2, end2 } = params;
+    const { cart } = params;
 */
 export const getVIEWCARTFINDER = async params =>
   await axios({
-    url: "/79/797066c5d6.json",
+    url: "/82/32635d468b.json",
     params
   }).then(res => res);
 
 /**
 *   @database: { 质量信息系统 }
-*   @desc:     { 添加机检弱项信息 } 
+*   @desc:     { 机台连续废信息通知 } 
   
-    const { prod_id, code_num, cart_number, proc_name, machine_name, captain_name, fake_type, paper_num, level_type, img_url, remark, rec_time } = params;
+    const { cart_number, prod_id, proc_name, machine_name, captain_name, fake_type, kilo_num, pos_num, remark, rec_time } = params;
 */
-export const addPrintMachinecheckWeak = async params =>
+export const addPrintMachinecheckMultiweak = async params =>
   await axios({
-    url: "/80/c2f98ddf63.json",
-    params
-  }).then(res => res);
-
-/**
-*   @database: { 质量信息系统 }
-*   @desc:     { 机台是否通知作废信息 } 
-  
-    const { cart_number } = params;
-*/
-export const getPrintMachinecheckMultiweak = async params =>
-  await axios({
-    url: "/84/4c10668fdd.json",
+    url: "/83/3475990fbf.json",
     params
   }).then(res => res);

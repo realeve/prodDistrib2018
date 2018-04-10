@@ -1,4 +1,4 @@
-import { axios, DEV } from "../../../utils/axios";
+import { axios } from "../../../utils/axios";
 import * as lib from "../../../utils/lib";
 const R = require("ramda");
 
@@ -11,7 +11,7 @@ const weaklistUrl = "81/a22afbf675/array.json";
 */
 const getVIEWCARTFINDER = async params =>
   await axios({
-    url: DEV ? "http://localhost:8000/public/40614909a0.json" : weaklistUrl,
+    url: weaklistUrl, // DEV ? "http://localhost:8000/public/40614909a0.json" :
     params
   }).then(res => res);
 

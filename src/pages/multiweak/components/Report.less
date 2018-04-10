@@ -1,0 +1,57 @@
+.container {
+  margin-top: 20px;
+  .title {
+    font-size: 28px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  :global(.ant-card-head) {
+    padding: 0 12px;
+  }
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  .title {
+    font-size: 24px;
+  }
+  .dateRange {
+    :global(.ant-calendar-picker) {
+      width: 220px;
+    }
+  }
+}
+
+.exCard {
+  :global(.ant-card-head) {
+    padding: 0 12px;
+  }
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.inlineForm {
+  display: flex;
+  width: 100%;
+  .item {
+    width: 50%;
+  }
+}
+
+.radioButton {
+  :global(.ant-radio-button-wrapper-checked) {
+    background: #1890ff;
+    border-color: #1890ff;
+    color: #fff;
+  }
+}
+
+.hide {
+  display: none;
+}
+.show {
+  display: block;
+}

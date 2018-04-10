@@ -12,11 +12,10 @@ import {
   Col,
   Radio
 } from "antd";
-import ErrImage from "./ErrImage";
 
 import moment from "moment";
 import "moment/locale/zh-cn";
-import * as db from "../services/Weak";
+import * as db from "../services/multiweak";
 
 import styles from "./Report.less";
 import * as lib from "../../../utils/lib";
@@ -40,16 +39,22 @@ const formTailLayout = {
 
 class DynamicRule extends React.Component {
   state = {
-    level_type: 0,
     procList: [],
     machineList: [],
     captainList: [],
     prodInfo: [],
     fakeTypeList: [],
     fakeTypes,
-    isNotice: false,
-    noticeInfo: ""
+    kInfoList: []
   };
+
+  componentDidMount() {
+    let kInfoList = [];
+    for (let i = 1; i < 41; i++) {
+      kInfoList.push(i);
+    }
+    this.setState({ kInfoList });
+  }
 
   insertData = async () => {
     let data = this.getInsertedData();
@@ -57,16 +62,7 @@ class DynamicRule extends React.Component {
       data.remark = "";
     }
 
-    if (data.img_url.trim() === "") {
-      notification.error({
-        message: "提示",
-        description: "请先上传缺陷图像",
-        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
-      });
-      // return;
-    }
-
-    let insertRes = await db.addPrintMachinecheckWeak(data);
+    let insertRes = await db.addPrintMachinecheckMultiweak(data);
 
     if (!insertRes.rows) {
       notification.error({
@@ -83,32 +79,13 @@ class DynamicRule extends React.Component {
       icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
     });
 
-    this.resetData();
-  };
-
-  // 设置右侧数据，方便输入下一条；
-  resetData = () => {
-    const { setFieldsValue } = this.props.form;
-    setFieldsValue({
-      paper_num: 0,
-      remark: "",
-      fake_type: ""
-    });
-    this.setState({ level_type: 0 });
-    this.props.dispatch({
-      type: "weak/setImgUrl",
-      payload: ""
-    });
-    this.props.dispatch({
-      type: "weak/setFileList",
-      payload: []
-    });
+    this.clearData();
   };
 
   // 重置所有数据
   reset = () => {
-    this.chearData();
-    this.props.form.resetFields();
+    this.clearData();
+    // this.props.form.resetFields();
   };
 
   // 号码信息更改时清空数据
@@ -116,33 +93,39 @@ class DynamicRule extends React.Component {
     const { setFieldsValue } = this.props.form;
     setFieldsValue({
       cart_number: "",
-      proc_name: "",
-      captain_name: [],
-      machine_name: "",
-      fake_type: ""
-    });
-    this.setState({
-      procList: [],
-      machineList: [],
-      captainList: [],
-      prodInfo: [],
-      fakeTypeList: [],
-      isNotice: false,
-      noticeInfo: ""
+      fake_type: "",
+      kilo_num: [],
+      pos_info: [],
+      remark: ""
     });
   };
 
   getInsertedData = () => {
     let data = this.props.form.getFieldsValue();
+    let kilo_num =
+      typeof data.kilo_num === "string"
+        ? data.kilo_num
+        : data.kilo_num.sort((a, b) => a - b).join(",");
+    let pos_info =
+      typeof data.pos_info === "string"
+        ? data.pos_info
+        : data.pos_info.sort((a, b) => a - b).join(",");
     let captain_name =
       typeof data.captain_name === "string"
         ? data.captain_name
         : data.captain_name.join(",");
+
+    let prod_id = R.compose(
+      R.prop("value"),
+      R.find(R.propEq("name", data.prod_id))
+    )(this.props.productList);
+
     data = Object.assign(data, {
-      level_type: this.state.level_type,
-      img_url: this.props.imgUrl,
       rec_time: lib.now(),
-      captain_name
+      kilo_num,
+      pos_info,
+      captain_name,
+      prod_id
     });
     return data;
   };
@@ -156,41 +139,9 @@ class DynamicRule extends React.Component {
     });
   };
 
-  handleLevelType = e => {
-    const level_type = e.target.value;
-    this.setState({ level_type });
-  };
-
-  searchCart = async (value, prod_id) => {
-    this.clearData();
-    if (R.isNil(value) || value.length < 6) {
-      return;
-    }
-    // console.log(value);
-    // else if (!lib.isGZ(value)) {
-    //   notification.error({
-    //     message: "冠字错误",
-    //     description: "冠字信息校验失败，请重新输入",
-    //     icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
-    //   });
-    //   return;
-    // }
-
-    // let prodInfo = this.props.productList.find(item => item.value === prod_id);
-
-    let prod = R.compose(R.prop("name"), R.find(R.propEq("value", prod_id)))(
-      this.props.productList
-    );
-
-    let params = lib.handleGZInfo({ code: value, prod });
-    params.prod = prod;
-
-    // props状态更新时会引起 vdom重载：
-    // await this.props.dispatch({
-    //   type: "weak/getProdInfo",
-    //   payload: params
-    // });
-
+  searchCart = async cart => {
+    // this.clearData();
+    let params = { cart };
     let { data } = await db.getVIEWCARTFINDER(params);
 
     if (R.isNil(data) || !data.length) {
@@ -205,71 +156,30 @@ class DynamicRule extends React.Component {
     data = data.filter(item => item.PROCNAME.includes("印"));
     let procList = R.uniq(R.map(R.prop("PROCNAME"), data));
     this.setState({ procList, prodInfo: data });
-
-    const { setFieldsValue } = this.props.form;
-    let cart_number = data.length ? data[0].CARTNUMBER : "";
-    setFieldsValue({
-      cart_number
-    });
-  };
-
-  isThisCartNotice = async (cart_number, machine_name) => {
-    let { data } = await db.getPrintMachinecheckMultiweak({ cart_number });
-    let isNotice = false;
-    if (!R.isNil(data) && data.length) {
-      let noticeInfo = data.find(item => item.machine_name === machine_name);
-      if (!R.isNil(noticeInfo)) {
-        isNotice = true;
-        let {
-          machine_name,
-          captain_name,
-          kilo_num,
-          pos_info,
-          rec_time,
-          fake_type,
-          remark
-        } = noticeInfo;
-        this.setState({
-          noticeInfo: `${rec_time}日，${machine_name} ${captain_name}通知第 ${kilo_num} 千位，${pos_info} 开产品有作废(${fake_type})，备注信息:${
-            remark.trim().length === 0 ? "无" : remark
-          }`,
-          isNotice: true
-        });
-        notification.error({
-          message: "提示",
-          description: "当前车号机台有通知作废信息，建议降废处理",
-          icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
-        });
-        return;
-      }
-    }
-    this.setState({ isNotice, noticeInfo: "" });
-    if (!isNotice) {
-      notification.error({
-        message: "提示",
-        description: "当前车号机台未通知作废信息",
-        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
-      });
-    }
-  };
-
-  handleProduct = e => {
-    let { code_num } = this.props.form.getFieldsValue();
-    this.searchCart(code_num, e);
   };
 
   searchCode = e => {
     let { value } = e.target;
-    value = value
+    let cart_number = value
       .toUpperCase()
       .trim()
-      .slice(0, 6);
-    e.target.value = value;
-    let { prod_id } = this.props.form.getFieldsValue();
-    if (R.isNil(prod_id)) {
+      .slice(0, 8);
+    e.target.value = cart_number;
+
+    if (R.isNil(cart_number) || cart_number.length < 8) {
       return;
     }
-    this.searchCart(value, prod_id);
+
+    const { setFieldsValue } = this.props.form;
+
+    setFieldsValue({
+      prod_id: R.compose(
+        R.prop("name"),
+        R.find(R.propEq("value", cart_number[2]))
+      )(this.props.productList)
+    });
+
+    this.searchCart(cart_number);
   };
 
   changeProc = v => {
@@ -290,10 +200,8 @@ class DynamicRule extends React.Component {
       });
       this.changeMachine(machineList[0]);
     }
-    this.setState({ fakeTypeList: fakeTypes[proc[0]] });
 
-    let { cart_number } = this.props.form.getFieldsValue();
-    this.isThisCartNotice(cart_number, machineList[0]);
+    this.setState({ fakeTypeList: fakeTypes[proc[0]] });
   };
 
   changeMachine = v => {
@@ -318,36 +226,42 @@ class DynamicRule extends React.Component {
     const { getFieldDecorator } = this.props.form;
     const {
       procTipInfo,
-      level_type,
       procList,
       machineList,
       captainList,
       fakeTypeList,
-      noticeInfo,
-      isNotice
+      kInfoList
     } = this.state;
-    let extraInfo;
-    switch (level_type) {
-      case 0:
-        extraInfo = `连续非精品不记废`;
-        break;
-      case 1:
-        extraInfo = `机台提前通知的产品降低记废等级`;
-        break;
-      default:
-        extraInfo = `本开产品记废${level_type}张`;
-        break;
-    }
+
+    let { prod_id } = this.props.form.getFieldsValue();
+    let kList = kInfoList.slice(
+      0,
+      R.isNil(prod_id) || prod_id.includes("9602") || prod_id.includes("9603")
+        ? 40
+        : 35
+    );
 
     return (
       <Form>
         <Row>
           <Col span={8}>
+            <FormItem {...formItemLayout} label="车号">
+              {getFieldDecorator("cart_number", {
+                rules: [
+                  {
+                    required: true,
+                    message: "车号信息必须输入",
+                    pattern: /^\d{4}[A-Z]\d{3}$/
+                  }
+                ]
+              })(<Input onChange={this.searchCode} />)}
+            </FormItem>
+
             <FormItem {...formItemLayout} label="品种">
               {getFieldDecorator("prod_id", {
                 rules: [{ required: true, message: "请选择品种" }]
               })(
-                <Select placeholder="请选择品种" onChange={this.handleProduct}>
+                <Select disabled>
                   {this.props.productList.map(({ name, value }) => (
                     <Option value={value} key={value}>
                       {name}
@@ -356,27 +270,7 @@ class DynamicRule extends React.Component {
                 </Select>
               )}
             </FormItem>
-            <FormItem {...formItemLayout} label="印码号">
-              {getFieldDecorator("code_num", {
-                rules: [
-                  {
-                    required: true,
-                    message: "请输入印码号前6位",
-                    pattern: /^[A-Za-z]{2}\d{4}$|^[A-Za-z]\d[A-Za-z]\d{3}$|^[A-Za-z]\d{2}[A-Za-z]\d{2}$|^[A-Za-z]\d{3}[A-Za-z]\d$|^[A-Za-z]\d{4}[A-Za-z]$/
-                  }
-                ]
-              })(
-                <Input
-                  placeholder="请输入印码号前6位"
-                  onChange={this.searchCode}
-                />
-              )}
-            </FormItem>
-            <FormItem {...formItemLayout} label="车号">
-              {getFieldDecorator("cart_number", {
-                rules: [{ required: false }]
-              })(<Input disabled />)}
-            </FormItem>
+
             <FormItem
               {...formItemLayout}
               label="工序"
@@ -436,41 +330,41 @@ class DynamicRule extends React.Component {
           </Col>
 
           <Col span={8}>
-            <FormItem {...formItemLayout} label="产品张数">
-              {getFieldDecorator("paper_num", {
+            <FormItem {...formItemLayout} label="千位数">
+              {getFieldDecorator("kilo_num", {
                 rules: [
                   {
                     required: true,
-                    message: "请输入产品张数",
-                    pattern: /^\d+$/
+                    message: "请选择千位数"
                   }
                 ]
-              })(<Input placeholder="请输入产品张数" />)}
+              })(
+                <Select mode="multiple" placeholder="请输入千位数">
+                  {"0123456789".split("").map(name => (
+                    <Option value={name} key={name}>
+                      {name}
+                    </Option>
+                  ))}
+                </Select>
+              )}
             </FormItem>
-
-            <FormItem
-              {...formItemLayout}
-              label="记废等级"
-              className={styles.radioButton}
-              extra={extraInfo}
-            >
-              <Radio.Group value={level_type} onChange={this.handleLevelType}>
-                <Radio.Button value={0}>0</Radio.Button>
-                <Radio.Button value={1}>1</Radio.Button>
-                <Radio.Button value={9}>10</Radio.Button>
-                <Radio.Button value={99}>100</Radio.Button>
-                <Radio.Button value={999}>1000</Radio.Button>
-              </Radio.Group>
-            </FormItem>
-
-            {!isNotice ? null : (
-              <FormItem {...formItemLayout} label="机台通知信息">
-                <label>{noticeInfo}</label>
-              </FormItem>
-            )}
-
-            <FormItem {...formItemLayout} label="缺陷图像">
-              <ErrImage />
+            <FormItem {...formItemLayout} label="产品开位">
+              {getFieldDecorator("pos_info", {
+                rules: [
+                  {
+                    required: true,
+                    message: "请输入产品开位"
+                  }
+                ]
+              })(
+                <Select mode="multiple" placeholder="请选择产品开位">
+                  {kList.map(name => (
+                    <Option value={name} key={name}>
+                      {name}
+                    </Option>
+                  ))}
+                </Select>
+              )}
             </FormItem>
 
             <FormItem {...formItemLayout} label="备注">
@@ -501,19 +395,15 @@ class DynamicRule extends React.Component {
 
 const WrappedDynamicRule = Form.create()(DynamicRule);
 
-function weak({ dispatch, loading, productList, imgUrl }) {
+function multiweak({ dispatch, loading, productList }) {
   return (
     <div className={styles.container}>
       <Card
-        title={<h3 className={styles.header}>机检弱项记废信息</h3>}
+        title={<h3 className={styles.header}>连续废信息通知</h3>}
         loading={loading}
         style={{ width: "100%" }}
       >
-        <WrappedDynamicRule
-          productList={productList}
-          imgUrl={imgUrl}
-          dispatch={dispatch}
-        />
+        <WrappedDynamicRule productList={productList} dispatch={dispatch} />
       </Card>
     </div>
   );
@@ -521,9 +411,9 @@ function weak({ dispatch, loading, productList, imgUrl }) {
 
 function mapStateToProps(state) {
   return {
-    loading: state.loading.models.weak,
-    ...state.weak
+    loading: state.loading.models.multiweak,
+    ...state.multiweak
   };
 }
 
-export default connect(mapStateToProps)(weak);
+export default connect(mapStateToProps)(multiweak);

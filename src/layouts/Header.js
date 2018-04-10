@@ -58,8 +58,8 @@ function HeaderMenu({ location }) {
             </span>
           }
         >
-          <Menu.Item key="/prodinfo">
-            <Link to="/prodinfo">
+          <Menu.Item key="/multiweak">
+            <Link to="/multiweak">
               <Icon type="close-circle-o" />连续废通知
             </Link>
           </Menu.Item>

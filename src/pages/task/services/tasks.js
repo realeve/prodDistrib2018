@@ -37,17 +37,6 @@ export function handleColumns({ dataSrc, sortedInfo }) {
       item.render = text => parseInt(text, 10).toLocaleString();
       return item;
     }
-
-    // let fInfo = isFilterColumn(data, key);
-
-    // if (filteredInfo && fInfo.filters) {
-    //   item.filters = fInfo.uniqColumn.map(text => ({
-    //     text,
-    //     value: text
-    //   }));
-    //   item.onFilter = (value, record) => record[key].includes(value);
-    //   item.filteredValue = filteredInfo[key] || null;
-    // }
     return item;
   });
   return column;

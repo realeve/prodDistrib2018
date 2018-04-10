@@ -66,7 +66,7 @@ class ErrImage extends Component {
           onPreview={this.handlePreview}
           onChange={this.handleChange}
         >
-          {fileList.length >= 1 ? null : uploadButton}
+          {fileList.length < 1 && uploadButton}
         </Upload>
         <Modal
           visible={previewVisible}

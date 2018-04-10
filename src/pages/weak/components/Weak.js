@@ -447,7 +447,6 @@ class DynamicRule extends React.Component {
                 ]
               })(<Input placeholder="请输入产品张数" />)}
             </FormItem>
-
             <FormItem
               {...formItemLayout}
               label="记废等级"
@@ -463,16 +462,14 @@ class DynamicRule extends React.Component {
               </Radio.Group>
             </FormItem>
 
-            {!isNotice ? null : (
+            {isNotice && (
               <FormItem {...formItemLayout} label="机台通知信息">
                 <label>{noticeInfo}</label>
               </FormItem>
             )}
-
             <FormItem {...formItemLayout} label="缺陷图像">
               <ErrImage />
             </FormItem>
-
             <FormItem {...formItemLayout} label="备注">
               {getFieldDecorator("remark", {
                 rules: [
@@ -483,7 +480,6 @@ class DynamicRule extends React.Component {
                 ]
               })(<Input.TextArea rows={3} placeholder="请输入备注信息" />)}
             </FormItem>
-
             <FormItem {...formTailLayout}>
               <Button type="primary" onClick={this.submit}>
                 提交

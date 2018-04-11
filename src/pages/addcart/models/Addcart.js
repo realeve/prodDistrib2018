@@ -1,7 +1,6 @@
 import pathToRegexp from "path-to-regexp";
 import * as db from "../services/Addcart";
 import dateRanges from "../../../utils/ranges";
-const R = require("ramda");
 
 const namespace = "addcart";
 export default {
@@ -15,8 +14,6 @@ export default {
     page: 1,
     pageSize: 15,
     dateRange: [],
-    machines: [],
-    productList: [],
     abnormalTypeList: []
   },
   reducers: {
@@ -52,18 +49,6 @@ export default {
       return {
         ...state,
         dateRange
-      };
-    },
-    setMachines(state, { payload: machines }) {
-      return {
-        ...state,
-        machines
-      };
-    },
-    setProduct(state, { payload: productList }) {
-      return {
-        ...state,
-        productList
       };
     },
     setProc(state, { payload: abnormalTypeList }) {
@@ -145,20 +130,6 @@ export default {
         }
       });
     },
-    *getMachines(payload, { put, select, call }) {
-      let machines = yield call(db.getMachine);
-      yield put({
-        type: "setMachines",
-        payload: R.map(R.nth(0))(machines.data)
-      });
-    },
-    *getProducts(payload, { put, select, call }) {
-      let products = yield call(db.getProduct);
-      yield put({
-        type: "setProduct",
-        payload: products.data
-      });
-    },
     *getProc(payload, { put, select, call }) {
       let proc = yield call(db.getPrintAbnormalProd);
       yield put({
@@ -182,8 +153,7 @@ export default {
           dispatch({
             type: "handleReportData"
           });
-          dispatch({ type: "getMachines" });
-          dispatch({ type: "getProducts" });
+
           dispatch({ type: "getProc" });
         }
       });

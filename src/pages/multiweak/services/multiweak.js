@@ -1,22 +1,6 @@
 import { axios } from "../../../utils/axios";
 
 /**
-*   @database: { 质量信息系统 }
-*   @desc:     { 印钞品种列表 } 
-  
-*/
-export const getProduct = async () =>
-  await axios({
-    url: "/71/0fff65bc40.json"
-  }).then(res => {
-    res.data = res.data.map(item => {
-      item.name = item.name.trim();
-      return item;
-    });
-    return res;
-  });
-
-/**
 *   @database: { 机台作业 }
 *   @desc:     { 车号信息查询 } 
   

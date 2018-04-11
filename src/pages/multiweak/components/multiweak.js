@@ -258,7 +258,7 @@ class DynamicRule extends React.Component {
               {getFieldDecorator("prod_id", {
                 rules: [{ required: true, message: "请选择品种" }]
               })(
-                <Select disabled>
+                <Select placeholder="请选择品种">
                   {this.props.productList.map(({ name, value }) => (
                     <Option value={value} key={value}>
                       {name}
@@ -387,15 +387,15 @@ class DynamicRule extends React.Component {
 
 const WrappedDynamicRule = Form.create()(DynamicRule);
 
-function multiweak({ dispatch, loading, productList }) {
+function multiweak(props) {
   return (
     <div className={styles.container}>
       <Card
         title={<h3 className={styles.header}>连续废信息通知</h3>}
-        loading={loading}
+        loading={props.loading}
         style={{ width: "100%" }}
       >
-        <WrappedDynamicRule productList={productList} dispatch={dispatch} />
+        <WrappedDynamicRule {...props} />
       </Card>
     </div>
   );
@@ -404,7 +404,8 @@ function multiweak({ dispatch, loading, productList }) {
 function mapStateToProps(state) {
   return {
     loading: state.loading.models.multiweak,
-    ...state.multiweak
+    ...state.multiweak,
+    productList: state.common.productList
   };
 }
 

@@ -1,8 +1,6 @@
 import pathToRegexp from "path-to-regexp";
 import * as db from "../services/Newproc";
 import dateRanges from "../../../utils/ranges";
-const R = require("ramda");
-
 const namespace = "newproc";
 export default {
   namespace,
@@ -15,9 +13,8 @@ export default {
     page: 1,
     pageSize: 15,
     dateRange: [],
-    machines: [],
-    productList: [],
-    procList: []
+    procList: [],
+    machineList: []
   },
   reducers: {
     save(state, { payload: { dataSrc, dataSource, total } }) {
@@ -54,22 +51,16 @@ export default {
         dateRange
       };
     },
-    setMachines(state, { payload: machines }) {
-      return {
-        ...state,
-        machines
-      };
-    },
-    setProduct(state, { payload: productList }) {
-      return {
-        ...state,
-        productList
-      };
-    },
     setProc(state, { payload: procList }) {
       return {
         ...state,
         procList
+      };
+    },
+    setMachineList(state, { payload: machineList }) {
+      return {
+        ...state,
+        machineList
       };
     }
   },
@@ -145,18 +136,11 @@ export default {
         }
       });
     },
-    *getMachines(payload, { put, select, call }) {
-      let machines = yield call(db.getMachine);
+    *getMachineList(payload, { call, put }) {
+      let { data } = yield call(db.getTBBASEMACHINEINFO);
       yield put({
-        type: "setMachines",
-        payload: R.map(R.nth(0))(machines.data)
-      });
-    },
-    *getProducts(payload, { put, select, call }) {
-      let products = yield call(db.getProduct);
-      yield put({
-        type: "setProduct",
-        payload: products.data
+        type: "setMachineList",
+        payload: data
       });
     },
     *getProc(payload, { put, select, call }) {
@@ -202,8 +186,8 @@ export default {
           dispatch({
             type: "handleReportData"
           });
-          dispatch({ type: "getMachines" });
-          dispatch({ type: "getProducts" });
+          dispatch({ type: "getMachineList" });
+
           dispatch({ type: "getProc" });
         }
       });

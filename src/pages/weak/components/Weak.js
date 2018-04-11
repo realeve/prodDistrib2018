@@ -488,19 +488,15 @@ class DynamicRule extends React.Component {
 
 const WrappedDynamicRule = Form.create()(DynamicRule);
 
-function weak({ dispatch, loading, productList, imgUrl }) {
+function weak(props) {
   return (
     <div className={styles.container}>
       <Card
         title={<h3 className={styles.header}>机检弱项记废信息</h3>}
-        loading={loading}
+        loading={props.loading}
         style={{ width: "100%" }}
       >
-        <WrappedDynamicRule
-          productList={productList}
-          imgUrl={imgUrl}
-          dispatch={dispatch}
-        />
+        <WrappedDynamicRule {...props} />
       </Card>
     </div>
   );
@@ -509,7 +505,8 @@ function weak({ dispatch, loading, productList, imgUrl }) {
 function mapStateToProps(state) {
   return {
     loading: state.loading.models.weak,
-    ...state.weak
+    ...state.weak,
+    productList: state.common.productList
   };
 }
 

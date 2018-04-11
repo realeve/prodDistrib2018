@@ -102,26 +102,6 @@ export const getPrintSampleMachine = async params =>
 
 /**
 *   @database: { 质量信息系统 }
-*   @desc:     { 印码机台列表 } 
-  
-*/
-export const getMachine = async () =>
-  await axios({
-    url: "/70/6410480d19/array.json"
-  }).then(res => res);
-
-/**
-*   @database: { 质量信息系统 }
-*   @desc:     { 印钞品种列表 } 
-  
-*/
-export const getProduct = async () =>
-  await axios({
-    url: "/71/0fff65bc40.json"
-  }).then(res => res);
-
-/**
-*   @database: { 质量信息系统 }
 *   @desc:     { 异常产品原因列表 } 
   
 */

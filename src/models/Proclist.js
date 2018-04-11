@@ -1,10 +1,11 @@
 import * as db from "../services/Proclist";
 
-const namespace = "proclist";
+const namespace = "common";
 export default {
   namespace,
   state: {
-    procList: []
+    procList: [],
+    productList: []
   },
   reducers: {
     setProcList(state, { payload: procList }) {
@@ -12,14 +13,30 @@ export default {
         ...state,
         procList
       };
+    },
+    setProduct(state, { payload: productList }) {
+      return {
+        ...state,
+        productList
+      };
     }
   },
   effects: {
-    *getProclist(payload, { put, select, call }) {
+    *getProclist(payload, { put, call }) {
       let { data } = yield call(db.getPrintNewprocType);
       yield put({
         type: "setProcList",
         payload: data
+      });
+    },
+    *getProduct(payload, { put, call }) {
+      let { data } = yield call(db.getProduct);
+      yield put({
+        type: "setProduct",
+        payload: data.map(item => {
+          item.name = item.name.trim();
+          return item;
+        })
       });
     }
   },
@@ -27,6 +44,7 @@ export default {
     setup({ dispatch, history }) {
       return history.listen(async () => {
         dispatch({ type: "getProclist" });
+        dispatch({ type: "getProduct" });
       });
     }
   }

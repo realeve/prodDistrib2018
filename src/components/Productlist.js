@@ -4,10 +4,10 @@ import { connect } from "dva";
 import { Select } from "antd";
 const { Option } = Select;
 
-function Proclist({ procList }) {
+function Productlist({ productList }) {
   return (
-    <Select placeholder="请选择产品工艺流程">
-      {procList.map(({ value, name }) => (
+    <Select placeholder="请选择产品品种">
+      {productList.map(({ value, name }) => (
         <Option value={value} key={value}>
           {name}
         </Option>
@@ -22,4 +22,4 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps)(Proclist);
+export default connect(mapStateToProps)(Productlist);

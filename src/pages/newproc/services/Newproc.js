@@ -38,16 +38,6 @@ export function handleColumns({ dataSrc, sortedInfo, filteredInfo }) {
       return item;
     }
 
-    // let fInfo = isFilterColumn(data, key);
-
-    // if (filteredInfo && fInfo.filters) {
-    //   item.filters = fInfo.uniqColumn.map(text => ({
-    //     text,
-    //     value: text
-    //   }));
-    //   item.onFilter = (value, record) => record[key].includes(value);
-    //   item.filteredValue = filteredInfo[key] || null;
-    // }
     return item;
   });
   return column;
@@ -89,18 +79,6 @@ export const getPageData = ({ data, page, pageSize }) =>
   data.slice((page - 1) * pageSize, page * pageSize);
 
 /**
-*   @database: { 质量管理数据库 }
-*   @desc:     { 各机台产品抽检情况 } 
-  
-    const { tstart, tend } = params;
-*/
-export const getPrintSampleMachine = async params =>
-  await axios({
-    url: "/58/0695d9575b/array.json",
-    params
-  }).then(res => res);
-
-/**
 *   @database: { 质量信息系统 }
 *   @desc:     { 印码机台列表 } 
   
@@ -108,26 +86,6 @@ export const getPrintSampleMachine = async params =>
 export const getMachine = async () =>
   await axios({
     url: "/70/6410480d19/array.json"
-  }).then(res => res);
-
-/**
-*   @database: { 质量信息系统 }
-*   @desc:     { 印钞品种列表 } 
-  
-*/
-export const getProduct = async () =>
-  await axios({
-    url: "/71/0fff65bc40.json"
-  }).then(res => res);
-
-/**
-*   @database: { 质量信息系统 }
-*   @desc:     { 异常产品原因列表 } 
-  
-*/
-export const getPrintAbnormalProd = async () =>
-  await axios({
-    url: "/72/2b853fe9ed.json"
   }).then(res => res);
 
 /**
@@ -175,5 +133,27 @@ export const addPrintNewprocPlan2 = async params =>
 export const addPrintNewprocPlan3 = async params =>
   await axios({
     url: "/85/2df9bb813c.json",
+    params
+  }).then(res => res);
+
+/**
+*   @database: { 机台作业 }
+*   @desc:     { 印刷工序所有机台列表 } 
+  
+*/
+export const getTBBASEMACHINEINFO = async () =>
+  await axios({
+    url: "/88/6d0e2a4781.json"
+  }).then(res => res);
+
+/**
+*   @database: { 机台作业 }
+*   @desc:     { 机台最近开印品种 } 
+  
+    const { machine_name } = params;
+*/
+export const getLatestMachineProd = async params =>
+  await axios({
+    url: "/89/cab08fa0d8.json",
     params
   }).then(res => res);

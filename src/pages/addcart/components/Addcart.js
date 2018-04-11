@@ -16,7 +16,6 @@ import styles from "./Report.less";
 import * as lib from "../../../utils/lib";
 
 import * as db from "../services/Addcart";
-import Proclist from "../../../components/Proclist";
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -75,7 +74,6 @@ class DynamicRule extends React.Component {
           ? data.captain_name
           : data.captain_name.join(",");
 
-      console.log(data);
       this.insertData(data);
     });
   };
@@ -89,7 +87,6 @@ class DynamicRule extends React.Component {
     }
 
     let { setFieldsValue } = this.props.form;
-
     setFieldsValue({
       prod_id: val[2]
     });
@@ -218,9 +215,18 @@ class DynamicRule extends React.Component {
               }
             >
               {getFieldDecorator("proc_stream", {
-                rules: [{ required: true, message: "请选择产品工艺流程" }]
-              })(<Proclist />)}
+                rules: [{ required: false, message: "请选择产品工艺流程" }]
+              })(
+                <Select placeholder="请选择产品工艺流程">
+                  {this.props.procList.map(({ value, name }) => (
+                    <Option value={value} key={value}>
+                      {name}
+                    </Option>
+                  ))}
+                </Select>
+              )}
             </FormItem>
+
             <FormItem {...formTailLayout}>
               <Button type="primary" onClick={this.submit}>
                 提交
@@ -305,26 +311,15 @@ class DynamicRule extends React.Component {
 
 const WrappedDynamicRule = Form.create()(DynamicRule);
 
-function Addcart({
-  dispatch,
-  loading,
-  machines,
-  productList,
-  abnormalTypeList
-}) {
+function Addcart(props) {
   return (
     <div className={styles.container}>
       <Card
         title={<div className={styles.header}>添加异常品车号</div>}
-        loading={loading}
+        loading={props.loading}
         style={{ width: "100%" }}
       >
-        <WrappedDynamicRule
-          machines={machines}
-          productList={productList}
-          abnormalTypeList={abnormalTypeList}
-          dispatch={dispatch}
-        />
+        <WrappedDynamicRule {...props} />
       </Card>
     </div>
   );
@@ -333,7 +328,8 @@ function Addcart({
 function mapStateToProps(state) {
   return {
     loading: state.loading.models.addcart,
-    ...state.addcart
+    ...state.addcart,
+    ...state.common
   };
 }
 

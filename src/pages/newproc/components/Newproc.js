@@ -19,8 +19,6 @@ import moment from "moment";
 import "moment/locale/zh-cn";
 import * as db from "../services/Newproc";
 
-import Proclist from "../../../components/Proclist";
-
 import styles from "./Report.less";
 import * as lib from "../../../utils/lib";
 
@@ -41,10 +39,20 @@ const formTailLayout = {
 };
 
 class DynamicRule extends React.Component {
-  state = {
-    date_type: 0,
-    procTipInfo: ""
-  };
+  constructor(props) {
+    super(props);
+    const deptList =
+      R.isNil(props.machineList) || props.machineList.length === 0
+        ? []
+        : R.compose(R.uniq, R.map(R.prop("dept_name")))(props.machineList);
+    this.state = {
+      date_type: 0,
+      procTipInfo: "",
+      machines: [],
+      deptList,
+      dept_name: ""
+    };
+  }
 
   insertData = async () => {
     let data = this.getInsertedData();
@@ -119,13 +127,42 @@ class DynamicRule extends React.Component {
     });
   }
 
-  machineChange = v => {
+  machineChange = async machine_name => {
     message.success("机台改变时读取近期印刷的品种");
 
     let { setFieldsValue } = this.props.form;
+    let { data } = await db.getLatestMachineProd({ machine_name });
+    if (R.isNil(data) || data.length === 0) {
+      notification.open({
+        message: "系统提示",
+        description: "该机台未生产产品，获取品种信息失败",
+        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+      });
+      return;
+    }
+    let { prod_type } = data[0];
+    let prod_id = R.compose(
+      R.prop("value"),
+      R.find(R.propEq("name", prod_type))
+    )(this.props.productList);
+    message.success(`该机台近期印刷${prod_type}品`);
 
     setFieldsValue({
-      prod_id: "4"
+      prod_id
+    });
+  };
+  handleDeptName = e => {
+    const dept_name = e.target.value;
+
+    let machines = R.compose(
+      R.sort((a, b) => a - b),
+      R.map(R.prop("machine_name")),
+      R.filter(R.propEq("dept_name", dept_name))
+    )(this.props.machineList);
+
+    this.setState({
+      machines,
+      dept_name
     });
   };
 
@@ -163,6 +200,16 @@ class DynamicRule extends React.Component {
     this.setState({ procTipInfo });
   };
 
+  Proclist = (
+    <Select placeholder="请选择产品工艺流程">
+      {this.props.procStreamList.map(({ value, name }) => (
+        <Option value={value} key={value}>
+          {name}
+        </Option>
+      ))}
+    </Select>
+  );
+
   Procprocess = () => {
     const { date_type } = this.state;
     const { getFieldDecorator } = this.props.form;
@@ -185,7 +232,7 @@ class DynamicRule extends React.Component {
         >
           {this.props.form.getFieldDecorator("proc_stream1", {
             rules: [{ required: true, message: "请选择产品工艺流程" }]
-          })(<Proclist />)}
+          })(this.Proclist)}
         </FormItem>
       );
     }
@@ -216,7 +263,7 @@ class DynamicRule extends React.Component {
                 rules: [
                   { required: date_type < 2, message: "请选择产品工艺流程" }
                 ]
-              })(<Proclist />)}
+              })(this.Proclist)}
             </FormItem>
           </div>
           <div className={styles.inlineForm}>
@@ -230,7 +277,7 @@ class DynamicRule extends React.Component {
                 rules: [
                   { required: date_type < 2, message: "请选择产品工艺流程" }
                 ]
-              })(<Proclist />)}
+              })(this.Proclist)}
             </FormItem>
           </div>
         </>
@@ -304,7 +351,7 @@ class DynamicRule extends React.Component {
         >
           {this.props.form.getFieldDecorator("proc_stream1", {
             rules: [{ required: true, message: "请选择产品工艺流程" }]
-          })(<Proclist />)}
+          })(this.Proclist)}
         </FormItem>
       </div>
     );
@@ -312,7 +359,13 @@ class DynamicRule extends React.Component {
 
   render() {
     const { getFieldDecorator } = this.props.form;
-    const { procTipInfo, date_type } = this.state;
+    const {
+      procTipInfo,
+      date_type,
+      dept_name,
+      deptList,
+      machines
+    } = this.state;
 
     let extraInfo = "";
     switch (date_type) {
@@ -348,22 +401,38 @@ class DynamicRule extends React.Component {
         <Row>
           <Col span={8}>
             {date_type < 2 && (
-              <FormItem {...formItemLayout} label="机台">
-                {getFieldDecorator("machine_name", {
-                  rules: [{ required: date_type < 2, message: "请选择机台" }]
-                })(
-                  <Select
-                    placeholder="请选择机台"
-                    onChange={this.machineChange}
-                  >
-                    {this.props.machines.map(item => (
-                      <Option value={item} key={item}>
-                        {item}
-                      </Option>
+              <>
+                <FormItem
+                  {...formItemLayout}
+                  label="部门/工序"
+                  className={styles.radioButton}
+                >
+                  <Radio.Group value={dept_name} onChange={this.handleDeptName}>
+                    {deptList.map(name => (
+                      <Radio.Button value={name} key={name}>
+                        {name}
+                      </Radio.Button>
                     ))}
-                  </Select>
-                )}
-              </FormItem>
+                  </Radio.Group>
+                </FormItem>
+
+                <FormItem {...formItemLayout} label="机台">
+                  {getFieldDecorator("machine_name", {
+                    rules: [{ required: date_type < 2, message: "请选择机台" }]
+                  })(
+                    <Select
+                      placeholder="请选择机台"
+                      onChange={this.machineChange}
+                    >
+                      {machines.map((item, i) => (
+                        <Option value={item} key={i}>
+                          {item}
+                        </Option>
+                      ))}
+                    </Select>
+                  )}
+                </FormItem>
+              </>
             )}
             <FormItem {...formItemLayout} label="品种">
               {getFieldDecorator("prod_id", {
@@ -437,20 +506,15 @@ class DynamicRule extends React.Component {
 
 const WrappedDynamicRule = Form.create()(DynamicRule);
 
-function newproc({ dispatch, loading, machines, productList, procList }) {
+function newproc(props) {
   return (
     <div className={styles.container}>
       <Card
         title={<div className={styles.header}>添加四新计划</div>}
-        loading={loading}
+        loading={props.loading}
         style={{ width: "100%" }}
       >
-        <WrappedDynamicRule
-          machines={machines}
-          productList={productList}
-          procList={procList}
-          dispatch={dispatch}
-        />
+        <WrappedDynamicRule {...props} />
       </Card>
     </div>
   );
@@ -459,7 +523,9 @@ function newproc({ dispatch, loading, machines, productList, procList }) {
 function mapStateToProps(state) {
   return {
     loading: state.loading.models.newproc,
-    ...state.newproc
+    ...state.newproc,
+    productList: state.common.productList,
+    procStreamList: state.common.procList
   };
 }
 

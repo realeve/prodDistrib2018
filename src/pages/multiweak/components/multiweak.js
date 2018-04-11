@@ -21,9 +21,9 @@ import styles from "./Report.less";
 import * as lib from "../../../utils/lib";
 import fakeTypes from "../../../utils/fakeTypes";
 
-moment.locale("zh-cn");
-
 const R = require("ramda");
+
+moment.locale("zh-cn");
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -362,6 +362,20 @@ class DynamicRule extends React.Component {
                   ))}
                 </Select>
               )}
+            </FormItem>
+
+            <FormItem
+              {...formItemLayout}
+              label="预计作废张数"
+              extra="请填写此信息，系统将根据情况通知产品后续工艺。"
+            >
+              {getFieldDecorator("fake_num", {
+                rules: [
+                  {
+                    pattern: /^\d+$/
+                  }
+                ]
+              })(<Input placeholder="预计作废张数" />)}
             </FormItem>
 
             <FormItem {...formItemLayout} label="备注">

@@ -98,3 +98,15 @@ export let isGZ = value =>
   /^[A-Za-z]{2}\d{4}$|^[A-Za-z]\d[A-Za-z]\d{3}$|^[A-Za-z]\d{2}[A-Za-z]\d{2}$|^[A-Za-z]\d{3}[A-Za-z]\d$|^[A-Za-z]\d{4}[A-Za-z]$/.test(
     value
   );
+
+export let loadFile = (fileName, content) => {
+  var aLink = document.createElement("a");
+  var blob = new Blob([content], {
+    type: "text/plain"
+  });
+  // var evt = new Event("click");
+  aLink.download = fileName;
+  aLink.href = URL.createObjectURL(blob);
+  aLink.click();
+  URL.revokeObjectURL(blob);
+};

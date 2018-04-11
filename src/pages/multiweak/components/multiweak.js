@@ -160,10 +160,7 @@ class DynamicRule extends React.Component {
 
   searchCode = e => {
     let { value } = e.target;
-    let cart_number = value
-      .toUpperCase()
-      .trim()
-      .slice(0, 8);
+    let cart_number = value.toUpperCase().trim();
     e.target.value = cart_number;
 
     if (R.isNil(cart_number) || cart_number.length < 8) {
@@ -254,7 +251,7 @@ class DynamicRule extends React.Component {
                     pattern: /^\d{4}[A-Z]\d{3}$/
                   }
                 ]
-              })(<Input onChange={this.searchCode} />)}
+              })(<Input onChange={this.searchCode} maxLength="8" />)}
             </FormItem>
 
             <FormItem {...formItemLayout} label="品种">
@@ -368,14 +365,9 @@ class DynamicRule extends React.Component {
             </FormItem>
 
             <FormItem {...formItemLayout} label="备注">
-              {getFieldDecorator("remark", {
-                rules: [
-                  {
-                    required: false,
-                    message: "请输入备注信息"
-                  }
-                ]
-              })(<Input.TextArea rows={3} placeholder="请输入备注信息" />)}
+              {getFieldDecorator("remark")(
+                <Input.TextArea rows={3} placeholder="请输入备注信息" />
+              )}
             </FormItem>
 
             <FormItem {...formTailLayout}>

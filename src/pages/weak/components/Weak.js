@@ -260,10 +260,7 @@ class DynamicRule extends React.Component {
 
   searchCode = e => {
     let { value } = e.target;
-    value = value
-      .toUpperCase()
-      .trim()
-      .slice(0, 6);
+    value = value.toUpperCase().trim();
     e.target.value = value;
     let { prod_id } = this.props.form.getFieldsValue();
     if (R.isNil(prod_id)) {
@@ -369,13 +366,12 @@ class DynamicRule extends React.Component {
                 <Input
                   placeholder="请输入印码号前6位"
                   onChange={this.searchCode}
+                  maxLength="6"
                 />
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="车号">
-              {getFieldDecorator("cart_number", {
-                rules: [{ required: false }]
-              })(<Input disabled />)}
+              {getFieldDecorator("cart_number")(<Input disabled />)}
             </FormItem>
             <FormItem
               {...formItemLayout}
@@ -471,14 +467,9 @@ class DynamicRule extends React.Component {
               <ErrImage />
             </FormItem>
             <FormItem {...formItemLayout} label="备注">
-              {getFieldDecorator("remark", {
-                rules: [
-                  {
-                    required: false,
-                    message: "请输入备注信息"
-                  }
-                ]
-              })(<Input.TextArea rows={3} placeholder="请输入备注信息" />)}
+              {getFieldDecorator("remark")(
+                <Input.TextArea rows={3} placeholder="请输入备注信息" />
+              )}
             </FormItem>
             <FormItem {...formTailLayout}>
               <Button type="primary" onClick={this.submit}>

@@ -19,6 +19,8 @@ import moment from "moment";
 import "moment/locale/zh-cn";
 import * as db from "../services/Newproc";
 
+import Proclist from "../../../components/Proclist";
+
 import styles from "./Report.less";
 import * as lib from "../../../utils/lib";
 
@@ -52,9 +54,9 @@ class DynamicRule extends React.Component {
       insertRes = await db.addPrintNewprocPlan1(data);
     } else if (data.date_type === 1) {
       insertRes = await db.addPrintNewprocPlan2(data);
+    } else {
+      insertRes = await db.addPrintNewprocPlan3(data);
     }
-
-    console.log(insertRes);
 
     if (R.isNil(insertRes) || !insertRes.rows) {
       notification.error({
@@ -83,6 +85,7 @@ class DynamicRule extends React.Component {
     let data = this.props.form.getFieldsValue();
     const { date_type } = this.state;
     data.date_type = date_type;
+    data.rec_time = lib.now();
 
     if (data.date_type < 2) {
       data.date_type = this.state.date_type;
@@ -92,11 +95,10 @@ class DynamicRule extends React.Component {
         data.rec_date1 = moment(data.rec_date[0]).format("YYYY-MM-DD");
         data.rec_date2 = moment(data.rec_date[1]).format("YYYY-MM-DD");
       }
-      data.rec_time = lib.now();
-      Reflect.deleteProperty(data, "rec_date");
-      Reflect.deleteProperty(data, "alphaNum");
+      Reflect.deleteProperty(data, "alpha_num");
     }
 
+    Reflect.deleteProperty(data, "rec_date");
     return data;
   };
 
@@ -118,7 +120,6 @@ class DynamicRule extends React.Component {
   }
 
   machineChange = v => {
-    console.log(v);
     message.success("机台改变时读取近期印刷的品种");
 
     let { setFieldsValue } = this.props.form;
@@ -133,13 +134,11 @@ class DynamicRule extends React.Component {
     this.setState({ date_type });
     let { setFieldsValue } = this.props.form;
 
-    if (date_type !== 2) {
-      let today = moment();
-      let nextHalfMonth = moment().add(15, "days");
-      setFieldsValue({
-        rec_date: date_type === 0 ? today : [today, nextHalfMonth]
-      });
-    }
+    let today = moment();
+    let nextHalfMonth = moment().add(15, "days");
+    setFieldsValue({
+      rec_date: date_type === 0 ? today : [today, nextHalfMonth]
+    });
   };
 
   handleProcName = v => {
@@ -164,14 +163,6 @@ class DynamicRule extends React.Component {
     this.setState({ procTipInfo });
   };
 
-  ProcList = (
-    <Select placeholder="请选择产品工艺流程">
-      <Option value="0">8位清分机全检</Option>
-      <Option value="1">人工拉号</Option>
-      <Option value="2">系统自动分配</Option>
-    </Select>
-  );
-
   Procprocess = () => {
     const { date_type } = this.state;
     const { getFieldDecorator } = this.props.form;
@@ -194,7 +185,7 @@ class DynamicRule extends React.Component {
         >
           {this.props.form.getFieldDecorator("proc_stream1", {
             rules: [{ required: true, message: "请选择产品工艺流程" }]
-          })(this.ProcList)}
+          })(<Proclist />)}
         </FormItem>
       );
     }
@@ -225,7 +216,7 @@ class DynamicRule extends React.Component {
                 rules: [
                   { required: date_type < 2, message: "请选择产品工艺流程" }
                 ]
-              })(this.ProcList)}
+              })(<Proclist />)}
             </FormItem>
           </div>
           <div className={styles.inlineForm}>
@@ -239,7 +230,7 @@ class DynamicRule extends React.Component {
                 rules: [
                   { required: date_type < 2, message: "请选择产品工艺流程" }
                 ]
-              })(this.ProcList)}
+              })(<Proclist />)}
             </FormItem>
           </div>
         </>
@@ -269,9 +260,9 @@ class DynamicRule extends React.Component {
           label="字母信息"
           extra="请输入冠字号段的字母部分，如AA、A*A、A**A、A***A"
         >
-          {getFieldDecorator("alphaNum", {
+          {getFieldDecorator("alpha_num", {
             rules: [{ required: date_type > 1, message: "冠字号段必须输入" }]
-          })(<Input placeholder="请输入冠字字母" />)}
+          })(<Input placeholder="请输入冠字字母" maxLength="6" />)}
         </FormItem>
         <div className={styles.inlineForm}>
           <FormItem {...formStyle2} label="开始号段">
@@ -280,10 +271,10 @@ class DynamicRule extends React.Component {
                 {
                   required: date_type > 1,
                   message: "冠字号必须输入",
-                  pattern: /^\d{4}$/
+                  pattern: /^\d+$/
                 }
               ]
-            })(<Input />)}
+            })(<Input maxLength="4" />)}
           </FormItem>
           <FormItem {...formStyle1} label="结束号段">
             {getFieldDecorator("num2", {
@@ -291,10 +282,10 @@ class DynamicRule extends React.Component {
                 {
                   required: date_type > 1,
                   message: "冠字号必须输入",
-                  pattern: /^\d{4}$/
+                  pattern: /^\d+$/
                 }
               ]
-            })(<Input />)}
+            })(<Input maxLength="4" />)}
           </FormItem>
         </div>
         <FormItem
@@ -313,17 +304,11 @@ class DynamicRule extends React.Component {
         >
           {this.props.form.getFieldDecorator("proc_stream1", {
             rules: [{ required: true, message: "请选择产品工艺流程" }]
-          })(this.ProcList)}
+          })(<Proclist />)}
         </FormItem>
       </div>
     );
   };
-
-  // GZInfo = () => {
-  //   const { getFieldDecorator } = this.props.form;
-  //   const { date_type } = this.state;
-
-  // };
 
   render() {
     const { getFieldDecorator } = this.props.form;
@@ -362,7 +347,7 @@ class DynamicRule extends React.Component {
       <Form>
         <Row>
           <Col span={8}>
-            {date_type < 2 ? (
+            {date_type < 2 && (
               <FormItem {...formItemLayout} label="机台">
                 {getFieldDecorator("machine_name", {
                   rules: [{ required: date_type < 2, message: "请选择机台" }]
@@ -379,7 +364,7 @@ class DynamicRule extends React.Component {
                   </Select>
                 )}
               </FormItem>
-            ) : null}
+            )}
             <FormItem {...formItemLayout} label="品种">
               {getFieldDecorator("prod_id", {
                 rules: [{ required: true, message: "请选择品种" }]
@@ -408,14 +393,9 @@ class DynamicRule extends React.Component {
             </FormItem>
 
             <FormItem {...formItemLayout} label="原因说明">
-              {getFieldDecorator("reason", {
-                rules: [
-                  {
-                    required: false,
-                    message: "请输入原因说明"
-                  }
-                ]
-              })(<Input.TextArea rows={3} placeholder="请输入异常原因说明" />)}
+              {getFieldDecorator("reason")(
+                <Input.TextArea rows={3} placeholder="请输入异常原因说明" />
+              )}
             </FormItem>
           </Col>
 

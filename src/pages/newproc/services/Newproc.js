@@ -165,3 +165,15 @@ export const addPrintNewprocPlan2 = async params =>
     url: "/76/1335f12ee9.json",
     params
   }).then(res => res);
+
+/**
+*   @database: { 质量信息系统 }
+*   @desc:     { 增加冠字号段验证计划 } 
+  
+    const { alpha_num, date_type, num1, num2, proc_name, proc_stream1, prod_id, reason, rec_time } = params;
+*/
+export const addPrintNewprocPlan3 = async params =>
+  await axios({
+    url: "/85/2df9bb813c.json",
+    params
+  }).then(res => res);

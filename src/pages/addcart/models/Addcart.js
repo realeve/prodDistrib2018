@@ -17,7 +17,7 @@ export default {
     dateRange: [],
     machines: [],
     productList: [],
-    procList: []
+    abnormalTypeList: []
   },
   reducers: {
     save(state, { payload: { dataSrc, dataSource, total } }) {
@@ -66,10 +66,10 @@ export default {
         productList
       };
     },
-    setProc(state, { payload: procList }) {
+    setProc(state, { payload: abnormalTypeList }) {
       return {
         ...state,
-        procList
+        abnormalTypeList
       };
     }
   },

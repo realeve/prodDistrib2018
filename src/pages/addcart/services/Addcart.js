@@ -146,10 +146,22 @@ export const getViewPrintAbnormalProd = async params =>
 *   @database: { 质量信息系统 }
 *   @desc:     { 添加异常品 } 
   
-    const { prod_id, cart_number, rec_date, machine_name, proc_name, reason, proc_stream } = params;
+    const { prod_id, cart_number, rec_date, machine_name, reason, proc_stream, proc_name, captain_name, prod_date, problem_type } = params;
 */
 export const addPrintAbnormalProd = async params =>
   await axios({
     url: "/77/d9072e2900.json",
+    params
+  }).then(res => res);
+
+/**
+*   @database: { 接口管理 }
+*   @desc:     { 根据车号查询生产信息 } 
+  
+    const { cart } = params;
+*/
+export const getViewCartfinder = async params =>
+  await axios({
+    url: "/86/db8acd1ea1.json",
     params
   }).then(res => res);

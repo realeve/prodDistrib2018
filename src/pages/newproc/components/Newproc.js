@@ -406,6 +406,7 @@ class DynamicRule extends React.Component {
                   {...formItemLayout}
                   label="部门/工序"
                   className={styles.radioButton}
+                  extraInfo="冠字号段验证无需选择机台信息"
                 >
                   <Radio.Group value={dept_name} onChange={this.handleDeptName}>
                     {deptList.map(name => (

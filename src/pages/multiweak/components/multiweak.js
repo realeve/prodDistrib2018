@@ -96,7 +96,8 @@ class DynamicRule extends React.Component {
       fake_type: "",
       kilo_num: [],
       pos_info: [],
-      remark: ""
+      remark: "",
+      fake_num: ""
     });
   };
 

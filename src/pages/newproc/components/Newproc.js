@@ -128,7 +128,7 @@ class DynamicRule extends React.Component {
   }
 
   machineChange = async machine_name => {
-    message.success("机台改变时读取近期印刷的品种");
+    // message.success("机台改变时读取近期印刷的品种");
 
     let { setFieldsValue } = this.props.form;
     let { data } = await db.getLatestMachineProd({ machine_name });

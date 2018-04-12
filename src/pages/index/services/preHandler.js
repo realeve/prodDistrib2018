@@ -1,12 +1,13 @@
 import setting from "./setting";
-
 const R = require("ramda");
 
 // 数据预处理
 const preHandle = data => {
+  console.log("开始处理车号分配：");
   let uniqCarts = R.compose(R.uniqBy(R.prop(0)), R.filter(R.propEq(3, "印码")))(
     data
   );
+
   let cartChecks = Math.ceil(uniqCarts.length * setting.percent / 100);
   return {
     total: uniqCarts.length,
@@ -313,7 +314,9 @@ const getUnionCarts = carts => {
   return newCarts;
 };
 
-const init = (data, sampledMachines, sampledCarts) => {
+const init = ({ data, sampledMachines, sampledCarts, stockData }) => {
+  let usedData = stockData;
+
   // 任务量
   let taskInfo = preHandle(data);
   taskInfo.percent = setting.percent;
@@ -321,19 +324,19 @@ const init = (data, sampledMachines, sampledCarts) => {
   let taskList, sCarts;
 
   // 使用历史数据
-  // sampleByLessCarts(data, sampledMachines, sampledCarts);
+  // sampleByLessCarts(usedData, sampledMachines, sampledCarts);
 
   // 文案2：效率优先，同时不使用历史数据
-  sCarts = sampleByLessCarts(data, [], []);
+  sCarts = sampleByLessCarts(usedData, [], []);
   console.log(sCarts);
 
   // 方案1：按风险最低 ———— 码后核查共生产275车产品，按4%抽样将抽取11车产品 实际抽取20车
-  // taskList = getCheckedCarts(data, taskInfo);
+  // taskList = getCheckedCarts(usedData, taskInfo);
   // console.log(taskList);
   // sCarts = R.map(R.prop(0))(taskList);
 
   // 数据汇总
-  let count = countMachineCheckInfo(sCarts, data);
+  let count = countMachineCheckInfo(sCarts, usedData);
   taskList = getUnionCarts(count.log);
   return { ...count, taskList, taskInfo };
 };

@@ -1,4 +1,5 @@
 import * as db from "../services/table";
+import wms from "../services/wms";
 import handler from "../services/preHandler";
 import * as lib from "../../../utils/lib";
 const R = require("ramda");
@@ -129,12 +130,32 @@ export default {
 
       const { pageSize, page, sampledMachines, sampledCarts } = store;
 
+      // 车号列表，未确认是否在库
+      let unStockedData = data.data.map(item => Object.values(item).slice(1));
+      let uniqCarts = R.compose(
+        R.uniqBy(R.prop(0)),
+        R.filter(R.propEq(3, "印码"))
+      )(unStockedData);
+
+      let cartList = R.compose(R.uniq, R.map(R.nth(0)))(uniqCarts);
+      let stockCarts = yield call(wms.getStockStatus, cartList);
+
+      let stockData = [];
+      if (stockCarts.length > 0) {
+        stockCarts.forEach(item => {
+          let stockItem = R.filter(R.propEq("0", item))(unStockedData);
+          stockData = [...stockData, ...stockItem];
+        });
+      }
+      console.log("在库车号列表:", stockCarts);
+
       // 自动排活
-      let disData = handler.init(
-        data.data.map(item => Object.values(item).slice(1)),
+      let disData = handler.init({
+        data: unStockedData,
         sampledMachines,
-        sampledCarts
-      );
+        sampledCarts,
+        stockData
+      });
 
       const sampling = {
         taskInfo: {

@@ -222,11 +222,11 @@ class DynamicRule extends React.Component {
           label="工艺流程"
           extra={
             <label>
-              推荐选择 <span className={styles.bold}>8位清分机全检</span>，当不能确定最终流程时选择<span
+              推荐选择 <span className={styles.bold}>8位清分机全检</span>,当选择自动分配时，<span
                 className={styles.bold}
               >
-                系统自动分配.
-              </span>
+                系统将自动根据拉号情况自动分配
+              </span>.
             </label>
           }
         >
@@ -341,11 +341,11 @@ class DynamicRule extends React.Component {
           label="工艺流程"
           extra={
             <label>
-              推荐选择 <span className={styles.bold}>8位清分机全检</span>，当不能确定最终流程时选择<span
+              推荐选择 <span className={styles.bold}>8位清分机全检</span>,当选择自动分配时，<span
                 className={styles.bold}
               >
-                系统自动分配.
-              </span>
+                系统将自动根据拉号情况自动分配
+              </span>.
             </label>
           }
         >
@@ -400,6 +400,12 @@ class DynamicRule extends React.Component {
       <Form>
         <Row>
           <Col span={8}>
+            <FormItem {...formItemLayout} label="名称">
+              {getFieldDecorator("task_name")(
+                <Input placeholder="请输入验证名称" />
+              )}
+            </FormItem>
+
             {date_type < 2 && (
               <>
                 <FormItem

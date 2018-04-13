@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50720
 File Encoding         : 65001
 
-Date: 2018-04-12 18:26:17
+Date: 2018-04-13 08:37:19
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -31,7 +31,7 @@ CREATE TABLE `sys_api` (
   `rec_time` datetime DEFAULT NULL COMMENT '插入时间',
   `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=92 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=93 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of sys_api
@@ -83,6 +83,7 @@ INSERT INTO `sys_api` VALUES ('88', '0000000014', '49', '印刷工序所有机�
 INSERT INTO `sys_api` VALUES ('89', '0000000014', '49', '机台最近开印品种', 'cab08fa0d8', 'select 品种 \"prod_type\" from (select t.品种,row_number() over ( order by 完成时间 desc ) rn from VIEW_CARTFINDER t where 机台=? order by 完成时间 desc) t where t.rn=1', 'machine_name', '', '2018-04-11 17:32:58', '2018-04-11 17:32:58');
 INSERT INTO `sys_api` VALUES ('90', '0000000002', '49', '更新四新计划状态信息', 'a6c66f8d72', 'update print_newproc_plan set complete_num = ?,complete_status = ?,update_time = ? where id=?', 'complete_num,complete_status,update_time,_id', '@id:_id. 参数说明：api 索引序号', '2018-04-12 11:39:03', '2018-04-12 11:39:03');
 INSERT INTO `sys_api` VALUES ('91', '0000000002', '49', '记录库管系统日志信息', 'f0500427cb', 'insert into print_wms_log(remark,rec_time,return_info ) values ?', 'values', '@desc:批量插入数据时，约定使用二维数组values参数，格式为[{remark,rec_time,return_info }]，数组的每一项表示一条数据', '2018-04-12 11:44:49', '2018-04-12 11:44:49');
+INSERT INTO `sys_api` VALUES ('92', '0000000002', '49', '批量插入立体库四新计划工艺流转信息', 'db02022755', 'insert into dbo.print_wms_proclist(cart_number,gz_num,proc_plan,proc_real,rec_time,check_type ) values ?', 'values', '@desc:批量插入数据时，约定使用二维数组values参数，格式为[{cart_number,gz_num,proc_plan,proc_real,rec_time }]，数组的每一项表示一条数据', '2018-04-12 22:51:14', '2018-04-13 08:36:58');
 DROP TRIGGER IF EXISTS `api_nonce`;
 DELIMITER ;;
 CREATE TRIGGER `api_nonce` BEFORE INSERT ON `sys_api` FOR EACH ROW set new.nonce = substring(MD5(RAND()*100),1,10)

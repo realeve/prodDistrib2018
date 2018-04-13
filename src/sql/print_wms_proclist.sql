@@ -11,7 +11,7 @@ Target Server Type    : SQL Server
 Target Server Version : 105000
 File Encoding         : 65001
 
-Date: 2018-04-13 08:37:31
+Date: 2018-04-13 15:01:08
 */
 
 
@@ -22,12 +22,13 @@ DROP TABLE [dbo].[print_wms_proclist]
 GO
 CREATE TABLE [dbo].[print_wms_proclist] (
 [id] int NOT NULL IDENTITY(1,1) ,
-[cart_number] varchar(1) NULL ,
-[gz_num] varchar(1) NULL ,
+[cart_number] varchar(255) NULL ,
+[gz_num] varchar(255) NULL ,
 [proc_plan] varchar(255) NULL ,
 [proc_real] varchar(255) NULL ,
 [rec_time] datetime2(7) NULL ,
-[check_type] varchar(255) NULL 
+[check_type] varchar(255) NULL ,
+[complete_status] int NULL 
 )
 
 

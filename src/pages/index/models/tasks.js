@@ -157,8 +157,6 @@ export default {
       let cartList = R.compose(R.uniq, R.map(R.nth(0)))(uniqCarts);
       let stockCarts = yield call(wms.getStockStatus, cartList);
 
-      console.log(stockCarts);
-
       let stockData = [];
       if (stockCarts.length > 0) {
         stockCarts.forEach(item => {
@@ -166,7 +164,7 @@ export default {
           stockData = [...stockData, ...stockItem];
         });
       }
-      console.log("在库车号列表:", stockData);
+      console.log("在库车号列表:", stockCarts);
 
       // 自动排活
       let disData = handler.init({
@@ -179,7 +177,8 @@ export default {
       const sampling = {
         taskInfo: {
           ...disData.taskInfo,
-          machines: disData.machine.length
+          machines: disData.machine.length,
+          stockCount: stockCarts.length
         },
         weekDay: disData.weekDay,
         classDis: disData.className,

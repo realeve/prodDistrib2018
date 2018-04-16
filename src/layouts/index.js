@@ -20,7 +20,7 @@ class Index extends Component {
     let curPageName;
     switch (pathname.slice(1)) {
       case "task":
-        curPageName = "领取任务";
+        curPageName = "领取抽检任务";
         break;
       case "report":
         curPageName = "数据报表";

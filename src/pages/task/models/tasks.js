@@ -16,10 +16,20 @@ export default {
     dateRange: []
   },
   reducers: {
-    save(state, { payload: { dataSrc, dataSource, total } }) {
+    save(
+      state,
+      {
+        payload: { dataSrc, dataSource, total }
+      }
+    ) {
       return { ...state, dataSrc, dataSource, total };
     },
-    setColumns(state, { payload: { dataClone, columns } }) {
+    setColumns(
+      state,
+      {
+        payload: { dataClone, columns }
+      }
+    ) {
       return {
         ...state,
         dataClone,
@@ -80,12 +90,15 @@ export default {
     },
     *handleTaskData(payload, { call, put, select }) {
       const store = yield select(state => state[namespace]);
-      const { pageSize, page, dateRange } = store;
+      const { pageSize, page } = store;
 
-      let data = yield call(db.getPrintSampleCartlist, {
-        tstart: dateRange[0],
-        tend: dateRange[1]
-      });
+      let data = yield call(
+        db.getPrintSampleCartlistAll
+        //   , {
+        //   tstart: dateRange[0],
+        //   tend: dateRange[1]
+        // }
+      );
 
       let dataSource = [],
         dataClone = [];
@@ -123,7 +136,12 @@ export default {
         }
       });
     },
-    *checkTask({ payload: { cart_number, keyId } }, { call, select, put }) {
+    *checkTask(
+      {
+        payload: { cart_number, keyId }
+      },
+      { call, select, put }
+    ) {
       const store = yield select(state => state[namespace]);
       const { dataSource } = store;
 
@@ -157,7 +175,7 @@ export default {
       return history.listen(async ({ pathname, query }) => {
         const match = pathToRegexp("/task").exec(pathname);
         if (match && match[0] === "/task") {
-          const [tstart, tend] = dateRanges["本周"];
+          const [tstart, tend] = dateRanges["上周"];
           const [ts, te] = [tstart.format("YYYYMMDD"), tend.format("YYYYMMDD")];
 
           // let data = await db.getPrintSampleCartlist({ tstart: ts, tend: te });

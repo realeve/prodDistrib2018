@@ -6,16 +6,18 @@ import {
   Card,
   Button,
   message,
-  DatePicker,
+  // DatePicker,
   Badge
 } from "antd";
-import moment from "moment";
-import "moment/locale/zh-cn";
+// import moment from "moment";
+// import "moment/locale/zh-cn";
 import styles from "./Tasks.less";
-import dateRanges from "../../../utils/ranges";
+// import dateRanges from "../../../utils/ranges";
 import * as lib from "../../../utils/lib";
-const RangePicker = DatePicker.RangePicker;
-moment.locale("zh-cn");
+import wms from "../../index/services/wms";
+
+// const RangePicker = DatePicker.RangePicker;
+// moment.locale("zh-cn");
 
 function Tasks({
   dispatch,
@@ -29,15 +31,15 @@ function Tasks({
   columns,
   dateRange
 }) {
-  const onDateChange = async (dates, dateStrings) => {
-    await dispatch({
-      type: "taskGet/setDateRange",
-      payload: dateStrings
-    });
-    dispatch({
-      type: "taskGet/handleTaskData"
-    });
-  };
+  // const onDateChange = async (dates, dateStrings) => {
+  //   await dispatch({
+  //     type: "taskGet/setDateRange",
+  //     payload: dateStrings
+  //   });
+  //   dispatch({
+  //     type: "taskGet/handleTaskData"
+  //   });
+  // };
   // 页码更新
   const pageChangeHandler = page => {
     dispatch({
@@ -69,6 +71,10 @@ function Tasks({
       type: "taskGet/checkTask",
       payload: { cart_number, keyId: e.key }
     });
+
+    // 解锁本车(该逻辑由库房发出)
+    // await wms.setWhiteList([cart_number]);
+
     if (isSuccess) {
       message.success("产品成功领取");
     }
@@ -76,10 +82,10 @@ function Tasks({
 
   const distColumn = () => {
     if (columns.length) {
-      columns[5].render = text => `第${text}周`;
+      columns[6].render = text => `第${text}周`;
       columns[3].render = (text, record) =>
         text === "是" ? <Badge status="success" text={text} /> : text;
-      columns[6].render = (text, record) =>
+      columns[7].render = (text, record) =>
         text === "0" ? (
           <Button
             type={record.col3 === "是" ? "primary" : "default"}
@@ -102,7 +108,7 @@ function Tasks({
             <div className={styles.title}>
               {dataSrc.title}(第 {lib.weeks()} 周)
             </div>
-            <div className={styles.dateRange}>
+            {/* <div className={styles.dateRange}>
               <RangePicker
                 ranges={dateRanges}
                 format="YYYYMMDD"
@@ -112,7 +118,7 @@ function Tasks({
                   rangePlaceholder: ["开始日期", "结束日期"]
                 }}
               />
-            </div>
+            </div> */}
           </div>
         }
         style={{ width: "100%", marginTop: "30px" }}

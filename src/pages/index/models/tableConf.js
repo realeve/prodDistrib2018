@@ -48,7 +48,7 @@ export default {
           //   type: "updateTid",
           //   payload: tid
           // });
-          const [tstart, tend] = dateRanges["本周"];
+          const [tstart, tend] = dateRanges["上周"];
           const [ts, te] = [tstart.format("YYYYMMDD"), tend.format("YYYYMMDD")];
           dispatch({
             type: "setDateRange",

@@ -136,7 +136,7 @@ export const getQueryConfig = ({ tstart, tend }) => ({
     url: lib.apiHost,
     params: {
       // ID: tid,
-      cache: 10,
+      // cache: 10,
       tstart,
       tend,
       tstart2: tstart,

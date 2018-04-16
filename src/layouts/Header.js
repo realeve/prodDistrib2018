@@ -31,7 +31,7 @@ function HeaderMenu({ location }) {
           </Menu.Item>
           <Menu.Item key="/task">
             <Link to="/task">
-              <Icon type="bars" />领取任务
+              <Icon type="bars" />领取抽检任务
             </Link>
           </Menu.Item>
           <Menu.Item key="/report">

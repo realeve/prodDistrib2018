@@ -90,6 +90,15 @@ export const getPrintSampleCartlist = async params =>
   }).then(res => res);
 
 /**
+ *   @database: { 质量信息系统 }
+ *   @desc:     { 待检车号列表 }
+ */
+export const getPrintSampleCartlistAll = async () =>
+  await axios({
+    url: "/104/fe5d8ec5c9/array.json"
+  }).then(res => res);
+
+/**
 *   @database: { 质量管理数据库 }
 *   @desc:     { 人工抽检领活 } 
   

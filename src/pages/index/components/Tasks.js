@@ -3,6 +3,7 @@ import { connect } from "dva";
 import { Table, Pagination, Card, Button, Badge } from "antd";
 import * as lib from "../../../utils/lib.js";
 import * as db from "../services/table";
+import wms from "../services/wms";
 import { notification, Icon, Modal } from "antd";
 
 import styles from "./Tasks.less";
@@ -76,9 +77,11 @@ function Tasks({
         <h2>自动分配抽样结果</h2>
         <div className={styles.desc}>
           <h5>
-            码后核查共生产<strong>{taskInfo.total}</strong>车产品，按<strong>
-              {taskInfo.percent}
-            </strong>%抽样将抽取<strong>{taskInfo.checks}</strong>车产品
+            码后核查共生产<strong>{taskInfo.total}</strong>车产品,在库<strong>
+              {taskInfo.stockCount}
+            </strong>车,按<strong>{taskInfo.percent}</strong>%抽样将抽取<strong>
+              {taskInfo.checks}
+            </strong>车产品
           </h5>
           <h5>
             实际抽取<strong>{total}</strong>车，共涉及<strong>
@@ -137,9 +140,29 @@ function Tasks({
     }
 
     let insertData = async () => {
-      let data = await db.addPrintSampleCartlist(insertingData);
-      if (data.rows) {
-        openNotification("车号列表领取成功");
+      let carnos = R.compose(R.uniq, R.map(R.prop("cart_number")))(
+        insertingData
+      );
+      let lockData = await wms.setBlackList({
+        reason_code: "q_handCheck",
+        carnos
+      });
+      let { unhandledList, handledList } = lockData;
+      unhandledList = R.map(R.prop("carno"))(unhandledList);
+      handledList = R.map(R.prop("carno"))(handledList);
+
+      openNotification("锁车完毕,以下车号锁车失败:" + unhandledList.join("、"));
+
+      console.log(lockData);
+      insertingData = R.filter(item => handledList.includes(item))(
+        insertingData
+      );
+
+      if (insertingData.length) {
+        let data = await db.addPrintSampleCartlist(insertingData);
+        if (data.rows) {
+          openNotification("车号列表领取成功");
+        }
       }
 
       let machines = sampling.save2db.machine.map(({ name, value }) => ({
@@ -147,7 +170,8 @@ function Tasks({
         check_num: value,
         ...exInfo
       }));
-      data = await db.addPrintSampleMachine(machines);
+
+      let data = await db.addPrintSampleMachine(machines);
       if (data.rows) {
         openNotification("机台信息添加成功");
       }

@@ -21,7 +21,12 @@ export default {
     sampledMachines: []
   },
   reducers: {
-    save(state, { payload: { dataSrc, dataSource, total } }) {
+    save(
+      state,
+      {
+        payload: { dataSrc, dataSource, total }
+      }
+    ) {
       return { ...state, dataSrc, dataSource, total };
     },
     setPage(state, { payload: page }) {
@@ -43,7 +48,12 @@ export default {
         // total: dataSource.length
       };
     },
-    setColumns(state, { payload: { dataClone, columns } }) {
+    setColumns(
+      state,
+      {
+        payload: { dataClone, columns }
+      }
+    ) {
       return {
         ...state,
         dataClone,
@@ -96,7 +106,12 @@ export default {
         payload: page
       });
     },
-    *fetchSampledData({ payload: { tstart, tend } }, { call, put, select }) {
+    *fetchSampledData(
+      {
+        payload: { tstart, tend }
+      },
+      { call, put, select }
+    ) {
       let data = yield call(db.getSampledCartlist, { tstart, tend });
       let carts = R.compose(
         R.uniq(),
@@ -110,7 +125,9 @@ export default {
     },
     // 对尚未抽检的设备单独统计
     *fetchSampledMachines(
-      { payload: { tstart, tend } },
+      {
+        payload: { tstart, tend }
+      },
       { call, put, select }
     ) {
       let data = yield call(db.getPrintSampleMachine, { tstart, tend });
@@ -140,14 +157,16 @@ export default {
       let cartList = R.compose(R.uniq, R.map(R.nth(0)))(uniqCarts);
       let stockCarts = yield call(wms.getStockStatus, cartList);
 
+      console.log(stockCarts);
+
       let stockData = [];
       if (stockCarts.length > 0) {
         stockCarts.forEach(item => {
-          let stockItem = R.filter(R.propEq("0", item))(unStockedData);
+          let stockItem = R.filter(R.propEq("0", item.carno))(unStockedData);
           stockData = [...stockData, ...stockItem];
         });
       }
-      console.log("在库车号列表:", stockCarts);
+      console.log("在库车号列表:", stockData);
 
       // 自动排活
       let disData = handler.init({

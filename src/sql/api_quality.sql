@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50720
 File Encoding         : 65001
 
-Date: 2018-04-16 18:31:43
+Date: 2018-04-17 17:45:16
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -31,7 +31,7 @@ CREATE TABLE `sys_api` (
   `rec_time` datetime DEFAULT NULL COMMENT '插入时间',
   `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=106 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=110 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of sys_api
@@ -83,8 +83,8 @@ INSERT INTO `sys_api` VALUES ('88', '0000000014', '49', '印刷工序所有机�
 INSERT INTO `sys_api` VALUES ('89', '0000000014', '49', '机台最近开印品种', 'cab08fa0d8', 'select 品种 \"prod_type\" from (select t.品种,row_number() over ( order by 完成时间 desc ) rn from VIEW_CARTFINDER t where 机台=? order by 完成时间 desc) t where t.rn=1', 'machine_name', '', '2018-04-11 17:32:58', '2018-04-11 17:32:58');
 INSERT INTO `sys_api` VALUES ('90', '0000000002', '49', '更新四新计划状态信息', 'a6c66f8d72', 'update print_newproc_plan set complete_num = ?,complete_status = ?,update_time = ? where id=?', 'complete_num,complete_status,update_time,_id', '@id:_id. 参数说明：api 索引序号', '2018-04-12 11:39:03', '2018-04-12 11:39:03');
 INSERT INTO `sys_api` VALUES ('91', '0000000002', '49', '记录库管系统日志信息', 'f0500427cb', 'insert into print_wms_log(remark,rec_time,return_info ) values ?', 'values', '@desc:批量插入数据时，约定使用二维数组values参数，格式为[{remark,rec_time,return_info }]，数组的每一项表示一条数据', '2018-04-12 11:44:49', '2018-04-12 11:44:49');
-INSERT INTO `sys_api` VALUES ('92', '0000000002', '49', '批量插入立体库四新计划工艺流转信息', 'db02022755', 'insert into dbo.print_wms_proclist(cart_number,gz_num,proc_plan,proc_real,rec_time,check_type ) values ?', 'values', '@desc:批量插入数据时，约定使用二维数组values参数，格式为[{cart_number,gz_num,proc_plan,proc_real,rec_time }]，数组的每一项表示一条数据', '2018-04-12 22:51:14', '2018-04-13 08:36:58');
-INSERT INTO `sys_api` VALUES ('93', '0000000002', '49', '未处理的异常品列表', 'ba126b61bf', 'SELECT distinct a.cart_number,a.proc_stream FROM Print_Abnormal_Prod a where a.id in (select max(a.id) id from Print_Abnormal_Prod a where complete_status=0 group by a.cart_number)', '', '', '2018-04-13 09:57:02', '2018-04-16 17:52:19');
+INSERT INTO `sys_api` VALUES ('92', '0000000002', '49', '批量插入立体库四新计划工艺流转信息', 'db02022755', 'insert into dbo.print_wms_proclist(cart_number,gz_num,proc_plan,proc_real,rec_time,check_type,task_id ) values ?', 'values', '@desc:批量插入数据时，约定使用二维数组values参数，格式为[{cart_number,gz_num,proc_plan,proc_real,rec_time }]，数组的每一项表示一条数据', '2018-04-12 22:51:14', '2018-04-17 15:38:08');
+INSERT INTO `sys_api` VALUES ('93', '0000000002', '49', '未处理的异常品列表', 'ba126b61bf', 'SELECT distinct a.cart_number,a.proc_stream,a.id FROM Print_Abnormal_Prod a where a.id in (select max(a.id) id from Print_Abnormal_Prod a where complete_status=0 group by a.cart_number)', '', '', '2018-04-13 09:57:02', '2018-04-17 16:03:43');
 INSERT INTO `sys_api` VALUES ('94', '0000000002', '49', '记录异常品任务处理状态为已完成', 'ae030c585f', 'update Print_Abnormal_Prod set complete_status=1 where cart_number=?', 'cart_number', '', '2018-04-13 11:29:58', '2018-04-13 11:30:49');
 INSERT INTO `sys_api` VALUES ('95', '0000000002', '49', '更新NodeJS 服务心跳', 'eb4416dc92', 'insert into dbo.print_wms_heartbeat(rec_time,task_name ) values (?,?)', 'rec_time,task_name', '', '2018-04-13 11:35:59', '2018-04-13 11:35:59');
 INSERT INTO `sys_api` VALUES ('96', '0000000002', '49', '查询NodeJS 服务心跳', '8d7c52c835', 'SELECT a.rec_time,a.task_name FROM dbo.print_wms_heartbeat AS a', '', '', '2018-04-13 11:39:49', '2018-04-13 11:39:49');
@@ -97,6 +97,10 @@ INSERT INTO `sys_api` VALUES ('102', '0000000002', '49', '根据id信息查询�
 INSERT INTO `sys_api` VALUES ('103', '0000000002', '49', '连续废通知产品已完工', '1db66c49a0', 'update print_machinecheck_multiweak set complete_status = 1 where id=?', '_id', '@id:_id. 参数说明：api 索引序号', '2018-04-13 22:50:00', '2018-04-13 22:50:00');
 INSERT INTO `sys_api` VALUES ('104', '0000000002', '49', '待检车号列表', 'fe5d8ec5c9', 'SELECT DISTINCT a.cart_number 车号,a.gz_no + a.code_no 冠字,a.machine_name 机台,(  CASE  WHEN a.week_name = \'星期一\' THEN  \'是\'  ELSE  \'否\'  END ) 周一,convert(varchar,a.print_date,120) 印刷时间,a.prod_name 品种,a.week_num 周数,a.status 领取状态 FROM print_sample_cartlist a WHERE proc_name = \'印码\' ORDER BY a.status,6 DESC,5', '', '', '2018-04-16 17:26:38', '2018-04-16 17:29:45');
 INSERT INTO `sys_api` VALUES ('105', '0000000014', '49', '车号查冠字', '153ec8ad02', 'select distinct 车号 \"cart_number\",冠号||字号 \"gz_num\" from view_cartfinder t where t.车号 in (?)', 'carnos', '', '2018-04-16 18:05:03', '2018-04-16 18:25:13');
+INSERT INTO `sys_api` VALUES ('106', '0000000014', '49', '机台从某天起生产的X万产品车号列表', 'f47aa951dd', 'select 车号 from (select distinct 车号,row_number() over ( order by 开始时间) row_num from view_cartfinder a where a.机台=? and to_char(开始时间,\\\'YYYYMMDD\\\') >=?) a where a.row_num<=? order by a.row_num', 'machine_name, rec_date, max_carts', '', '2018-04-17 10:20:17', '2018-04-17 10:20:17');
+INSERT INTO `sys_api` VALUES ('107', '0000000014', '49', '机台某段时间生产的车号列表', '4463f2c07c', 'select 车号 from view_cartfinder a where a.机台=? and to_char(开始时间,\'YYYYMMDD\') between ? and ? order by a.开始时间', 'machine_name,         rec_date1,         rec_date2', '', '2018-04-17 13:25:44', '2018-04-17 13:29:35');
+INSERT INTO `sys_api` VALUES ('108', '0000000014', '49', '某冠字号段车号列表', 'cf760bfe6d', 'select distinct 车号,a.字号 from view_cartfinder a where a.品种=? and a.冠号=? and a.字号 between ? and ? order by a.字号', 'prod_name, gz, start_no, end_no', '', '2018-04-17 13:41:05', '2018-04-17 13:41:05');
+INSERT INTO `sys_api` VALUES ('109', '0000000002', '49', '过滤已处理的四新或异常品车号列表', '95aa0001e8', 'select distinct cart_number from print_wms_proclist where check_type=? and task_id=?', 'check_type,task_id', '', '2018-04-17 16:13:29', '2018-04-17 16:13:29');
 
 -- ----------------------------
 -- Table structure for sys_database

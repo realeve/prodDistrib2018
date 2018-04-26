@@ -7,6 +7,8 @@ import styles from "./index.less";
 import Excel from "../../utils/excel";
 import pdf from "../../utils/pdf";
 
+import VTable from "../../components/Table";
+
 import dateRanges from "../../utils/ranges";
 import moment from "moment";
 import "moment/locale/zh-cn";
@@ -17,7 +19,15 @@ const RangePicker = DatePicker.RangePicker;
 
 const R = require("ramda");
 
-function Tables({ dispatch, dateRange, title, columns, data, loading }) {
+function Tables({
+  dispatch,
+  dateRange,
+  title,
+  columns,
+  data,
+  loading,
+  dataSrc
+}) {
   const onDateChange = async (dates, dateStrings) => {
     const [tstart, tend] = dateStrings;
     await dispatch(db.getQueryConfig({ tstart, tend }));
@@ -116,37 +126,44 @@ function Tables({ dispatch, dateRange, title, columns, data, loading }) {
   };
 
   return (
-    <Card
-      title={
-        <div className={styles.header}>
-          <Action />
-          {tableTitle()}
-          <div className={styles.dateRange}>
-            <RangePicker
-              ranges={dateRanges}
-              format="YYYYMMDD"
-              onChange={onDateChange}
-              defaultValue={[moment(dateRange[0]), moment(dateRange[1])]}
-              locale={{
-                rangePlaceholder: ["开始日期", "结束日期"]
-              }}
-            />
-            <Search
-              placeholder="输入任意值过滤数据"
-              onChange={handleSearchChange}
-              style={{ width: 220 }}
-              className={styles.search}
-            />
+    <>
+      <Card
+        title={
+          <div className={styles.header}>
+            <Action />
+            {tableTitle()}
+            <div className={styles.dateRange}>
+              <RangePicker
+                ranges={dateRanges}
+                format="YYYYMMDD"
+                onChange={onDateChange}
+                defaultValue={[moment(dateRange[0]), moment(dateRange[1])]}
+                locale={{
+                  rangePlaceholder: ["开始日期", "结束日期"]
+                }}
+              />
+              <Search
+                placeholder="输入任意值过滤数据"
+                onChange={handleSearchChange}
+                style={{ width: 220 }}
+                className={styles.search}
+              />
+            </div>
           </div>
-        </div>
-      }
-      // loading={loading}
-      style={{ width: "100%" }}
-      bodyStyle={{ padding: "0px 0px 12px 0px" }}
-      className={styles.exCard}
-    >
-      <Table />
-    </Card>
+        }
+        // loading={loading}
+        style={{ width: "100%" }}
+        bodyStyle={{ padding: "0px 0px 12px 0px" }}
+        className={styles.exCard}
+      >
+        <Table />
+      </Card>
+      <VTable
+        dataSrc={dataSrc}
+        loading={loading}
+        style={{ marginTop: "40px" }}
+      />
+    </>
   );
 }
 
@@ -155,7 +172,8 @@ function mapStateToProps(state) {
     ...state.weaklistConf,
     title: state.weaklist.dataSrc.title || "",
     columns: state.weaklist.columns,
-    data: state.weaklist.dataClone
+    data: state.weaklist.dataClone,
+    dataSrc: state.weaklist.dataSrc
   };
 }
 

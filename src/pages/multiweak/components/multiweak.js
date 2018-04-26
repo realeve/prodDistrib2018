@@ -402,19 +402,15 @@ class DynamicRule extends React.Component {
 
 const WrappedDynamicRule = Form.create()(DynamicRule);
 
-function multiweak(props) {
-  return (
-    <div className={styles.container}>
-      <Card
-        title={<h3 className={styles.header}>连续废信息通知</h3>}
-        loading={props.loading}
-        style={{ width: "100%" }}
-      >
-        <WrappedDynamicRule {...props} />
-      </Card>
-    </div>
-  );
-}
+const multiweak = props => (
+  <Card
+    title={<h3 className={styles.header}>连续废信息通知</h3>}
+    loading={props.loading}
+    style={{ width: "100%" }}
+  >
+    <WrappedDynamicRule {...props} />
+  </Card>
+);
 
 function mapStateToProps(state) {
   return {

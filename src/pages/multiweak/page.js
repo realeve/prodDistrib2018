@@ -1,4 +1,8 @@
 import Multiweak from "./components/multiweak";
-export default () => {
-  return <Multiweak />;
-};
+import styles from "./components/Report.less";
+
+export default () => (
+  <div className={styles.container}>
+    <Multiweak />
+  </div>
+);

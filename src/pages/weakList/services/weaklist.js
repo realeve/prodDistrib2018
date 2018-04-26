@@ -136,3 +136,14 @@ export const getQueryConfig = ({ tstart, tend }) => ({
     }
   }
 });
+
+/**
+*   @database: { 质量信息系统 }
+*   @desc:     { 机检弱项产品作废汇总 } 
+    const { tstart, tend } = params;
+*/
+export const getViewPrintMachinecheckWeak = async params =>
+  await axios({
+    url: "/110/b579b29ab8.json",
+    params
+  }).then(res => res);

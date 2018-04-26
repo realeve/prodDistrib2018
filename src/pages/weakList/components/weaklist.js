@@ -65,13 +65,14 @@ function Tables({
   const columnInfo = () => {
     return columns.map(item => {
       if (item.dataIndex === "col10") {
-        item.render = text => (
-          <img
-            className={styles.fakeImg}
-            src={`${axios.uploadHost}${text}`}
-            alt={text}
-          />
-        );
+        item.render = text =>
+          text.length < 10 ? null : (
+            <img
+              className={styles.fakeImg}
+              src={`${axios.uploadHost}${text}`}
+              alt={text}
+            />
+          );
       } else if (item.dataIndex === "col11") {
         item.render = text => (R.isNil(text) ? "" : text);
       }

@@ -1,5 +1,5 @@
 import moment from "moment";
-import { host } from "./axios";
+import { host, axios, uploadHost } from "./axios";
 
 export const searchUrl = "http://10.8.2.133/search#";
 export const apiHost = host;
@@ -109,4 +109,100 @@ export let loadFile = (fileName, content) => {
   aLink.href = URL.createObjectURL(blob);
   aLink.click();
   URL.revokeObjectURL(blob);
+};
+
+let dataURItoBlob = dataURI => {
+  var byteString = atob(dataURI.split(",")[1]);
+  var mimeString = dataURI
+    .split(",")[0]
+    .split(":")[1]
+    .split(";")[0];
+  var ab = new ArrayBuffer(byteString.length);
+  var ia = new Uint8Array(ab);
+  for (var i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+  return new Blob([ab], { type: mimeString });
+};
+
+/**
+ * wiki: dataURL to blob, ref to https://gist.github.com/fupslot/5015897
+ * @param dataURI:base64
+ * @returns {FormData}
+ * 用法： axios({url,type:'POST',data}).then(res=>res.data);
+ */
+// 将BASE64编码图像转为FormData供数据上传，用法见上方注释。
+export let dataURI2FormData = dataURI => {
+  var data = new FormData();
+  var blob = dataURItoBlob(dataURI);
+  data.append("file", blob);
+  return data;
+};
+
+/**
+ * @功能：将base64字符串上传至服务器同时保存为文件，返回文件信息及attach_id
+ * @param {base64字符串} datURI
+ * @return {
+ *      status:bool,//上传状态
+ *      id:int,//文件id
+ *      fileInfo:object // 文件描述：宽、高、url、大小、类型、名称
+ * }
+ */
+export let uploadBase64Remark = async dataURI => {
+  var data = dataURI2FormData(dataURI);
+  let attach = await axios({
+    method: "POST",
+    url: uploadHost,
+    data
+  }).then(res => res);
+
+  console.log(attach);
+
+  if (attach.status === 0) {
+    return {
+      status: false
+    };
+  }
+
+  let params = {
+    width: attach.width,
+    height: attach.height,
+    file_size: attach.size,
+    file_type: attach.type,
+    file_url: attach.url,
+    file_name: attach.name,
+    status: true
+  };
+
+  return params;
+};
+
+/**
+ *
+ * @param {file文件对象，input type="file"} file
+ * @param {回调函数} callback
+ * @desc 将file图像文件对象转换为BASE64
+ */
+export let dataFile2URI = async (file, callback) => {
+  if (typeof FileReader === "undefined") {
+    return {
+      status: false,
+      data: "浏览器不支持 FileReader"
+    };
+  }
+  if (!/image\/\w+/.test(file.type)) {
+    //判断获取的是否为图片文件
+    return {
+      status: false,
+      data: "浏览器不支持 请确保文件为图像文件"
+    };
+  }
+  var reader = new FileReader();
+  reader.onload = ({ target }) => {
+    if (typeof callback === "function") {
+      callback(target.result);
+    }
+  };
+  reader.readAsDataURL(file);
+  return reader;
 };

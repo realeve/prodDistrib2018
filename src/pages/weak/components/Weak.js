@@ -17,10 +17,13 @@ import ErrImage from "./ErrImage";
 import moment from "moment";
 import "moment/locale/zh-cn";
 import * as db from "../services/Weak";
+import * as dbTblHandler from "../../../services/table";
 
 import styles from "./Report.less";
 import * as lib from "../../../utils/lib";
 import fakeTypes from "../../../utils/fakeTypes";
+
+import VTable from "../../../components/Table";
 
 moment.locale("zh-cn");
 
@@ -48,7 +51,10 @@ class DynamicRule extends React.Component {
     fakeTypeList: [],
     fakeTypes,
     isNotice: false,
-    noticeInfo: ""
+    noticeInfo: "",
+    dataCart: {
+      rows: 0
+    }
   };
 
   insertData = async () => {
@@ -91,8 +97,8 @@ class DynamicRule extends React.Component {
     const { setFieldsValue } = this.props.form;
     setFieldsValue({
       paper_num: 0,
-      remark: "",
-      fake_type: ""
+      remark: ""
+      // fake_type: ""
     });
     this.setState({ level_type: 0 });
     this.props.dispatch({
@@ -128,7 +134,10 @@ class DynamicRule extends React.Component {
       prodInfo: [],
       fakeTypeList: [],
       isNotice: false,
-      noticeInfo: ""
+      noticeInfo: "",
+      dataCart: {
+        rows: 0
+      }
     });
   };
 
@@ -210,6 +219,27 @@ class DynamicRule extends React.Component {
     let cart_number = data.length ? data[0].CARTNUMBER : "";
     setFieldsValue({
       cart_number
+    });
+
+    this.handleCartNumber(cart_number);
+  };
+
+  handleCartNumber = async cart_number => {
+    let dataCart = await db.getViewPrintMachinecheckWeak(cart_number);
+    dataCart = dbTblHandler.handleSrcData(dataCart);
+    this.setState({ dataCart });
+    if (dataCart.rows > 0) {
+      notification.open({
+        message: "系统提示",
+        description: `当前车号搜索到${dataCart.rows}条生产信息`,
+        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+      });
+      return;
+    }
+    notification.open({
+      message: "系统提示",
+      description: `当前车号信息首次输入`,
+      icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
     });
   };
 
@@ -311,6 +341,21 @@ class DynamicRule extends React.Component {
     }
   };
 
+  cartLink = () => {
+    let { cart_number } = this.props.form.getFieldsValue();
+    return (
+      cart_number && (
+        <a
+          href={"http://10.8.2.133/search/image/#" + cart_number}
+          className="ant-btn ant-btn-primary ant-btn-sm"
+          target="_blank"
+        >
+          缺陷图像
+        </a>
+      )
+    );
+  };
+
   render() {
     const { getFieldDecorator } = this.props.form;
     const {
@@ -337,151 +382,175 @@ class DynamicRule extends React.Component {
     }
 
     return (
-      <Form>
-        <Row>
-          <Col span={8}>
-            <FormItem {...formItemLayout} label="品种">
-              {getFieldDecorator("prod_id", {
-                rules: [{ required: true, message: "请选择品种" }]
-              })(
-                <Select placeholder="请选择品种" onChange={this.handleProduct}>
-                  {this.props.productList.map(({ name, value }) => (
-                    <Option value={value} key={value}>
-                      {name}
-                    </Option>
-                  ))}
-                </Select>
-              )}
-            </FormItem>
-            <FormItem {...formItemLayout} label="印码号">
-              {getFieldDecorator("code_num", {
-                rules: [
-                  {
-                    required: true,
-                    message: "请输入印码号前6位",
-                    pattern: /^[A-Za-z]{2}\d{4}$|^[A-Za-z]\d[A-Za-z]\d{3}$|^[A-Za-z]\d{2}[A-Za-z]\d{2}$|^[A-Za-z]\d{3}[A-Za-z]\d$|^[A-Za-z]\d{4}[A-Za-z]$/
-                  }
-                ]
-              })(
-                <Input
-                  placeholder="请输入印码号前6位"
-                  onChange={this.searchCode}
-                  maxLength="6"
-                />
-              )}
-            </FormItem>
-            <FormItem {...formItemLayout} label="车号">
-              {getFieldDecorator("cart_number")(<Input disabled />)}
-            </FormItem>
-            <FormItem
-              {...formItemLayout}
-              label="工序"
-              className={styles.radioButton}
-            >
-              {getFieldDecorator("proc_name", {
-                rules: [{ required: true, message: "请选择工序" }]
-              })(
-                <Radio.Group onChange={this.changeProc}>
-                  {procList.map(name => (
-                    <Radio.Button value={name} key={name}>
-                      {name}
-                    </Radio.Button>
-                  ))}
-                </Radio.Group>
-              )}
-            </FormItem>
-            <FormItem {...formItemLayout} label="设备">
-              {getFieldDecorator("machine_name", {
-                rules: [{ required: true, message: "请选择机台" }]
-              })(
-                <Select placeholder="请选择机台" onChange={this.changeMachine}>
-                  {machineList.map(name => (
-                    <Option value={name} key={name}>
-                      {name}
-                    </Option>
-                  ))}
-                </Select>
-              )}
-            </FormItem>
-            <FormItem {...formItemLayout} label="机长">
-              {getFieldDecorator("captain_name", {
-                rules: [{ required: true, message: "请选择机长" }]
-              })(
-                <Select mode="multiple" placeholder="请选择机长">
-                  {captainList.map(name => (
-                    <Option value={name} key={name}>
-                      {name}
-                    </Option>
-                  ))}
-                </Select>
-              )}
-            </FormItem>
-            <FormItem {...formItemLayout} label="分类" extra={procTipInfo}>
-              {getFieldDecorator("fake_type", {
-                rules: [{ required: true, message: "请选择分类" }]
-              })(
-                <Select placeholder="请选择分类">
-                  {fakeTypeList.map(name => (
-                    <Option value={name} key={name}>
-                      {name}
-                    </Option>
-                  ))}
-                </Select>
-              )}
-            </FormItem>
-          </Col>
+      <>
+        <Card
+          title={<h3 className={styles.header}>机检弱项记废信息</h3>}
+          loading={this.props.loading}
+          style={{ width: "100%" }}
+        >
+          <Form>
+            <Row>
+              <Col span={8}>
+                <FormItem {...formItemLayout} label="品种">
+                  {getFieldDecorator("prod_id", {
+                    rules: [{ required: true, message: "请选择品种" }]
+                  })(
+                    <Select
+                      placeholder="请选择品种"
+                      onChange={this.handleProduct}
+                    >
+                      {this.props.productList.map(({ name, value }) => (
+                        <Option value={value} key={value}>
+                          {name}
+                        </Option>
+                      ))}
+                    </Select>
+                  )}
+                </FormItem>
+                <FormItem {...formItemLayout} label="印码号">
+                  {getFieldDecorator("code_num", {
+                    rules: [
+                      {
+                        required: true,
+                        message: "请输入印码号前6位",
+                        pattern: /^[A-Za-z]{2}\d{4}$|^[A-Za-z]\d[A-Za-z]\d{3}$|^[A-Za-z]\d{2}[A-Za-z]\d{2}$|^[A-Za-z]\d{3}[A-Za-z]\d$|^[A-Za-z]\d{4}[A-Za-z]$/
+                      }
+                    ]
+                  })(
+                    <Input
+                      placeholder="请输入印码号前6位"
+                      onChange={this.searchCode}
+                      maxLength="6"
+                    />
+                  )}
+                </FormItem>
+                <FormItem
+                  {...formItemLayout}
+                  label="车号"
+                  extra={this.cartLink()}
+                >
+                  {getFieldDecorator("cart_number")(<Input disabled />)}
+                </FormItem>
+                <FormItem
+                  {...formItemLayout}
+                  label="工序"
+                  className={styles.radioButton}
+                >
+                  {getFieldDecorator("proc_name", {
+                    rules: [{ required: true, message: "请选择工序" }]
+                  })(
+                    <Radio.Group onChange={this.changeProc}>
+                      {procList.map(name => (
+                        <Radio.Button value={name} key={name}>
+                          {name}
+                        </Radio.Button>
+                      ))}
+                    </Radio.Group>
+                  )}
+                </FormItem>
+                <FormItem {...formItemLayout} label="设备">
+                  {getFieldDecorator("machine_name", {
+                    rules: [{ required: true, message: "请选择机台" }]
+                  })(
+                    <Select
+                      placeholder="请选择机台"
+                      onChange={this.changeMachine}
+                    >
+                      {machineList.map(name => (
+                        <Option value={name} key={name}>
+                          {name}
+                        </Option>
+                      ))}
+                    </Select>
+                  )}
+                </FormItem>
+                <FormItem {...formItemLayout} label="机长">
+                  {getFieldDecorator("captain_name", {
+                    rules: [{ required: true, message: "请选择机长" }]
+                  })(
+                    <Select mode="multiple" placeholder="请选择机长">
+                      {captainList.map(name => (
+                        <Option value={name} key={name}>
+                          {name}
+                        </Option>
+                      ))}
+                    </Select>
+                  )}
+                </FormItem>
+                <FormItem {...formItemLayout} label="分类" extra={procTipInfo}>
+                  {getFieldDecorator("fake_type", {
+                    rules: [{ required: true, message: "请选择分类" }]
+                  })(
+                    <Select placeholder="请选择分类">
+                      {fakeTypeList.map(name => (
+                        <Option value={name} key={name}>
+                          {name}
+                        </Option>
+                      ))}
+                    </Select>
+                  )}
+                </FormItem>
+              </Col>
 
-          <Col span={8}>
-            <FormItem {...formItemLayout} label="产品张数">
-              {getFieldDecorator("paper_num", {
-                rules: [
-                  {
-                    required: true,
-                    message: "请输入产品张数",
-                    pattern: /^\d+$/
-                  }
-                ]
-              })(<Input placeholder="请输入产品张数" />)}
-            </FormItem>
-            <FormItem
-              {...formItemLayout}
-              label="记废等级"
-              className={styles.radioButton}
-              extra={extraInfo}
-            >
-              <Radio.Group value={level_type} onChange={this.handleLevelType}>
-                <Radio.Button value={0}>0</Radio.Button>
-                <Radio.Button value={1}>1</Radio.Button>
-                <Radio.Button value={9}>10</Radio.Button>
-                <Radio.Button value={99}>100</Radio.Button>
-                <Radio.Button value={999}>1000</Radio.Button>
-              </Radio.Group>
-            </FormItem>
+              <Col span={8}>
+                <FormItem {...formItemLayout} label="产品张数">
+                  {getFieldDecorator("paper_num", {
+                    rules: [
+                      {
+                        required: true,
+                        message: "请输入产品张数",
+                        pattern: /^\d+$/
+                      }
+                    ]
+                  })(<Input placeholder="请输入产品张数" />)}
+                </FormItem>
+                <FormItem
+                  {...formItemLayout}
+                  label="记废等级"
+                  className={styles.radioButton}
+                  extra={extraInfo}
+                >
+                  <Radio.Group
+                    value={level_type}
+                    onChange={this.handleLevelType}
+                  >
+                    <Radio.Button value={0}>0</Radio.Button>
+                    <Radio.Button value={1}>1</Radio.Button>
+                    <Radio.Button value={9}>10</Radio.Button>
+                    <Radio.Button value={99}>100</Radio.Button>
+                    <Radio.Button value={999}>1000</Radio.Button>
+                  </Radio.Group>
+                </FormItem>
 
-            {isNotice && (
-              <FormItem {...formItemLayout} label="机台通知信息">
-                <label>{noticeInfo}</label>
-              </FormItem>
-            )}
-            <FormItem {...formItemLayout} label="缺陷图像">
-              <ErrImage />
-            </FormItem>
-            <FormItem {...formItemLayout} label="备注">
-              {getFieldDecorator("remark")(
-                <Input.TextArea rows={3} placeholder="请输入备注信息" />
-              )}
-            </FormItem>
-            <FormItem {...formTailLayout}>
-              <Button type="primary" onClick={this.submit}>
-                提交
-              </Button>
-              <Button style={{ marginLeft: 20 }} onClick={this.reset}>
-                重置
-              </Button>
-            </FormItem>
-          </Col>
-        </Row>
-      </Form>
+                {isNotice && (
+                  <FormItem {...formItemLayout} label="机台通知信息">
+                    <label>{noticeInfo}</label>
+                  </FormItem>
+                )}
+                <FormItem {...formItemLayout} label="缺陷图像">
+                  <ErrImage />
+                </FormItem>
+                <FormItem {...formItemLayout} label="备注">
+                  {getFieldDecorator("remark")(
+                    <Input.TextArea rows={3} placeholder="请输入备注信息" />
+                  )}
+                </FormItem>
+                <FormItem {...formTailLayout}>
+                  <Button type="primary" onClick={this.submit}>
+                    提交
+                  </Button>
+                  <Button style={{ marginLeft: 20 }} onClick={this.reset}>
+                    重置
+                  </Button>
+                </FormItem>
+              </Col>
+            </Row>
+          </Form>
+        </Card>
+        {this.state.dataCart.rows > 0 && (
+          <VTable dataSrc={this.state.dataCart} />
+        )}
+      </>
     );
   }
 }
@@ -491,13 +560,7 @@ const WrappedDynamicRule = Form.create()(DynamicRule);
 function weak(props) {
   return (
     <div className={styles.container}>
-      <Card
-        title={<h3 className={styles.header}>机检弱项记废信息</h3>}
-        loading={props.loading}
-        style={{ width: "100%" }}
-      >
-        <WrappedDynamicRule {...props} />
-      </Card>
+      <WrappedDynamicRule {...props} />
     </div>
   );
 }

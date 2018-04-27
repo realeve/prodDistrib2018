@@ -1,4 +1,6 @@
 import * as db from "../services/weaklist";
+import * as dbTblHandler from "../../../services/table";
+
 /*
 redux-saga:
   call:   调用 services中的异步事件
@@ -9,214 +11,53 @@ const namespace = "weaklist";
 export default {
   namespace,
   state: {
-    dataSource: [],
     dataSrc: [],
-    dataClone: [],
-    dataSearchClone: [],
-    columns: [],
-    total: null,
-    page: 1,
-    pageSize: 10,
-    filteredInfo: {},
-    sortedInfo: {}
+    dataCount: [],
+    dataCount2: [],
+    dataCount3: []
   },
   reducers: {
-    save(state, { payload: { dataSrc, dataSource, total, dataSearchClone } }) {
-      return { ...state, dataSrc, dataSource, total, dataSearchClone };
-    },
-    setPage(state, { payload: page }) {
-      return {
-        ...state,
-        page
-      };
-    },
-    setPageSize(state, { payload: pageSize }) {
-      return {
-        ...state,
-        pageSize
-      };
-    },
-    refreshTable(state, { payload: dataSource }) {
-      return {
-        ...state,
-        dataSource
-      };
-    },
-    setColumns(state, { payload: { dataClone, columns } }) {
-      return {
-        ...state,
-        dataClone,
-        columns
-      };
-    },
-    setFilterInfo(state, { payload: { filteredInfo, total } }) {
-      return {
-        ...state,
-        filteredInfo,
-        total
-      };
-    },
-    setSortedInfo(state, { payload: { sortedInfo, dataClone } }) {
-      return {
-        ...state,
-        sortedInfo,
-        dataClone
-      };
-    },
-    setDataClone(state, { payload: { dataClone, total } }) {
-      return {
-        ...state,
-        dataClone,
-        total
-      };
-    },
-    setDataSearchClone(state, { payload: { dataSearchClone, total } }) {
-      return {
-        ...state,
-        dataSearchClone,
-        total
-      };
+    save(
+      state,
+      {
+        payload: { dataSrc, dataCount, dataCount2, dataCount3 }
+      }
+    ) {
+      return { ...state, dataSrc, dataCount, dataCount2, dataCount3 };
     }
   },
   effects: {
-    *searchData({ payload: keyword }, { call, put, select }) {
-      keyword = keyword.trim();
-      const store = yield select(state => state.weaklist);
-      const { dataSearchClone, dataClone } = store;
-      if (keyword === "") {
-        // 如果有数据，还原dataClone;
-        if (dataSearchClone.length) {
-          yield put({
-            type: "setDataClone",
-            payload: {
-              dataClone: dataSearchClone,
-              total: dataSearchClone.length
-            }
-          });
-        }
-        return;
-      }
+    *fetchAPIData(
+      {
+        payload: { params }
+      },
+      { call, put }
+    ) {
+      let dataSrc = yield call(db.getViewPrintMachinecheckWeakSrc, params);
+      dataSrc = yield call(dbTblHandler.handleSrcData, dataSrc);
 
-      // 先将数据备份存储
-      if (dataSearchClone.length === 0) {
-        yield put({
-          type: "setDataSearchClone",
-          payload: { dataSearchClone: dataClone, total: dataClone.length }
-        });
-      }
+      let dataCount = yield call(db.getViewPrintMachinecheckWeak, params);
+      dataCount = yield call(dbTblHandler.handleSrcData, dataCount);
 
-      const data = dataSearchClone.filter(
-        tr =>
-          Object.values(tr)
-            .slice(1)
-            .filter(td => ("" + td).includes(keyword)).length
+      let dataCount2 = yield call(
+        db.getViewPrintMachinecheckWeakCount2,
+        params
       );
+      dataCount2 = yield call(dbTblHandler.handleSrcData, dataCount2);
 
-      if (dataSearchClone.length) {
-        yield put({
-          type: "setDataClone",
-          payload: { dataClone: data, total: data.length }
-        });
-      }
-    },
-    *customSorter({ payload: sortedInfo }, { call, put, select }) {
-      const { field, order } = sortedInfo;
-      if (typeof field === "undefined") {
-        return;
-      }
-      const store = yield select(state => state.weaklist);
-      const { dataClone } = store;
-      const sortedData = yield call(db.handleSort, { dataClone, field, order });
-
-      yield put({
-        type: "setSortedInfo",
-        payload: { sortedInfo, dataClone: sortedData }
-      });
-    },
-    *customFilter({ payload: filters }, { call, put, select }) {
-      const store = yield select(state => state.weaklist);
-      const { dataSrc, columns } = store;
-      let dataClone = yield call(db.handleFilter, {
-        data: dataSrc.data,
-        filters
-      });
-
-      let newColumn = yield call(db.updateColumns, { columns, filters });
-      yield put({
-        type: "setColumns",
-        payload: {
-          dataClone,
-          columns: newColumn
-        }
-      });
-
-      yield put({
-        type: "setFilterInfo",
-        payload: { filteredInfo: filters, total: dataClone.length }
-      });
-    },
-    *changePageSize({ payload: pageSize }, { put, select }) {
-      yield put({
-        type: "setPageSize",
-        payload: pageSize
-      });
-    },
-    *changePage({ payload: page }, { put, select }) {
-      const store = yield select(state => state.weaklist);
-      const { pageSize, dataClone } = store;
-      const dataSource = db.getPageData({ data: dataClone, page, pageSize });
-
-      yield put({
-        type: "refreshTable",
-        payload: dataSource
-      });
-      yield put({
-        type: "setPage",
-        payload: page
-      });
-    },
-    *fetchAPIData({ payload: { url, params } }, { call, put, select }) {
-      let data = yield call(db.fetchData, { url, params });
-      data.data = data.data.map((item, i) => [i + 1, ...item]);
-      data.header = ["id", ...data.header];
-      const store = yield select(state => state.weaklist);
-      const { pageSize, page, filteredInfo, sortedInfo } = store;
-
-      let dataSource = [],
-        dataClone = [];
-      if (data.rows) {
-        data.data = data.data.map((item, key) => {
-          let col = { key };
-          item.forEach((td, idx) => {
-            col["col" + idx] = td;
-          });
-          return col;
-        });
-        dataClone = data.data;
-        dataSource = db.getPageData({ data: dataClone, page, pageSize });
-      }
-
-      let columns = yield call(db.handleColumns, {
-        dataSrc: data,
-        filteredInfo: filteredInfo || {},
-        sortedInfo: sortedInfo || {}
-      });
-
-      yield put({
-        type: "setColumns",
-        payload: {
-          dataClone,
-          columns
-        }
-      });
+      let dataCount3 = yield call(
+        db.getViewPrintMachinecheckWeakCount3,
+        params
+      );
+      dataCount3 = yield call(dbTblHandler.handleSrcData, dataCount3);
 
       yield put({
         type: "save",
         payload: {
-          dataSrc: data,
-          dataSource,
-          total: data.rows,
-          dataSearchClone: []
+          dataSrc,
+          dataCount,
+          dataCount2,
+          dataCount3
         }
       });
     }

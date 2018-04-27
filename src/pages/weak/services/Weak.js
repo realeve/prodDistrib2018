@@ -34,3 +34,15 @@ export const getPrintMachinecheckMultiweak = async params =>
     url: "/84/4c10668fdd.json",
     params
   }).then(res => res);
+
+/**
+ *   @database: { 质量信息系统 }
+ *   @desc:     { 当前车号已输入信息 }
+ */
+export const getViewPrintMachinecheckWeak = async cart =>
+  await axios({
+    url: "/113/898aa211d8/array.json",
+    params: {
+      cart
+    }
+  }).then(res => res);

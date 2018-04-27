@@ -11,6 +11,7 @@ import {
 } from "antd";
 import * as db from "../services/table";
 import styles from "./Table.less";
+import * as axios from "../utils/axios";
 
 import Excel from "../utils/excel";
 import pdf from "../utils/pdf";
@@ -42,8 +43,6 @@ class Tables extends Component {
   }
 
   init = async () => {
-    // this.dataSrc = await db.fetchData(this.config);
-
     const { page, pageSize } = this.state;
     let data = this.dataSrc;
     const { source, timing } = data;
@@ -256,7 +255,7 @@ class Tables extends Component {
   getTBody = () => {
     const {
       loading,
-      columns,
+      // columns,
       dataSource,
       // source,
       // timing,
@@ -268,7 +267,7 @@ class Tables extends Component {
       <>
         <Table
           loading={loading}
-          columns={columns}
+          columns={this.columnInfo()}
           dataSource={dataSource}
           rowKey="key"
           pagination={false}
@@ -293,9 +292,28 @@ class Tables extends Component {
     );
   };
 
+  columnInfo = () => {
+    return this.state.columns.map(item => {
+      item.render = text => {
+        text = R.isNil(text) ? "" : text;
+        let isImg =
+          String(text).includes("/image") || String(text).includes("/file/");
+        return !isImg ? (
+          text
+        ) : (
+          <img
+            className={styles.imgContent}
+            src={`${axios.uploadHost}${text}`}
+            alt={text}
+          />
+        );
+      };
+      return item;
+    });
+  };
+
   render() {
     const tBody = this.getTBody();
-
     return (
       <Card
         title={
@@ -311,7 +329,7 @@ class Tables extends Component {
             </div>
           </div>
         }
-        style={{ width: "100%" }}
+        style={{ width: "100%", marginTop: 20 }}
         bodyStyle={{ padding: "0px 0px 12px 0px" }}
         className={styles.exCard}
       >

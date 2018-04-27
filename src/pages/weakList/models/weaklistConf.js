@@ -6,16 +6,9 @@ const namespace = "weaklistConf";
 export default {
   namespace,
   state: {
-    // tid: "",
     dateRange: []
   },
   reducers: {
-    // setTid(state, { payload: tid }) {
-    //   return {
-    //     ...state,
-    //     tid
-    //   };
-    // },
     setDateRange(state, { payload: dateRange }) {
       return {
         ...state,
@@ -24,12 +17,6 @@ export default {
     }
   },
   effects: {
-    // *updateTid({ payload: tid }, { put }) {
-    //   yield put({
-    //     type: "setTid",
-    //     payload: tid
-    //   });
-    // },
     *updateDateRange({ payload: dateRange }, { put }) {
       yield put({
         type: "setDateRange",
@@ -51,22 +38,10 @@ export default {
 
           const config = db.getQueryConfig({
             ...query,
-            // tid,
             tstart: ts,
             tend: te
           });
           await dispatch(config);
-          await dispatch({
-            type: "weaklist/fetchSampledData",
-            payload: { tstart: ts, tend: te }
-          });
-          await dispatch({
-            type: "weaklist/fetchSampledMachines",
-            payload: { tstart: ts, tend: te }
-          });
-          await dispatch({
-            type: "weaklist/handleTaskData"
-          });
         }
       });
     }

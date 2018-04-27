@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50720
 File Encoding         : 65001
 
-Date: 2018-04-17 17:45:16
+Date: 2018-04-27 18:36:35
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -31,7 +31,7 @@ CREATE TABLE `sys_api` (
   `rec_time` datetime DEFAULT NULL COMMENT '插入时间',
   `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=110 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=114 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of sys_api
@@ -72,7 +72,7 @@ INSERT INTO `sys_api` VALUES ('77', '0000000002', '49', '添加异常品', 'd907
 INSERT INTO `sys_api` VALUES ('78', '0000000002', '49', '未完成的全检任务计划列表', 'b36aab89f7', 'SELECT a.id,a.date_type,a.machine_name,a.proc_name,rtrim(b.ProductName) ProductName,a.reason,isnull(a.num1,0) num1,isnull(a.num2,0) num2,a.proc_stream1,a.proc_stream2,CONVERT (VARCHAR,a.rec_date1,112) rec_date1,CONVERT (VARCHAR,a.rec_date2,112) rec_date2,a.complete_num,a.complete_status,a.alpha_num FROM dbo.print_newproc_plan AS a INNER JOIN ProductData b on a.prod_id = b.ProductID WHERE a.complete_status = 0', '', '', '2018-04-01 17:26:42', '2018-04-12 10:29:19');
 INSERT INTO `sys_api` VALUES ('79', '0000000014', '49', '冠字查车号', '797066c5d6', 'SELECT 车号 cartNumber,冠号 carNumber,字号 gzNumber,工艺 techTypeName,工序 procName,班次 workClassName,机台 machineName,机长 captainName,班组 teamName,班长 monitorName,产量 printNum,to_char(开始时间,\'YYYY-MM-DD hh24:mi:ss\') startDate,品种 productName FROM CDYC_USER.VIEW_CARTFINDER A WHERE 品种 = ? AND ( ( 冠号 = ? AND 字号 BETWEEN ? AND ? ) OR ( 冠号 = ? AND 字号 BETWEEN ? AND ? ) ) ORDER BY 开始时间', 'prod,alpha,start,end,alpha2,start2,end2', '', '2018-04-09 11:53:13', '2018-04-16 17:22:02');
 INSERT INTO `sys_api` VALUES ('80', '0000000002', '49', '添加机检弱项信息', 'c2f98ddf63', 'insert into print_machinecheck_weak(prod_id,code_num,cart_number,proc_name,machine_name,captain_name,fake_type,paper_num,level_type,img_url,remark,rec_time ) values (?,?,?,?,?,?,?,?,?,?,?,?)', 'prod_id,code_num,cart_number,proc_name,machine_name,captain_name,fake_type,paper_num,level_type,img_url,remark,rec_time', '', '2018-04-09 16:57:02', '2018-04-09 16:57:02');
-INSERT INTO `sys_api` VALUES ('81', '0000000002', '49', '机检弱项记废列表', 'a22afbf675', 'SELECT a.[品种],a.[号码信息],a.[车号],a.[工序],a.[设备],a.[机长],a.[类型],a.[张数],a.[记废等级],a.[缺陷图像],a.[备注],a.[登记时间] FROM view_print_machinecheck_weak a where 登记日期 between ? and ?', 'tstart,tend', '', '2018-04-09 18:00:54', '2018-04-09 18:00:54');
+INSERT INTO `sys_api` VALUES ('81', '0000000002', '49', '机检弱项记废列表', 'a22afbf675', 'SELECT a.[品种],a.[号码信息],a.[车号],a.[工序],a.[设备],a.[机长],a.[类型],a.[张数],a.[记废等级],a.[缺陷图像],a.[备注],a.[登记时间] FROM view_print_machinecheck_weak a where 登记日期 between ? and ? order by a.[登记时间] desc', 'tstart,tend', '', '2018-04-09 18:00:54', '2018-04-27 16:38:09');
 INSERT INTO `sys_api` VALUES ('82', '0000000014', '49', '车号信息查询', '32635d468b', 'SELECT 车号 cartNumber,冠号 carNumber,字号 gzNumber,工艺 techTypeName,工序 procName,班次 workClassName,机台 machineName,机长 captainName,班组 teamName,班长 monitorName,产量 printNum,to_char(开始时间,\'YYYY-MM-DD hh24:mi:ss\') startDate,品种 productName FROM CDYC_USER.VIEW_CARTFINDER A WHERE 车号 = ? ORDER BY 开始时间', 'cart', '', '2018-04-10 10:30:01', '2018-04-16 17:21:53');
 INSERT INTO `sys_api` VALUES ('83', '0000000002', '49', '机台连续废信息通知', '3475990fbf', 'insert into print_machinecheck_multiweak(cart_number,prod_id,proc_name,machine_name,captain_name,fake_type,kilo_num,pos_info,remark,rec_time,fake_num ) values (?,?,?,?,?,?,?,?,?,?,?)', 'cart_number,prod_id,proc_name,machine_name,captain_name,fake_type,kilo_num,pos_info,remark,rec_time,fake_num', '', '2018-04-10 10:50:11', '2018-04-12 08:39:25');
 INSERT INTO `sys_api` VALUES ('84', '0000000002', '49', '机台是否通知作废信息', '4c10668fdd', 'select a.cart_number,a.machine_name,a.captain_name,a.fake_type,a.kilo_num,a.pos_info,a.remark,convert(varchar,a.rec_time,112) rec_time from print_machinecheck_multiweak a where a.cart_number=?', 'cart_number', '', '2018-04-10 13:11:51', '2018-04-10 13:11:51');
@@ -101,6 +101,10 @@ INSERT INTO `sys_api` VALUES ('106', '0000000014', '49', '机台从某天起生�
 INSERT INTO `sys_api` VALUES ('107', '0000000014', '49', '机台某段时间生产的车号列表', '4463f2c07c', 'select 车号 from view_cartfinder a where a.机台=? and to_char(开始时间,\'YYYYMMDD\') between ? and ? order by a.开始时间', 'machine_name,         rec_date1,         rec_date2', '', '2018-04-17 13:25:44', '2018-04-17 13:29:35');
 INSERT INTO `sys_api` VALUES ('108', '0000000014', '49', '某冠字号段车号列表', 'cf760bfe6d', 'select distinct 车号,a.字号 from view_cartfinder a where a.品种=? and a.冠号=? and a.字号 between ? and ? order by a.字号', 'prod_name, gz, start_no, end_no', '', '2018-04-17 13:41:05', '2018-04-17 13:41:05');
 INSERT INTO `sys_api` VALUES ('109', '0000000002', '49', '过滤已处理的四新或异常品车号列表', '95aa0001e8', 'select distinct cart_number from print_wms_proclist where check_type=? and task_id=?', 'check_type,task_id', '', '2018-04-17 16:13:29', '2018-04-17 16:13:29');
+INSERT INTO `sys_api` VALUES ('110', '0000000002', '49', '机检弱项产品作废汇总', 'b579b29ab8', 'SELECT a.[品种],a.[工序],a.[设备],a.[机长],a.[类型],(case when a.[记废等级]=0 then 0 else a.[记废等级]+1 end ) 记废等级,sum(a.[张数]) 总张数,count(a.[记废等级]) 次数,sum(a.张数*a.记废等级) 总作废开数 FROM view_print_machinecheck_weak a WHERE 登记日期 BETWEEN ? AND ? group by a.[品种],a.[工序],a.[设备],a.[机长],a.[类型],(case when a.[记废等级]=0 then 0 else a.[记废等级]+1 end ) order by 9 desc', 'tstart,tend', '', '2018-04-26 17:12:49', '2018-04-26 17:12:49');
+INSERT INTO `sys_api` VALUES ('111', '0000000002', '49', '各机台弱项类型汇总', '0dfc50bc58', 'SELECT a.[品种],a.[工序],a.[设备],a.[机长],a.[类型],sum(a.[张数]) 总张数,count(a.[记废等级]) 次数,sum(a.张数*a.记废等级) 总作废开数 FROM view_print_machinecheck_weak a WHERE 登记日期 BETWEEN ? AND ? group by a.[品种],a.[工序],a.[设备],a.[机长],a.[类型] order by 8 desc', 'tstart,tend', '', '2018-04-27 17:46:10', '2018-04-27 17:46:10');
+INSERT INTO `sys_api` VALUES ('112', '0000000002', '49', '胶凹设备机检弱项分布', 'e91457516b', 'SELECT a.[品种],a.[工序],a.[设备],a.[类型],sum(a.[张数]) 总张数,count(a.[记废等级]) 次数 FROM view_print_machinecheck_weak a WHERE 登记日期 BETWEEN ? AND ? group by a.[品种],a.[工序],a.[设备],a.[类型] order by 6 desc', 'tstart,tend', '', '2018-04-27 17:52:25', '2018-04-27 17:52:25');
+INSERT INTO `sys_api` VALUES ('113', '0000000002', '49', '当前车号已输入信息', '898aa211d8', 'SELECT a.[品种],a.[号码信息],a.[车号],a.[工序],a.[设备],a.[机长],a.[类型],a.[张数],a.[记废等级],a.[缺陷图像],a.[备注],a.[登记时间] FROM view_print_machinecheck_weak a where a.[车号] =? order by a.[登记时间] desc', 'cart', '', '2018-04-27 18:10:25', '2018-04-27 18:10:25');
 
 -- ----------------------------
 -- Table structure for sys_database

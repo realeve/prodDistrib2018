@@ -26,7 +26,6 @@ export function handleColumns({ dataSrc, filteredInfo }) {
   if (!rows || rows === 0) {
     return [];
   }
-  console.log(header);
 
   let column = header.map((title, i) => {
     let key = "col" + i;
@@ -108,3 +107,18 @@ export function handleSort({ dataClone, field, order }) {
 
 export const getPageData = ({ data, page, pageSize }) =>
   data.slice((page - 1) * pageSize, page * pageSize);
+
+export const handleSrcData = data => {
+  data.data = data.data.map((item, i) => [i + 1, ...item]);
+  data.header = ["", ...data.header];
+  if (data.rows) {
+    data.data = data.data.map((item, key) => {
+      let col = { key };
+      item.forEach((td, idx) => {
+        col["col" + idx] = td;
+      });
+      return col;
+    });
+  }
+  return data;
+};

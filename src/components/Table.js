@@ -24,7 +24,7 @@ class Tables extends Component {
   constructor(props) {
     super(props);
     // this.config = props.config;
-    this.dataSrc = props.dataSrc;
+    this.dataSrc = db.handleSrcData(props.dataSrc);
     this.dataClone = [];
     this.dataSearchClone = [];
 

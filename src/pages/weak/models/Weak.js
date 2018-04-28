@@ -1,4 +1,4 @@
-import * as dbTblHandler from "../../../services/table";
+// import * as dbTblHandler from "../../../services/table";
 import * as db from "../services/Weak";
 
 const namespace = "weak";
@@ -6,7 +6,13 @@ export default {
   namespace,
   state: {
     imgUrl: "",
-    fileList: [],
+    fileList: [
+      // {
+      //   uid: "MTUyNDkyODEzNF80ODUxNjhfMjAxN2Zpd0RMSDlscDlsR1Vjb1UzNkdUa2dFSw==",
+      //   thumbUrl:
+      //     "//localhost/upload//image/MTUyNDkyODEzNF80ODUxNjhfMjAxN2Zpd0RMSDlscDlsR1Vjb1UzNkdUa2dFSw==.webp"
+      // }
+    ],
     inputDataList: []
   },
   reducers: {
@@ -31,9 +37,7 @@ export default {
   },
   effects: {
     *fetchInputedData({ payload: params }, { call, put }) {
-      console.log(params);
       let inputDataList = yield call(db.getViewPrintMachinecheckWeak, params);
-      inputDataList = yield call(dbTblHandler.handleSrcData, inputDataList);
       yield put({
         type: "setInputedData",
         payload: {

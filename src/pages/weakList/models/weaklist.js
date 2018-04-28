@@ -1,5 +1,5 @@
 import * as db from "../services/weaklist";
-import * as dbTblHandler from "../../../services/table";
+// import * as dbTblHandler from "../../../services/table";
 
 /*
 redux-saga:
@@ -14,16 +14,24 @@ export default {
     dataSrc: [],
     dataCount: [],
     dataCount2: [],
-    dataCount3: []
+    dataCount3: [],
+    dataCount4: []
   },
   reducers: {
     save(
       state,
       {
-        payload: { dataSrc, dataCount, dataCount2, dataCount3 }
+        payload: { dataSrc, dataCount, dataCount2, dataCount3, dataCount4 }
       }
     ) {
-      return { ...state, dataSrc, dataCount, dataCount2, dataCount3 };
+      return {
+        ...state,
+        dataSrc,
+        dataCount,
+        dataCount2,
+        dataCount3,
+        dataCount4
+      };
     }
   },
   effects: {
@@ -34,22 +42,16 @@ export default {
       { call, put }
     ) {
       let dataSrc = yield call(db.getViewPrintMachinecheckWeakSrc, params);
-      dataSrc = yield call(dbTblHandler.handleSrcData, dataSrc);
-
       let dataCount = yield call(db.getViewPrintMachinecheckWeak, params);
-      dataCount = yield call(dbTblHandler.handleSrcData, dataCount);
-
       let dataCount2 = yield call(
         db.getViewPrintMachinecheckWeakCount2,
         params
       );
-      dataCount2 = yield call(dbTblHandler.handleSrcData, dataCount2);
-
       let dataCount3 = yield call(
         db.getViewPrintMachinecheckWeakCount3,
         params
       );
-      dataCount3 = yield call(dbTblHandler.handleSrcData, dataCount3);
+      let dataCount4 = yield call(db.getPrintMachinecheckWeak, params);
 
       yield put({
         type: "save",
@@ -57,7 +59,8 @@ export default {
           dataSrc,
           dataCount,
           dataCount2,
-          dataCount3
+          dataCount3,
+          dataCount4
         }
       });
     }

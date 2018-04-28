@@ -19,9 +19,10 @@ class ErrImage extends Component {
     });
   };
 
-  handleThumbUrl = url => lib.uploadHost + url; //.replace("/image/", "/image/thumb_");
+  handleThumbUrl = url => lib.uploadHost + url.slice(1); //.replace("/image/", "/image/thumb_");
 
   handleChange = ({ fileList }) => {
+    console.log(fileList);
     this.props.dispatch({
       type: "weak/setFileList",
       payload: fileList

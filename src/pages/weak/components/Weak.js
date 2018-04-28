@@ -17,10 +17,12 @@ import ErrImage from "./ErrImage";
 import moment from "moment";
 import "moment/locale/zh-cn";
 import * as db from "../services/Weak";
-import * as dbTblHandler from "../../../services/table";
+// import * as dbTblHandler from "../../../services/table";
 
 import styles from "./Report.less";
 import * as lib from "../../../utils/lib";
+import { uploadHost } from "../../../utils/axios";
+
 import fakeTypes from "../../../utils/fakeTypes";
 
 import VTable from "../../../components/Table";
@@ -42,18 +44,69 @@ const formTailLayout = {
 };
 
 class DynamicRule extends React.Component {
-  state = {
-    level_type: 0,
-    procList: [],
-    machineList: [],
-    captainList: [],
-    prodInfo: [],
-    fakeTypeList: [],
-    fakeTypes,
-    isNotice: false,
-    noticeInfo: "",
-    dataCart: {
-      rows: 0
+  constructor(props) {
+    super(props);
+    this.state = {
+      level_type: 0,
+      procList: [],
+      machineList: [],
+      captainList: [],
+      prodInfo: [],
+      fakeTypeList: [],
+      fakeTypes,
+      isNotice: false,
+      noticeInfo: "",
+      dataCart: {
+        rows: 0
+      }
+    };
+
+    // react 16.3中的用法，目前webpack报错
+    // this.base64Input = React.createRef();
+    this.base64URI = "";
+  }
+
+  setTextInputRef = e => {
+    // antd 二次封装后需console查看结构得到refs
+    this.base64Input = e.input.input;
+  };
+
+  handleThumbUrl = url => uploadHost + url;
+
+  uploadBase64 = async e => {
+    let dataURI = typeof e === "string" ? e : e.target.value;
+    if (dataURI.slice(0, 11) !== "data:image/") {
+      notification.error({
+        message: "提示",
+        description: "目前仅支持base64图像上传",
+        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+      });
+      return;
+    }
+    // let formData = lib.dataURI2FormData(dataURI);
+    // console.log(formData);
+    let response = await lib.uploadBase64(dataURI);
+
+    // 将数据绑定至上传组件
+    if (response && R.has("url")(response)) {
+      response.url = response.url.slice(1);
+
+      let fileName = response.url.split("/");
+
+      this.props.dispatch({
+        type: "weak/setFileList",
+        payload: [
+          {
+            uid: fileName[fileName.length - 1],
+            thumbUrl: this.handleThumbUrl(response.url)
+          }
+        ]
+      });
+
+      this.props.dispatch({
+        type: "weak/setImgUrl",
+        payload: response.url
+      });
     }
   };
 
@@ -226,7 +279,7 @@ class DynamicRule extends React.Component {
 
   handleCartNumber = async cart_number => {
     let dataCart = await db.getViewPrintMachinecheckWeak(cart_number);
-    dataCart = dbTblHandler.handleSrcData(dataCart);
+    // dataCart = dbTblHandler.handleSrcData(dataCart);
     this.setState({ dataCart });
     if (dataCart.rows > 0) {
       notification.open({
@@ -527,9 +580,24 @@ class DynamicRule extends React.Component {
                     <label>{noticeInfo}</label>
                   </FormItem>
                 )}
+
                 <FormItem {...formItemLayout} label="缺陷图像">
                   <ErrImage />
+                  <div className="ant-col-24 ant-form-item-control-wrapper">
+                    <div className="ant-form-item-control">
+                      <Input.Search
+                        ref={this.setTextInputRef}
+                        placeholder="粘贴图像信息自动上传"
+                        onSearch={this.uploadBase64}
+                        enterButton={<Icon type="upload" />}
+                        onFocus={e => this.base64Input.select()}
+                        onChange={this.uploadBase64}
+                        value={this.base64URI}
+                      />
+                    </div>
+                  </div>
                 </FormItem>
+
                 <FormItem {...formItemLayout} label="备注">
                   {getFieldDecorator("remark")(
                     <Input.TextArea rows={3} placeholder="请输入备注信息" />

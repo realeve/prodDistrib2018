@@ -1,6 +1,6 @@
 import moment from "moment";
-import { host, axios, uploadHost } from "./axios";
-
+import { host, uploadHost } from "./axios";
+import http from "axios";
 export const searchUrl = "http://10.8.2.133/search#";
 export const apiHost = host;
 export const isCartOrReel = str => {
@@ -148,33 +148,13 @@ export let dataURI2FormData = dataURI => {
  *      fileInfo:object // 文件描述：宽、高、url、大小、类型、名称
  * }
  */
-export let uploadBase64Remark = async dataURI => {
+export let uploadBase64 = async dataURI => {
   var data = dataURI2FormData(dataURI);
-  let attach = await axios({
+  return await http({
     method: "POST",
     url: uploadHost,
     data
-  }).then(res => res);
-
-  console.log(attach);
-
-  if (attach.status === 0) {
-    return {
-      status: false
-    };
-  }
-
-  let params = {
-    width: attach.width,
-    height: attach.height,
-    file_size: attach.size,
-    file_type: attach.type,
-    file_url: attach.url,
-    file_name: attach.name,
-    status: true
-  };
-
-  return params;
+  }).then(res => res.data);
 };
 
 /**

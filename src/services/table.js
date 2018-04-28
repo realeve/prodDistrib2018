@@ -109,6 +109,9 @@ export const getPageData = ({ data, page, pageSize }) =>
   data.slice((page - 1) * pageSize, page * pageSize);
 
 export const handleSrcData = data => {
+  if (data.length === 0) {
+    return data;
+  }
   data.data = data.data.map((item, i) => [i + 1, ...item]);
   data.header = ["", ...data.header];
   if (data.rows) {

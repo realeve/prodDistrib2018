@@ -49,3 +49,14 @@ export const getViewPrintMachinecheckWeakCount3 = async params =>
     url: "/112/e91457516b/array.json",
     params
   }).then(res => res);
+
+/**
+*   @database: { 质量信息系统 }
+*   @desc:     { 印码机检设备弱项统计信息 } 
+    const { tstart, tend } = params;
+*/
+export const getPrintMachinecheckWeak = async params =>
+  await axios({
+    url: "/114/da79e3d38c/array.json",
+    params
+  }).then(res => res);

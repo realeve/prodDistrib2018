@@ -16,7 +16,6 @@ const isFilterColumn = (data, key) => {
       }
     }
   };
-
   let uniqColumn = R.compose(R.uniq, R.map(R.prop(key)))(data);
   R.map(handleItem)(uniqColumn);
 

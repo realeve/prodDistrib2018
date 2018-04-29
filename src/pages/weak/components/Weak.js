@@ -68,6 +68,9 @@ class DynamicRule extends React.Component {
 
   setTextInputRef = e => {
     // antd 二次封装后需console查看结构得到refs
+    if (R.isNil(e)) {
+      return;
+    }
     this.base64Input = e.input.input;
   };
 

@@ -46,7 +46,7 @@ function Tables({
         />
       </div>
 
-      <VTable dataSrc={dataSrc} loading={loading} />
+      <VTable dataSrc={dataSrc} loading={loading} cartLinkMode="img" />
       <VTable dataSrc={dataCount} loading={loading} />
       <VTable dataSrc={dataCount2} loading={loading} />
       <VTable dataSrc={dataCount3} loading={loading} />

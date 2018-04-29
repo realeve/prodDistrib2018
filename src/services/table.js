@@ -1,4 +1,7 @@
 import * as lib from "../utils/lib";
+import { uploadHost } from "../utils/axios";
+import styles from "../components/Table.less";
+
 const R = require("ramda");
 
 const isFilterColumn = (data, key) => {
@@ -20,7 +23,10 @@ const isFilterColumn = (data, key) => {
   return { uniqColumn, filters: isValid };
 };
 
-export function handleColumns({ dataSrc, filteredInfo }) {
+export function handleColumns(
+  { dataSrc, filteredInfo },
+  cartLinkMode = "search"
+) {
   let { data, header, rows } = dataSrc;
   let showURL = typeof data !== "undefined" && rows > 0;
   if (!rows || rows === 0) {
@@ -44,10 +50,15 @@ export function handleColumns({ dataSrc, filteredInfo }) {
       return item;
     }
 
-    if (lib.isCartOrReel(tdValue)) {
+    const isCart = lib.isCart(tdValue);
+    if (lib.isReel(tdValue) || isCart) {
       item.render = text => {
+        let url = lib.searchUrl;
+        if (isCart && cartLinkMode !== "search") {
+          url = lib.imgUrl;
+        }
         const attrs = {
-          href: lib.searchUrl + text,
+          href: url + text,
           target: "_blank"
         };
         return <a {...attrs}>{text}</a>;
@@ -56,6 +67,21 @@ export function handleColumns({ dataSrc, filteredInfo }) {
     } else if (lib.isInt(tdValue) && !lib.isDateTime(tdValue)) {
       item.render = text => parseInt(text, 10).toLocaleString();
       return item;
+    } else {
+      item.render = text => {
+        text = R.isNil(text) ? "" : text;
+        let isImg =
+          String(text).includes("/image") || String(text).includes("/file/");
+        return !isImg ? (
+          text
+        ) : (
+          <img
+            className={styles.imgContent}
+            src={`${uploadHost}${text}`}
+            alt={text}
+          />
+        );
+      };
     }
 
     let fInfo = isFilterColumn(data, key);
@@ -70,6 +96,7 @@ export function handleColumns({ dataSrc, filteredInfo }) {
     }
     return item;
   });
+
   return column;
 }
 

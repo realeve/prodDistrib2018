@@ -11,7 +11,6 @@ import {
 } from "antd";
 import * as db from "../services/table";
 import styles from "./Table.less";
-import * as axios from "../utils/axios";
 
 import Excel from "../utils/excel";
 import pdf from "../utils/pdf";
@@ -69,10 +68,13 @@ class Tables extends Component {
       dataSource = db.getPageData({ data: this.dataClone, page, pageSize });
     }
 
-    const columns = db.handleColumns({
-      dataSrc: data,
-      filteredInfo: {}
-    });
+    const columns = db.handleColumns(
+      {
+        dataSrc: data,
+        filteredInfo: {}
+      },
+      this.props.cartLinkMode
+    );
     this.setState({
       columns,
       dataSource
@@ -255,7 +257,7 @@ class Tables extends Component {
   getTBody = () => {
     const {
       loading,
-      // columns,
+      columns,
       dataSource,
       // source,
       // timing,
@@ -267,7 +269,7 @@ class Tables extends Component {
       <>
         <Table
           loading={loading}
-          columns={this.columnInfo()}
+          columns={columns}
           dataSource={dataSource}
           rowKey="key"
           pagination={false}
@@ -290,26 +292,6 @@ class Tables extends Component {
         />
       </>
     );
-  };
-
-  columnInfo = () => {
-    return this.state.columns.map(item => {
-      item.render = text => {
-        text = R.isNil(text) ? "" : text;
-        let isImg =
-          String(text).includes("/image") || String(text).includes("/file/");
-        return !isImg ? (
-          text
-        ) : (
-          <img
-            className={styles.imgContent}
-            src={`${axios.uploadHost}${text}`}
-            alt={text}
-          />
-        );
-      };
-      return item;
-    });
   };
 
   render() {
@@ -347,7 +329,8 @@ Tables.defaultProps = {
     time: "0ms",
     header: []
   },
-  loading: false
+  loading: false,
+  cartLinkMode: "search"
 };
 
 export default Tables;

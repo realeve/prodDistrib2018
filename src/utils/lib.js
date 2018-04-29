@@ -2,14 +2,19 @@ import moment from "moment";
 import { host, uploadHost } from "./axios";
 import http from "axios";
 export const searchUrl = "http://10.8.2.133/search#";
+export const imgUrl = "http://10.8.2.133/search/image#";
+
 export const apiHost = host;
+const rules = {
+  cart: /^[1-9]\d{3}[A-Za-z]\d{3}$/,
+  reel: /^[1-9]\d{6}[A-Ca-c]$|^[1-9]\d{4}$|^[1-9]\d{4}[A-Ca-c]$|^[1-9]\d{6}$|[A-Z]\d{11}[A-Z]/
+};
 export const isCartOrReel = str => {
-  const rules = {
-    cart: /^[1-9]\d{3}[A-Za-z]\d{3}$/,
-    reel: /^[1-9]\d{6}[A-Ca-c]$|^[1-9]\d{4}$|^[1-9]\d{4}[A-Ca-c]$|^[1-9]\d{6}$|[A-Z]\d{11}[A-Z]/
-  };
   return rules.cart.test(str) || rules.reel.test(str);
 };
+
+export const isCart = str => rules.cart.test(str);
+export const isReel = str => rules.reel.test(str);
 
 export const isDateTime = str =>
   /^\d{4}(-|\/|)[0-1]\d(-|\/|)[0-3]\d$|^\d{4}(-|\/|)[0-1]\d(-|\/|)[0-3]\d [0-2][0-9]:[0-5][0-9](:[0-5][0-9])$|^[0-2][0-9]:[0-5][0-9](:[0-5][0-9])$/.test(

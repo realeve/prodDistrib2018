@@ -1,22 +1,22 @@
 import http from "axios";
 import qs from "qs";
 
-export let DEV = true;
+export let DEV = false;
 
-export let host = DEV
-  ? "http://localhost:90/api/"
-  : "http://10.8.1.25:100/api/";
+export let host = DEV ?
+  "http://localhost:90/api/" :
+  "http://10.8.1.25:100/api/";
 export let uploadHost = DEV ? "//localhost/upload/" : "//10.8.2.133/upload/";
 
 // 判断数据类型，对于FormData使用 typeof 方法会得到 object;
 let getType = data =>
   Object.prototype.toString
-    .call(data)
-    .match(/\S+/g)[1]
-    .replace("]", "")
-    .toLowerCase();
+  .call(data)
+  .match(/\S+/g)[1]
+  .replace("]", "")
+  .toLowerCase();
 
-const loadUserInfo = function() {
+const loadUserInfo = function () {
   // 业务经办人
   let userInfo = {
     name: "",
@@ -48,7 +48,9 @@ let refreshNoncer = async () => {
 const saveToken = () => {
   window.localStorage.setItem(
     "user",
-    JSON.stringify({ token: window.g_axios.token })
+    JSON.stringify({
+      token: window.g_axios.token
+    })
   );
 };
 
@@ -82,7 +84,7 @@ export let axios = async option => {
       baseURL: window.g_axios.host,
       timeout: 10000,
       transformRequest: [
-        function(data) {
+        function (data) {
           let dataType = getType(data);
           switch (dataType) {
             case "object":
@@ -96,7 +98,9 @@ export let axios = async option => {
         }
       ]
     })(option)
-    .then(({ data }) => {
+    .then(({
+      data
+    }) => {
       // 刷新token
       if (typeof data.token !== "undefined") {
         window.g_axios.token = data.token;

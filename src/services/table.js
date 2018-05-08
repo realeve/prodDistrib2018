@@ -70,7 +70,7 @@ export function handleColumns(
       item.render = text => {
         text = R.isNil(text) ? "" : text;
         let isImg =
-          String(text).includes("/image") || String(text).includes("/file/");
+          String(text).includes("image/") || String(text).includes("/file/");
         return !isImg ? (
           text
         ) : (

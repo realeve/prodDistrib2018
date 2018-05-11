@@ -147,14 +147,22 @@ function Tasks({
         reason_code: "q_handCheck",
         carnos
       });
-      let { unhandledList, handledList } = lockData;
-      unhandledList = R.map(R.prop("carno"))(unhandledList);
-      handledList = R.map(R.prop("carno"))(handledList);
+      let { unhandledList, handledList } = lockData.result;
+      // 接口在2018.05.01之前做调整
+      // unhandledList = R.map(R.prop("carno"))(unhandledList);
+      // handledList = R.map(R.prop("carno"))(handledList);
+      if (!lockData.status) {
+        openNotification("立体库锁车异常，请联系管理员6129/7036");
+        return;
+      }
 
-      openNotification("锁车完毕,以下车号锁车失败:" + unhandledList.join("、"));
+      if (unhandledList.length) {
+        openNotification(
+          "锁车完毕,以下车号锁车失败:" + unhandledList.join("、")
+        );
+      }
 
-      console.log(lockData);
-      insertingData = R.filter(item => handledList.includes(item))(
+      insertingData = R.filter(item => handledList.includes(item.cart_number))(
         insertingData
       );
 

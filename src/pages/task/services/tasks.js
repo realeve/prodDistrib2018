@@ -121,3 +121,14 @@ export const setPrintSampleMachine = async params =>
     url: "/57/3bbab164ad.json",
     params
   }).then(res => res);
+
+/**
+*   @database: { 质量信息系统 }
+*   @desc:     { 四新及异常品人工拉号产品列表 } 
+    const { tstart, tend } = params;
+*/
+export const getPrintWmsProclist = async params =>
+  await axios({
+    url: "/121/fff29f5a04/array.json",
+    params
+  }).then(res => res);

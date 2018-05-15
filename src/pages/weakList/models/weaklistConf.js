@@ -9,7 +9,9 @@ export default {
     dateRange: []
   },
   reducers: {
-    setDateRange(state, { payload: dateRange }) {
+    setDateRange(state, {
+      payload: dateRange
+    }) {
       return {
         ...state,
         dateRange
@@ -17,7 +19,11 @@ export default {
     }
   },
   effects: {
-    *updateDateRange({ payload: dateRange }, { put }) {
+    * updateDateRange({
+      payload: dateRange
+    }, {
+      put
+    }) {
       yield put({
         type: "setDateRange",
         payload: dateRange
@@ -25,11 +31,17 @@ export default {
     }
   },
   subscriptions: {
-    setup({ dispatch, history }) {
-      return history.listen(async ({ pathname, query }) => {
+    setup({
+      dispatch,
+      history
+    }) {
+      return history.listen(async ({
+        pathname,
+        query
+      }) => {
         const match = pathToRegexp("/weaklist").exec(pathname);
         if (match && match[0] === "/weaklist") {
-          const [tstart, tend] = dateRanges["本周"];
+          const [tstart, tend] = dateRanges["最近一月"];
           const [ts, te] = [tstart.format("YYYYMMDD"), tend.format("YYYYMMDD")];
           dispatch({
             type: "setDateRange",

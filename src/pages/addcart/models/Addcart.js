@@ -17,41 +17,66 @@ export default {
     abnormalTypeList: []
   },
   reducers: {
-    save(state, { payload: { dataSrc, dataSource, total } }) {
-      return { ...state, dataSrc, dataSource, total };
+    save(state, {
+      payload: {
+        dataSrc,
+        dataSource,
+        total
+      }
+    }) {
+      return { ...state,
+        dataSrc,
+        dataSource,
+        total
+      };
     },
-    setColumns(state, { payload: { dataClone, columns } }) {
+    setColumns(state, {
+      payload: {
+        dataClone,
+        columns
+      }
+    }) {
       return {
         ...state,
         dataClone,
         columns
       };
     },
-    setPage(state, { payload: page }) {
+    setPage(state, {
+      payload: page
+    }) {
       return {
         ...state,
         page
       };
     },
-    setPageSize(state, { payload: pageSize }) {
+    setPageSize(state, {
+      payload: pageSize
+    }) {
       return {
         ...state,
         pageSize
       };
     },
-    refreshTable(state, { payload: dataSource }) {
+    refreshTable(state, {
+      payload: dataSource
+    }) {
       return {
         ...state,
         dataSource
       };
     },
-    setDateRange(state, { payload: dateRange }) {
+    setDateRange(state, {
+      payload: dateRange
+    }) {
       return {
         ...state,
         dateRange
       };
     },
-    setProc(state, { payload: abnormalTypeList }) {
+    setProc(state, {
+      payload: abnormalTypeList
+    }) {
       return {
         ...state,
         abnormalTypeList
@@ -59,22 +84,43 @@ export default {
     }
   },
   effects: {
-    *updateDateRange({ payload: dateRange }, { put }) {
+    * updateDateRange({
+      payload: dateRange
+    }, {
+      put
+    }) {
       yield put({
         type: "setDateRange",
         payload: dateRange
       });
     },
-    *changePageSize({ payload: pageSize }, { put, select }) {
+    * changePageSize({
+      payload: pageSize
+    }, {
+      put,
+      select
+    }) {
       yield put({
         type: "setPageSize",
         payload: pageSize
       });
     },
-    *changePage({ payload: page }, { put, select }) {
+    * changePage({
+      payload: page
+    }, {
+      put,
+      select
+    }) {
       const store = yield select(state => state[namespace]);
-      const { pageSize, dataClone } = store;
-      const dataSource = db.getPageData({ data: dataClone, page, pageSize });
+      const {
+        pageSize,
+        dataClone
+      } = store;
+      const dataSource = db.getPageData({
+        data: dataClone,
+        page,
+        pageSize
+      });
 
       yield put({
         type: "refreshTable",
@@ -85,9 +131,17 @@ export default {
         payload: page
       });
     },
-    *handleReportData(payload, { call, put, select }) {
+    * handleReportData(payload, {
+      call,
+      put,
+      select
+    }) {
       const store = yield select(state => state[namespace]);
-      const { pageSize, page, dateRange } = store;
+      const {
+        pageSize,
+        page,
+        dateRange
+      } = store;
 
       let data = yield call(db.getViewPrintAbnormalProd, {
         tstart: dateRange[0],
@@ -98,14 +152,20 @@ export default {
         dataClone = [];
       if (data.rows) {
         data.data = data.data.map((item, key) => {
-          let col = { key };
+          let col = {
+            key
+          };
           item.forEach((td, idx) => {
             col["col" + idx] = td;
           });
           return col;
         });
         dataClone = data.data;
-        dataSource = db.getPageData({ data: dataClone, page, pageSize });
+        dataSource = db.getPageData({
+          data: dataClone,
+          page,
+          pageSize
+        });
       }
       let columns = yield call(db.handleColumns, {
         dataSrc: data,
@@ -130,7 +190,11 @@ export default {
         }
       });
     },
-    *getProc(payload, { put, select, call }) {
+    * getProc(payload, {
+      put,
+      select,
+      call
+    }) {
       let proc = yield call(db.getPrintAbnormalProd);
       yield put({
         type: "setProc",
@@ -139,11 +203,17 @@ export default {
     }
   },
   subscriptions: {
-    setup({ dispatch, history }) {
-      return history.listen(async ({ pathname, query }) => {
+    setup({
+      dispatch,
+      history
+    }) {
+      return history.listen(async ({
+        pathname,
+        query
+      }) => {
         const match = pathToRegexp("/" + namespace).exec(pathname);
         if (match && match[0] === "/" + namespace) {
-          const [tstart, tend] = dateRanges["本周"];
+          const [tstart, tend] = dateRanges["最近一月"];
           const [ts, te] = [tstart.format("YYYYMMDD"), tend.format("YYYYMMDD")];
 
           await dispatch({
@@ -154,7 +224,9 @@ export default {
             type: "handleReportData"
           });
 
-          dispatch({ type: "getProc" });
+          dispatch({
+            type: "getProc"
+          });
         }
       });
     }

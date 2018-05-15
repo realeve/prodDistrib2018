@@ -5,12 +5,13 @@ import axios from "axios";
 
 let host = DEV ?
   "http://mactest.cdyc.cbpm:8080/wms/if" :
-  "http://mac.cdyc.cbpm:8080/wms/if";
+  "http://cognosdb.cdyc.cbpm:8080/wms/if";
 
 // 本机
 // host = "http://10.8.60.202:8080/wms/if";
-host = "http://mactest.cdyc.cbpm:8080/wms/if";
-let hostProd = "http://mac.cdyc.cbpm:8080/wms/if";
+// host = "http://mactest.cdyc.cbpm:8080/wms/if";
+
+let hostProd = "http://cognosdb.cdyc.cbpm:8080/wms/if";
 
 // 公共函数
 // 根据库房id获取库房名
@@ -207,14 +208,16 @@ let getStockStatus = async carnos => {
 */
 let setBlackList = async ({
   carnos,
-  reason_code
+  reason_code,
+  log_id
 }) => {
   let data = await axios({
     method: "post",
     url: host + "/lockH",
     data: {
       carnos,
-      reason_code
+      reason_code,
+      log_id
     }
   }).then(res => res.data);
 
@@ -238,14 +241,16 @@ let setBlackList = async ({
 carnos:[carno1,carno2,carno3]*/
 let setProcs = async ({
   checkType,
-  carnos
+  carnos,
+  log_id
 }) => {
   let data = await axios({
     method: "post",
     url: host + "/carnoH",
     data: {
       checkType,
-      carnos
+      carnos,
+      log_id
     }
   }).then(res => res.data);
   return data;
@@ -329,14 +334,16 @@ let setWhiteList = async carnos => {
 // 码后验证。review:1设置验证,0取消验证
 let setReviewList = async ({
   carnos,
-  review
+  review,
+  log_id
 }) => {
   let data = await axios({
     method: "post",
     url: host + "/reviewH",
     data: {
       carnos,
-      review
+      review,
+      log_id
     }
   }).then(res => res.data);
   return data;

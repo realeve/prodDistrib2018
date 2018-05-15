@@ -1,5 +1,7 @@
 import * as lib from "../utils/lib";
-import { uploadHost } from "../utils/axios";
+import {
+  uploadHost
+} from "../utils/axios";
 import styles from "../components/Table.less";
 
 const R = require("ramda");
@@ -7,6 +9,9 @@ const R = require("ramda");
 const isFilterColumn = (data, key) => {
   let isValid = true;
   const handleItem = item => {
+    if (R.isNil(item)) {
+      isValid = false;
+    }
     if (isValid) {
       item = item.trim();
       let isNum = lib.isNumOrFloat(item);
@@ -18,15 +23,23 @@ const isFilterColumn = (data, key) => {
   };
   let uniqColumn = R.compose(R.uniq, R.map(R.prop(key)))(data);
   R.map(handleItem)(uniqColumn);
-
-  return { uniqColumn, filters: isValid };
+  return {
+    uniqColumn,
+    filters: isValid
+  };
 };
 
-export function handleColumns(
-  { dataSrc, filteredInfo },
+export function handleColumns({
+    dataSrc,
+    filteredInfo
+  },
   cartLinkMode = "search"
 ) {
-  let { data, header, rows } = dataSrc;
+  let {
+    data,
+    header,
+    rows
+  } = dataSrc;
   let showURL = typeof data !== "undefined" && rows > 0;
   if (!rows || rows === 0) {
     return [];
@@ -34,7 +47,9 @@ export function handleColumns(
 
   let column = header.map((title, i) => {
     let key = "col" + i;
-    let item = { title };
+    let item = {
+      title
+    };
 
     item.dataIndex = key;
     // item.key = key;
@@ -60,7 +75,10 @@ export function handleColumns(
           href: url + text,
           target: "_blank"
         };
-        return <a {...attrs}>{text}</a>;
+        return <a { ...attrs
+        } > {
+          text
+        } < /a>;
       };
       return item;
     } else if (lib.isInt(tdValue) && !lib.isDateTime(tdValue)) {
@@ -73,11 +91,16 @@ export function handleColumns(
           String(text).includes("image/") || String(text).includes("/file/");
         return !isImg ? (
           text
-        ) : (
-          <img
-            className={styles.imgContent}
-            src={`${uploadHost}${text}`}
-            alt={text}
+        ) : ( <
+          img className = {
+            styles.imgContent
+          }
+          src = {
+            `${uploadHost}${text}`
+          }
+          alt = {
+            text
+          }
           />
         );
       };
@@ -99,7 +122,10 @@ export function handleColumns(
   return column;
 }
 
-export function handleFilter({ data, filters }) {
+export function handleFilter({
+  data,
+  filters
+}) {
   R.compose(
     R.forEach(key => {
       if (filters[key] !== null && filters[key].length !== 0) {
@@ -111,7 +137,10 @@ export function handleFilter({ data, filters }) {
   return data;
 }
 
-export function updateColumns({ columns, filters }) {
+export function updateColumns({
+  columns,
+  filters
+}) {
   R.compose(
     R.forEach(key => {
       let idx = R.findIndex(R.propEq("dataIndex", key))(columns);
@@ -122,7 +151,11 @@ export function updateColumns({ columns, filters }) {
   return columns;
 }
 
-export function handleSort({ dataClone, field, order }) {
+export function handleSort({
+  dataClone,
+  field,
+  order
+}) {
   return R.sort((a, b) => {
     if (order === "descend") {
       return b[field] - a[field];
@@ -131,7 +164,11 @@ export function handleSort({ dataClone, field, order }) {
   })(dataClone);
 }
 
-export const getPageData = ({ data, page, pageSize }) =>
+export const getPageData = ({
+    data,
+    page,
+    pageSize
+  }) =>
   data.slice((page - 1) * pageSize, page * pageSize);
 
 export const handleSrcData = data => {
@@ -142,7 +179,9 @@ export const handleSrcData = data => {
   data.header = ["", ...data.header];
   if (data.rows) {
     data.data = data.data.map((item, key) => {
-      let col = { key };
+      let col = {
+        key
+      };
       item.forEach((td, idx) => {
         col["col" + idx] = td;
       });

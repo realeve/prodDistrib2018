@@ -22,26 +22,39 @@ export default {
   },
   reducers: {
     save(
-      state,
-      {
-        payload: { dataSrc, dataSource, total }
+      state, {
+        payload: {
+          dataSrc,
+          dataSource,
+          total
+        }
       }
     ) {
-      return { ...state, dataSrc, dataSource, total };
+      return { ...state,
+        dataSrc,
+        dataSource,
+        total
+      };
     },
-    setPage(state, { payload: page }) {
+    setPage(state, {
+      payload: page
+    }) {
       return {
         ...state,
         page
       };
     },
-    setPageSize(state, { payload: pageSize }) {
+    setPageSize(state, {
+      payload: pageSize
+    }) {
       return {
         ...state,
         pageSize
       };
     },
-    refreshTable(state, { payload: dataSource }) {
+    refreshTable(state, {
+      payload: dataSource
+    }) {
       return {
         ...state,
         dataSource
@@ -49,9 +62,11 @@ export default {
       };
     },
     setColumns(
-      state,
-      {
-        payload: { dataClone, columns }
+      state, {
+        payload: {
+          dataClone,
+          columns
+        }
       }
     ) {
       return {
@@ -60,25 +75,33 @@ export default {
         columns
       };
     },
-    setSampling(state, { payload: sampling }) {
+    setSampling(state, {
+      payload: sampling
+    }) {
       return {
         ...state,
         sampling
       };
     },
-    setSampleStatus(state, { payload: sampleStatus }) {
+    setSampleStatus(state, {
+      payload: sampleStatus
+    }) {
       return {
         ...state,
         sampleStatus
       };
     },
-    setSampledCarts(state, { payload: sampledCarts }) {
+    setSampledCarts(state, {
+      payload: sampledCarts
+    }) {
       return {
         ...state,
         sampledCarts
       };
     },
-    setSampledMachines(state, { payload: sampledMachines }) {
+    setSampledMachines(state, {
+      payload: sampledMachines
+    }) {
       return {
         ...state,
         sampledMachines
@@ -86,16 +109,33 @@ export default {
     }
   },
   effects: {
-    *changePageSize({ payload: pageSize }, { put, select }) {
+    * changePageSize({
+      payload: pageSize
+    }, {
+      put,
+      select
+    }) {
       yield put({
         type: "setPageSize",
         payload: pageSize
       });
     },
-    *changePage({ payload: page }, { put, select }) {
+    * changePage({
+      payload: page
+    }, {
+      put,
+      select
+    }) {
       const store = yield select(state => state.tasks);
-      const { pageSize, dataClone } = store;
-      const dataSource = db.getPageData({ data: dataClone, page, pageSize });
+      const {
+        pageSize,
+        dataClone
+      } = store;
+      const dataSource = db.getPageData({
+        data: dataClone,
+        page,
+        pageSize
+      });
 
       yield put({
         type: "refreshTable",
@@ -106,13 +146,20 @@ export default {
         payload: page
       });
     },
-    *fetchSampledData(
-      {
-        payload: { tstart, tend }
-      },
-      { call, put, select }
-    ) {
-      let data = yield call(db.getSampledCartlist, { tstart, tend });
+    * fetchSampledData({
+      payload: {
+        tstart,
+        tend
+      }
+    }, {
+      call,
+      put,
+      select
+    }) {
+      let data = yield call(db.getSampledCartlist, {
+        tstart,
+        tend
+      });
       let carts = R.compose(
         R.uniq(),
         R.map(R.prop(0)),
@@ -124,13 +171,20 @@ export default {
       });
     },
     // 对尚未抽检的设备单独统计
-    *fetchSampledMachines(
-      {
-        payload: { tstart, tend }
-      },
-      { call, put, select }
-    ) {
-      let data = yield call(db.getPrintSampleMachine, { tstart, tend });
+    * fetchSampledMachines({
+      payload: {
+        tstart,
+        tend
+      }
+    }, {
+      call,
+      put,
+      select
+    }) {
+      let data = yield call(db.getPrintSampleMachine, {
+        tstart,
+        tend
+      });
 
       let sampledMachines = R.compose(
         R.map(R.prop(0)),
@@ -141,11 +195,25 @@ export default {
         payload: sampledMachines
       });
     },
-    *handleTaskData({ payload }, { call, put, select }) {
+    * handleTaskData({
+      payload
+    }, {
+      call,
+      put,
+      select
+    }) {
       const store = yield select(state => state.tasks);
-      let { dataSrc: data, columns } = yield select(state => state.table);
+      let {
+        dataSrc: data,
+        columns
+      } = yield select(state => state.table);
 
-      const { pageSize, page, sampledMachines, sampledCarts } = store;
+      const {
+        pageSize,
+        page,
+        sampledMachines,
+        sampledCarts
+      } = store;
 
       // 车号列表，未确认是否在库
       let unStockedData = data.data.map(item => Object.values(item).slice(1));
@@ -156,6 +224,7 @@ export default {
 
       let cartList = R.compose(R.uniq, R.map(R.nth(0)))(uniqCarts);
       let stockCarts = yield call(wms.getStockStatus, cartList);
+      stockCarts = stockCarts.result;
 
       let stockData = [];
       if (stockCarts.length > 0) {
@@ -193,14 +262,20 @@ export default {
       if (data.rows) {
         // 使用 disData.log 时全部只输出到印码
         dataClone = disData.taskList.map((item, key) => {
-          let col = { key };
+          let col = {
+            key
+          };
           item.forEach((td, idx) => {
             col["col" + idx] = td;
           });
           return col;
         });
 
-        dataSource = db.getPageData({ data: dataClone, page, pageSize });
+        dataSource = db.getPageData({
+          data: dataClone,
+          page,
+          pageSize
+        });
       }
 
       yield put({
@@ -229,7 +304,9 @@ export default {
         payload: sampling
       });
 
-      data = yield call(db.getPrintSampleCartlist, { week_num: lib.weeks() });
+      data = yield call(db.getPrintSampleCartlist, {
+        week_num: lib.weeks()
+      });
       yield put({
         type: "setSampleStatus",
         payload: parseInt(data[0].nums, 10)

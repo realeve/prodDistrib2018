@@ -1,16 +1,28 @@
-import { axios } from "../../../utils/axios";
+import {
+  axios
+} from "../../../utils/axios";
 import * as lib from "../../../utils/lib";
 const R = require("ramda");
 
-export function handleColumns({ dataSrc, sortedInfo, filteredInfo }) {
-  let { data, header, rows } = dataSrc;
+export function handleColumns({
+  dataSrc,
+  sortedInfo,
+  filteredInfo
+}) {
+  let {
+    data,
+    header,
+    rows
+  } = dataSrc;
   let showURL = typeof data !== "undefined" && rows > 0;
   if (!rows || rows === 0) {
     return [];
   }
   let column = header.map((title, i) => {
     let key = "col" + i;
-    let item = { title };
+    let item = {
+      title
+    };
     item.dataIndex = key;
     // item.key = key;
 
@@ -30,7 +42,10 @@ export function handleColumns({ dataSrc, sortedInfo, filteredInfo }) {
           href: lib.searchUrl + text,
           target: "_blank"
         };
-        return <a {...attrs}>{text}</a>;
+        return <a { ...attrs
+        } > {
+          text
+        } < /a>;
       };
       return item;
     } else if (lib.isInt(tdValue) && !lib.isDateTime(tdValue)) {
@@ -43,7 +58,10 @@ export function handleColumns({ dataSrc, sortedInfo, filteredInfo }) {
   return column;
 }
 
-export function handleFilter({ data, filters }) {
+export function handleFilter({
+  data,
+  filters
+}) {
   R.compose(
     R.forEach(key => {
       if (filters[key] !== null && filters[key].length !== 0) {
@@ -55,7 +73,10 @@ export function handleFilter({ data, filters }) {
   return data;
 }
 
-export function updateColumns({ columns, filters }) {
+export function updateColumns({
+  columns,
+  filters
+}) {
   R.compose(
     R.forEach(key => {
       let idx = R.findIndex(R.propEq("dataIndex", key))(columns);
@@ -66,7 +87,11 @@ export function updateColumns({ columns, filters }) {
   return columns;
 }
 
-export function handleSort({ dataClone, field, order }) {
+export function handleSort({
+  dataClone,
+  field,
+  order
+}) {
   return R.sort((a, b) => {
     if (order === "descend") {
       return b[field] - a[field];
@@ -75,7 +100,11 @@ export function handleSort({ dataClone, field, order }) {
   })(dataClone);
 }
 
-export const getPageData = ({ data, page, pageSize }) =>
+export const getPageData = ({
+    data,
+    page,
+    pageSize
+  }) =>
   data.slice((page - 1) * pageSize, page * pageSize);
 
 /**

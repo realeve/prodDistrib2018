@@ -74,7 +74,10 @@ function Tasks({
 
     return (
       <div className={styles.sampling}>
-        <h2>自动分配抽样结果</h2>
+        <div>
+          <h2>自动分配抽样结果</h2>
+          <p>(本周已领取 {sampleStatus} 车人工校验产品)</p>
+        </div>
         <div className={styles.desc}>
           <h5>
             码后核查共生产<strong>{taskInfo.total}</strong>车产品,在库<strong>
@@ -143,10 +146,35 @@ function Tasks({
       let carnos = R.compose(R.uniq, R.map(R.prop("cart_number")))(
         insertingData
       );
+
+      // 20180515调整日志添加接口
+      let logInfo = await db.addPrintWmsLog([
+        {
+          remark: JSON.stringify({ carnos, proc_stream: "人工拉号每周抽检" }),
+          rec_time: lib.now()
+        }
+      ]);
+
+      // 添加日志正常？
+      if (logInfo.rows < 1 || logInfo.data[0].affected_rows < 1) {
+        console.log(logInfo);
+        openNotification("锁车失败，日志信息添加异常");
+        return false;
+      }
+      let log_id = logInfo.data[0].id;
+
       let lockData = await wms.setBlackList({
         reason_code: "q_handCheck",
-        carnos
+        carnos,
+        log_id
       });
+
+      // 更新日志返回信息
+      await db.setPrintWmsLog({
+        return_info: JSON.stringify(lockData),
+        _id: log_id
+      });
+
       let { unhandledList, handledList } = lockData.result;
       // 接口在2018.05.01之前做调整
       // unhandledList = R.map(R.prop("carno"))(unhandledList);

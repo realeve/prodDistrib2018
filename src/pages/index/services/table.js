@@ -220,3 +220,44 @@ export const getPrintSampleMachine = async params =>
       : "/58/0695d9575b/array.json",
     params
   }).then(res => res);
+
+/**
+*   @database: { 质量信息系统 }
+*   @desc:     { 更新四新计划状态信息 } 
+	以下参数在建立过程中与系统保留字段冲突，已自动替换:
+	@id:_id. 参数说明：api 索引序号
+  
+    const { complete_num, complete_status, update_time, _id } = params;
+*/
+export const setPrintNewprocPlan = async params =>
+  await axios({
+    url: "/90/a6c66f8d72.json",
+    params
+  }).then(res => res);
+
+/**
+*   @database: { 质量信息系统 }
+*   @desc:     { 批量记录库管系统日志信息 } 
+以下参数在建立过程中与系统保留字段冲突，已自动替换:
+@desc:批量插入数据时，约定使用二维数组values参数，格式为[{remark,rec_time }]，数组的每一项表示一条数据*/
+
+export const addPrintWmsLog = async values =>
+  await axios({
+    method: "post",
+    data: {
+      values,
+      id: 91,
+      nonce: "f0500427cb"
+    }
+  }).then(res => res);
+
+/**
+*   @database: { 质量信息系统 }
+*   @desc:     { 更新wms日志信息 } 
+    const { return_info, _id } = params;
+*/
+export const setPrintWmsLog = async params =>
+  await axios({
+    url: "/120/e7d88969ca.json",
+    params
+  }).then(res => res);

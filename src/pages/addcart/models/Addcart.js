@@ -1,69 +1,30 @@
 import pathToRegexp from "path-to-regexp";
 import * as db from "../services/Addcart";
 import dateRanges from "../../../utils/ranges";
+import wms from '../../index/services/wms';
+const R = require('ramda');
 
 const namespace = "addcart";
 export default {
   namespace,
   state: {
     dataSource: [],
-    dataSrc: [],
-    dataClone: [],
-    columns: [],
-    total: null,
-    page: 1,
-    pageSize: 15,
     dateRange: [],
-    abnormalTypeList: []
+    abnormalTypeList: [],
+    abnormalWMS: [],
+    lockInfo: {
+      checkByWeek: 0,
+      abnormal: 0
+    }
   },
   reducers: {
     save(state, {
       payload: {
-        dataSrc,
         dataSource,
-        total
       }
     }) {
       return { ...state,
-        dataSrc,
         dataSource,
-        total
-      };
-    },
-    setColumns(state, {
-      payload: {
-        dataClone,
-        columns
-      }
-    }) {
-      return {
-        ...state,
-        dataClone,
-        columns
-      };
-    },
-    setPage(state, {
-      payload: page
-    }) {
-      return {
-        ...state,
-        page
-      };
-    },
-    setPageSize(state, {
-      payload: pageSize
-    }) {
-      return {
-        ...state,
-        pageSize
-      };
-    },
-    refreshTable(state, {
-      payload: dataSource
-    }) {
-      return {
-        ...state,
-        dataSource
       };
     },
     setDateRange(state, {
@@ -81,6 +42,26 @@ export default {
         ...state,
         abnormalTypeList
       };
+    },
+    saveWMS(state, {
+      payload: {
+        abnormalWMS
+      }
+    }) {
+      return {
+        ...state,
+        abnormalWMS
+      }
+    },
+    saveLockInfo(state, {
+      payload: {
+        lockInfo
+      }
+    }) {
+      return {
+        ...state,
+        lockInfo
+      }
     }
   },
   effects: {
@@ -94,42 +75,47 @@ export default {
         payload: dateRange
       });
     },
-    * changePageSize({
-      payload: pageSize
-    }, {
+    * getLockCart(payload, {
+      call,
       put,
       select
     }) {
-      yield put({
-        type: "setPageSize",
-        payload: pageSize
-      });
-    },
-    * changePage({
-      payload: page
-    }, {
-      put,
-      select
-    }) {
-      const store = yield select(state => state[namespace]);
-      const {
-        pageSize,
-        dataClone
-      } = store;
-      const dataSource = db.getPageData({
-        data: dataClone,
-        page,
-        pageSize
+      const [ts, te] = dateRanges["本周"];
+      const [tstart, tend] = [ts.format("YYYYMMDD"), te.format("YYYYMMDD")];
+
+      // 获取每周人工拉号锁车产品信息
+      let {
+        data
+      } = yield call(db.getPrintSampleCartlist, {
+        tstart,
+        tend,
+        tstart2: tstart,
+        tend2: tend
       });
 
+      let lockInfo = {
+        checkByWeek: 0,
+        abnormal: 0
+      }
+
+      data.forEach(({
+        num,
+        type
+      }) => {
+        if (type === 0) {
+          lockInfo.checkByWeek = num;
+        } else {
+          lockInfo.abnormal = num;
+        }
+      })
+
       yield put({
-        type: "refreshTable",
-        payload: dataSource
-      });
-      yield put({
-        type: "setPage",
-        payload: page
-      });
+        type: 'saveLockInfo',
+        payload: {
+          lockInfo
+        }
+      })
+
     },
     * handleReportData(payload, {
       call,
@@ -138,57 +124,35 @@ export default {
     }) {
       const store = yield select(state => state[namespace]);
       const {
-        pageSize,
-        page,
         dateRange
       } = store;
 
-      let data = yield call(db.getViewPrintAbnormalProd, {
+      let dataSource = yield call(db.getViewPrintAbnormalProd, {
         tstart: dateRange[0],
         tend: dateRange[1]
       });
 
-      let dataSource = [],
-        dataClone = [];
-      if (data.rows) {
-        data.data = data.data.map((item, key) => {
-          let col = {
-            key
-          };
-          item.forEach((td, idx) => {
-            col["col" + idx] = td;
-          });
-          return col;
-        });
-        dataClone = data.data;
-        dataSource = db.getPageData({
-          data: dataClone,
-          page,
-          pageSize
-        });
-      }
-      let columns = yield call(db.handleColumns, {
-        dataSrc: data,
-        filteredInfo: {},
-        sortedInfo: {}
-      });
-
-      yield put({
-        type: "setColumns",
-        payload: {
-          dataClone,
-          columns
-        }
-      });
+      // 车号列表
+      let carts = R.map(R.nth(1))(dataSource.data);
 
       yield put({
         type: "save",
         payload: {
-          dataSrc: data,
           dataSource,
-          total: data.rows
         }
       });
+
+      let abnormalWMS = yield call(db.getTbstock, carts);
+      abnormalWMS.data = abnormalWMS.data.map(item => {
+        item[6] = wms.getLockReason(item[6]);
+        return item;
+      })
+      yield put({
+        type: 'saveWMS',
+        payload: {
+          abnormalWMS
+        }
+      })
     },
     * getProc(payload, {
       put,
@@ -213,7 +177,7 @@ export default {
       }) => {
         const match = pathToRegexp("/" + namespace).exec(pathname);
         if (match && match[0] === "/" + namespace) {
-          const [tstart, tend] = dateRanges["最近一月"];
+          const [tstart, tend] = dateRanges["本周"];
           const [ts, te] = [tstart.format("YYYYMMDD"), tend.format("YYYYMMDD")];
 
           await dispatch({
@@ -227,6 +191,10 @@ export default {
           dispatch({
             type: "getProc"
           });
+
+          dispatch({
+            type: 'getLockCart'
+          })
         }
       });
     }

@@ -113,6 +113,7 @@ class DynamicRule extends React.Component {
     this.setState({
       procList
     });
+    console.log(data);
     const { proc_name } = data[0];
 
     setFieldsValue({
@@ -312,6 +313,8 @@ class DynamicRule extends React.Component {
 const WrappedDynamicRule = Form.create()(DynamicRule);
 
 function Addcart(props) {
+  console.log("此处待调试：");
+  console.log(props.lockInfo);
   return (
     <div className={styles.container}>
       <Card

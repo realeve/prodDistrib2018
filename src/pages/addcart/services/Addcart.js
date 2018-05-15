@@ -145,3 +145,26 @@ export const getViewCartfinder = async params =>
     url: "/86/db8acd1ea1.json",
     params
   }).then(res => res);
+
+/**
+ *   @database: { 库管系统 }
+ *   @desc:     { 查询批次状态 }
+ */
+export const getTbstock = async carnos =>
+  await axios({
+    url: "/123/231ab2ec4a/array.json",
+    params: {
+      carnos
+    }
+  }).then(res => res);
+
+/**
+*   @database: { 质量信息系统 }
+*   @desc:     { 人工拉号车号万数汇总 } 
+    const { tstart, tend, tstart2, tend2 } = params;
+*/
+export const getPrintSampleCartlist = async params =>
+  await axios({
+    url: "/124/cd6e54e7e3.json",
+    params
+  }).then(res => res);

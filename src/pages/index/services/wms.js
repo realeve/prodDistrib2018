@@ -2,6 +2,7 @@ import {
   DEV
 } from "../../../utils/axios";
 import axios from "axios";
+const R = require('ramda');
 
 let host = DEV ?
   "http://mactest.cdyc.cbpm:8080/wms/if" :
@@ -161,6 +162,20 @@ let reasonCode = [{
     reason_desc: "异常品锁车"
   }
 ];
+
+let getLockReason = reason_code => {
+  if (R.isNil(reason_code)) {
+    return '';
+  }
+  reason_code = reason_code.trim();
+  if (reason_code.length === 0) {
+    return '';
+  }
+  let {
+    reason_desc
+  } = reasonCode.find(item => item.reason_code == reason_code);
+  return reason_desc;
+}
 
 // 数据库交互
 // 1.批量车号在库查询
@@ -358,5 +373,6 @@ export default {
   addBlackReason,
   setBlackList,
   setWhiteList,
-  setReviewList
+  setReviewList,
+  getLockReason
 };

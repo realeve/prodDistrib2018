@@ -102,7 +102,7 @@ export default {
         num,
         type
       }) => {
-        if (type === 0) {
+        if (type === '1') {
           lockInfo.checkByWeek = num;
         } else {
           lockInfo.abnormal = num;
@@ -122,6 +122,20 @@ export default {
       put,
       select
     }) {
+      yield put({
+        type: "save",
+        payload: {
+          dataSource: [],
+        }
+      });
+
+      yield put({
+        type: 'saveWMS',
+        payload: {
+          abnormalWMS: []
+        }
+      })
+
       const store = yield select(state => state[namespace]);
       const {
         dateRange
@@ -134,6 +148,27 @@ export default {
 
       // 车号列表
       let carts = R.map(R.nth(1))(dataSource.data);
+      if (R.isNil(carts) || carts.length === 0) {
+        return;
+      }
+      let abnormalWMS = yield call(db.getTbstock, carts);
+      abnormalWMS.data = abnormalWMS.data.map(item => {
+        item[6] = wms.getLockReason(item[6]);
+        return item;
+      })
+
+      // 将库管系统数据合并
+      dataSource.header = [...dataSource.header.slice(0, 8), '锁车状态(库管系统)', '工艺(库管系统)', '完成状态(调度服务)', ...dataSource.header.slice(9, 11)]
+      dataSource.data = dataSource.data.map(item => {
+        let iTemp = item.slice(0, 8);
+        let lockStatus = abnormalWMS.data.filter(wmsItem => wmsItem[2] === item[1]);
+        if (lockStatus.length === 0) {
+          iTemp = [...iTemp, '', ''];
+        } else {
+          iTemp = [...iTemp, lockStatus[0][5], lockStatus[0][7]];
+        }
+        return [...iTemp, ...item.slice(8, 11)];
+      });
 
       yield put({
         type: "save",
@@ -142,17 +177,18 @@ export default {
         }
       });
 
-      let abnormalWMS = yield call(db.getTbstock, carts);
-      abnormalWMS.data = abnormalWMS.data.map(item => {
-        item[6] = wms.getLockReason(item[6]);
-        return item;
-      })
       yield put({
         type: 'saveWMS',
         payload: {
           abnormalWMS
         }
       })
+      yield put({
+        type: "setLoading",
+        payload: {
+          loading: false,
+        }
+      });
     },
     * getProc(payload, {
       put,

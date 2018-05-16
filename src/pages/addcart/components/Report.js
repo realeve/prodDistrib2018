@@ -20,10 +20,11 @@ function Addcart({ dispatch, dataSource, loading, dateRange, abnormalWMS }) {
       type: "addcart/handleReportData"
     });
   };
-
+  console.log("载入状态:", loading);
+  //  loading={loading}
   return (
     <>
-      <div className="header">
+      <div className={styles.header}>
         <div className={styles.dateRange}>
           <RangePicker
             ranges={dateRanges}
@@ -36,8 +37,8 @@ function Addcart({ dispatch, dataSource, loading, dateRange, abnormalWMS }) {
           />
         </div>
       </div>
-      <VTable dataSrc={dataSource} loading={loading} />
-      <VTable dataSrc={abnormalWMS} loading={loading} />
+      <VTable dataSrc={dataSource} />
+      <VTable dataSrc={abnormalWMS} />
     </>
   );
 }

@@ -313,12 +313,21 @@ class DynamicRule extends React.Component {
 const WrappedDynamicRule = Form.create()(DynamicRule);
 
 function Addcart(props) {
-  console.log("此处待调试：");
-  console.log(props.lockInfo);
+  let { checkByWeek, abnormal } = props.lockInfo;
   return (
     <div className={styles.container}>
       <Card
-        title={<div className={styles.header}>添加异常品车号</div>}
+        title={
+          <div className={styles.header}>
+            <h2>添加异常品车号</h2>
+            <p className={styles.desc}>
+              本周人工拉号已添加{parseInt(checkByWeek, 10) +
+                parseInt(abnormal, 10)}车(日常抽检:{checkByWeek}，异常品及四新:{
+                abnormal
+              })
+            </p>
+          </div>
+        }
         loading={props.loading}
         style={{ width: "100%" }}
       >

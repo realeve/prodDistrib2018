@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50720
 File Encoding         : 65001
 
-Date: 2018-05-15 16:39:34
+Date: 2018-05-16 11:20:28
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -31,7 +31,7 @@ CREATE TABLE `sys_api` (
   `rec_time` datetime DEFAULT NULL COMMENT '插入时间',
   `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=123 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=125 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of sys_api
@@ -114,6 +114,8 @@ INSERT INTO `sys_api` VALUES ('119', '0000000002', '49', '机台生产异常信�
 INSERT INTO `sys_api` VALUES ('120', '0000000002', '49', '更新wms日志信息', 'e7d88969ca', 'update print_wms_log set return_info=? where id=?', 'return_info,_id', '', '2018-05-15 12:00:16', '2018-05-15 12:00:16');
 INSERT INTO `sys_api` VALUES ('121', '0000000002', '49', '四新及异常品人工拉号产品列表', 'fff29f5a04', 'SELECT a.cart_number 车号,a.gz_num 冠字,a.proc_plan 计划执行工艺,a.proc_real 实际执行工艺,convert(varchar,a.rec_time,120) 记录时间,a.check_type 验证类型,(case when a.manual_check_status=0 then \'未领取\' else \'已领取\' end) 领取状态,(case when a.complete_status=0 then \'未完成\' else \'已完成\' end) 检封完工状态,a.process_name 当前工序 FROM print_wms_proclist a where proc_plan like \'%人工拉号%\' and convert(varchar,a.rec_time,112) BETWEEN ? and ? order by (case when a.check_type=\'异常品处理\' then 0 else 1 end),3,manual_check_status,2', 'tstart,tend', '', '2018-05-15 14:40:26', '2018-05-15 15:25:43');
 INSERT INTO `sys_api` VALUES ('122', '0000000002', '49', '更新四新及异常品人工抽检产品领用状态', '9343c77d3b', 'update print_wms_proclist set manual_check_status=1 where cart_number=?', 'cart', '', '2018-05-15 16:38:17', '2018-05-15 16:38:17');
+INSERT INTO `sys_api` VALUES ('123', '0000000013', '49', '查询批次状态', '231ab2ec4a', 'select org.strorgname 库房,def.strproductname 品种,st.strcarno 车号,ps.strpsname 工序,st.intstock 数量,(case when nvl2(bl.BATCH_NO,1,0)=1 then \'锁定\' else \'未锁车\' end) 锁车状态,bl.REASON_DESC 锁车原因,nvl(tech.TECHNOLOGY_TYPE_NAME,\'不分工艺\') 工艺 from mac2.tbstock st left join mac2.vw_wim_tb_black_list bl on st.strcarno = bl.BATCH_NO left join mac2.VW_TECHNOLOGY_TYPE tech on st.strcarno=tech.CAR_NO left join mac2.tborg org on st.intorgid=org.intorgid left join mac2.tbproductdef def on def.intproductid=st.intproductid left join mac2.tbproductst ps on ps.strpscode=st.strpscode where st.strcarno in (?) and st.intstock > 0', 'carnos', '', '2018-05-15 16:42:42', '2018-05-15 16:55:52');
+INSERT INTO `sys_api` VALUES ('124', '0000000002', '49', '人工拉号车号万数汇总', 'cd6e54e7e3', 'SELECT count(*) num,0 type FROM Print_Abnormal_Prod where proc_stream=1 and rec_date between ? and ? union all SELECT count(*) num,1 type FROM print_sample_cartlist where CONVERT(varchar,rec_time,112) between ? and ?', 'tstart,tend,tstart2,tend2', '', '2018-05-15 17:24:31', '2018-05-15 17:24:31');
 DROP TRIGGER IF EXISTS `api_nonce`;
 DELIMITER ;;
 CREATE TRIGGER `api_nonce` BEFORE INSERT ON `sys_api` FOR EACH ROW set new.nonce = substring(MD5(RAND()*100),1,10)

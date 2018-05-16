@@ -37,7 +37,7 @@ function Addcart({ dispatch, dataSource, loading, dateRange, abnormalWMS }) {
           />
         </div>
       </div>
-      <VTable dataSrc={dataSource} />
+      <VTable dataSrc={dataSource} cartLinkMode="img" />
       <VTable dataSrc={abnormalWMS} />
     </>
   );

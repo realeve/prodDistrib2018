@@ -20,7 +20,7 @@ function Addcart({ dispatch, dataSource, loading, dateRange, abnormalWMS }) {
       type: "addcart/handleReportData"
     });
   };
-  console.log("载入状态:", loading);
+  // console.log("载入状态:", loading);
   //  loading={loading}
   return (
     <>

@@ -173,7 +173,7 @@ let getLockReason = reason_code => {
   }
   let {
     reason_desc
-  } = reasonCode.find(item => item.reason_code == reason_code);
+  } = reasonCode.find(item => item.reason_code === reason_code);
   return reason_desc;
 }
 

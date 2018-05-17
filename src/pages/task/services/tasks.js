@@ -132,3 +132,15 @@ export const getPrintWmsProclist = async params =>
     url: "/121/fff29f5a04/array.json",
     params
   }).then(res => res);
+
+/**
+ *   @database: { 库管系统 }
+ *   @desc:     { 人工拉号准许出库查询 }
+ */
+export const getTbDryingstatusTask = async carnos =>
+  await axios({
+    url: "/125/0ec8ee76b3/array.json",
+    params: {
+      carnos
+    }
+  }).then(res => res);

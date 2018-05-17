@@ -36,8 +36,8 @@ function Tasks({ dispatch, dataSource, loading, dateRange, dataSrcNewproc }) {
           />
         </div>
       </div>
-      <VTable dataSrc={dataSource} loading={loading} />
-      <VTable dataSrc={dataSrcNewproc} loading={loading} />
+      <VTable dataSrc={dataSource} />
+      <VTable dataSrc={dataSrcNewproc} cartLinkMode="img" />
     </>
   );
 }

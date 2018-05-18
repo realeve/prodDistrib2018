@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50720
 File Encoding         : 65001
 
-Date: 2018-05-17 15:02:51
+Date: 2018-05-18 11:40:17
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -31,7 +31,7 @@ CREATE TABLE `sys_api` (
   `rec_time` datetime DEFAULT NULL COMMENT '插入时间',
   `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=126 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=129 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of sys_api
@@ -117,6 +117,9 @@ INSERT INTO `sys_api` VALUES ('122', '0000000002', '49', '更新四新及异常�
 INSERT INTO `sys_api` VALUES ('123', '0000000013', '49', '查询批次状态', '231ab2ec4a', 'select org.strorgname 库房,def.strproductname 品种,st.strcarno 车号,ps.strpsname 工序,st.intstock 数量,(case when nvl2(bl.BATCH_NO,1,0)=1 then \'锁定\' else \'未锁车\' end) 锁车状态,bl.REASON_DESC 锁车原因,nvl(tech.TECHNOLOGY_TYPE_NAME,\'不分工艺\') 工艺 from mac2.tbstock st left join mac2.vw_wim_tb_black_list bl on st.strcarno = bl.BATCH_NO left join mac2.VW_TECHNOLOGY_TYPE tech on st.strcarno=tech.CAR_NO left join mac2.tborg org on st.intorgid=org.intorgid left join mac2.tbproductdef def on def.intproductid=st.intproductid left join mac2.tbproductst ps on ps.strpscode=st.strpscode where st.strcarno in (?) and st.intstock > 0', 'carnos', '', '2018-05-15 16:42:42', '2018-05-15 16:55:52');
 INSERT INTO `sys_api` VALUES ('124', '0000000002', '49', '人工拉号车号万数汇总', 'cd6e54e7e3', 'SELECT count(*) num,0 type FROM Print_Abnormal_Prod where proc_stream=1 and rec_date between ? and ? union all SELECT count(*) num,1 type FROM print_sample_cartlist where CONVERT(varchar,rec_time,112) between ? and ?', 'tstart,tend,tstart2,tend2', '', '2018-05-15 17:24:31', '2018-05-15 17:24:31');
 INSERT INTO `sys_api` VALUES ('125', '0000000013', '49', '人工拉号准许出库查询', '0ec8ee76b3', 'select t.strcarno 车号,st.strpscode 工序,to_char(min(t.dteparking+d.strfullname/24),\'yyyy-mm-dd hh24:mi:ss\') 准许拉号时间,(case when (min(t.dteparking+d.strfullname/24))<=sysdate then 1 else 0 end) 准许 from tb_dryingstatus_task t,tpdatadict d,tbstock st where st.strpscode in (t.strpscode,t.strtocode) and st.intstock>0 and t.intproductid=d.stritemcode and t.strcarno in (?) and t.strpscode in (\'dhdg\') group by t.strcarno,st.strpscode', 'carnos', '', '2018-05-17 13:30:14', '2018-05-17 14:58:46');
+INSERT INTO `sys_api` VALUES ('126', '0000000002', '49', '本周待检车号列表', 'd8f5882e8b', 'SELECT distinct a.cart_number 车号,a.gz_no+a.code_no 冠字,a.machine_name 机台,convert(varchar,a.print_date,120) 印刷时间,a.prod_name 品种,a.week_num 周数,a.status FROM print_sample_cartlist a where convert(varchar,rec_time,112) between ? and ? and proc_name=\\\'印码\\\' order by a.status ,4 desc', 'tstart,tend', '', '2018-05-18 09:23:40', '2018-05-18 09:23:40');
+INSERT INTO `sys_api` VALUES ('127', '0000000014', '49', '根据车号列表查询机台信息', '3039fdade1', 'SELECT distinct a.机台 FROM CDYC_USER.VIEW_CARTFINDER a where substr(a.工序,0,1) in (\'胶\',\'凹\',\'印\',\'丝\') and a.车号 in (?)', 'carts', '', '2018-05-18 10:08:20', '2018-05-18 10:08:33');
+INSERT INTO `sys_api` VALUES ('128', '0000000002', '49', '当前时间已添加异常品车号列表', 'be6c4a1438', 'SELECT distinct cart_number FROM Print_Abnormal_Prod a where a.proc_stream=1 and a.rec_date between ? and ?', 'tstart,tend', '', '2018-05-18 10:22:33', '2018-05-18 11:39:28');
 DROP TRIGGER IF EXISTS `api_nonce`;
 DELIMITER ;;
 CREATE TRIGGER `api_nonce` BEFORE INSERT ON `sys_api` FOR EACH ROW set new.nonce = substring(MD5(RAND()*100),1,10)

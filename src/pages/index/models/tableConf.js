@@ -42,7 +42,7 @@ export default {
         const match = pathToRegexp("/").exec(pathname);
 
         if (match && match[0] === "/") {
-          const [tstart, tend] = dateRanges["本周"];
+          const [tstart, tend] = dateRanges["上周"];
           const [ts, te] = [tstart.format("YYYYMMDD"), tend.format("YYYYMMDD")];
           dispatch({
             type: "setDateRange",

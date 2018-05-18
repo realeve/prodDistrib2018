@@ -332,6 +332,7 @@ export default {
       data = yield call(db.getPrintSampleCartlist, {
         week_num: lib.weeks()
       });
+
       yield put({
         type: "setSampleStatus",
         payload: parseInt(data[0].nums, 10)

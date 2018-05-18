@@ -366,8 +366,14 @@ const init = ({
   console.log(sCarts);
 
   // 数据汇总
+  // 针对在库车号抽检
   let count = countMachineCheckInfo(sCarts, usedData);
+
+  // 非在库车号显示
+  // let count = countMachineCheckInfo(sCarts, data);
+
   taskList = getUnionCarts(count.log);
+
   return { ...count,
     taskList,
     taskInfo

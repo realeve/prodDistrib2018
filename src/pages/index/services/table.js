@@ -194,16 +194,13 @@ export const getPrintSampleCartlist = async params =>
   }).then(res => res.data);
 
 /**
-*   @database: { 质量管理数据库 }
-*   @desc:     { 已领取车号列表 } 
-  
+*   @database: { 质量信息系统 }
+*   @desc:     { 本周待检车号列表 } 
     const { tstart, tend } = params;
 */
 export const getSampledCartlist = async params =>
   await axios({
-    url: DEV
-      ? "http://localhost:8000/public/38989f6661.json"
-      : "/55/38989f6661/array.json",
+    url: "/126/d8f5882e8b/array.json",
     params
   }).then(res => res);
 
@@ -218,6 +215,29 @@ export const getPrintSampleMachine = async params =>
     url: DEV
       ? "http://localhost:8000/public/0695d9575b.json"
       : "/58/0695d9575b/array.json",
+    params
+  }).then(res => res);
+
+/**
+ *   @database: { 机台作业 }
+ *   @desc:     { 根据车号列表查询机台信息 }
+ */
+export const getPrintSampleMachineFromViewCartfinder = async carts =>
+  await axios({
+    url: "/127/3039fdade1/array.json",
+    params: {
+      carts
+    }
+  }).then(res => res);
+
+/**
+*   @database: { 质量信息系统 }
+*   @desc:     { 当前时间已添加异常品车号列表 } 
+    const { tstart, tend } = params;
+*/
+export const getPrintAbnormalProd = async params =>
+  await axios({
+    url: "/128/be6c4a1438/array.json",
     params
   }).then(res => res);
 

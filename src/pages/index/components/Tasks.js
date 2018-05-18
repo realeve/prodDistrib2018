@@ -87,7 +87,10 @@ function Tasks({
             </strong>车产品
           </h5>
           <h5>
-            实际抽取<strong>{total}</strong>车，共涉及<strong>
+            实际抽取<strong>{total}</strong>车(已抽取<strong>
+              {taskInfo.sampled}
+            </strong>,其中异常品<strong>{taskInfo.abnormalCarts}</strong>)，共涉及<strong
+            >
               {taskInfo.machines}
             </strong>台胶、凹、码设备。其中{classDesc}
           </h5>

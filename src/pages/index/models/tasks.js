@@ -18,7 +18,8 @@ export default {
     sampling: {},
     sampleStatus: 0,
     sampledCarts: [],
-    sampledMachines: []
+    sampledMachines: [],
+    abnormalCarts: []
   },
   reducers: {
     save(
@@ -99,6 +100,14 @@ export default {
         sampledCarts
       };
     },
+    setAbnormalCarts(state, {
+      payload: abnormalCarts
+    }) {
+      return {
+        ...state,
+        abnormalCarts
+      }
+    },
     setSampledMachines(state, {
       payload: sampledMachines
     }) {
@@ -156,40 +165,48 @@ export default {
       put,
       select
     }) {
+      // 1.已添加的自动排活车号列表
       let data = yield call(db.getSampledCartlist, {
         tstart,
         tend
       });
+
       let carts = R.compose(
         R.uniq(),
-        R.map(R.prop(0)),
-        R.filter(R.propEq(6, "1"))
+        R.map(R.prop(0))
       )(data.data);
-      yield put({
-        type: "setSampledCarts",
-        payload: carts
-      });
-    },
-    // 对尚未抽检的设备单独统计
-    * fetchSampledMachines({
-      payload: {
-        tstart,
-        tend
-      }
-    }, {
-      call,
-      put,
-      select
-    }) {
-      let data = yield call(db.getPrintSampleMachine, {
+
+      // 2.获取本周已抽取的异常品车号列表
+      data = yield call(db.getPrintAbnormalProd, {
         tstart,
         tend
       });
 
-      let sampledMachines = R.compose(
-        R.map(R.prop(0)),
-        R.filter(R.propEq(3, "0"))
-      )(data.data);
+      // 异常品车号列表
+      let abnormalCarts = R.map(R.prop(0))(data.data);
+      yield put({
+        type: "setAbnormalCarts",
+        payload: abnormalCarts
+      })
+
+      carts = R.uniq([...carts, ...abnormalCarts]);
+      // 已抽取产品及异常品同步纳入本周车号列表
+      yield put({
+        type: "setSampledCarts",
+        payload: carts
+      });
+
+      if (carts.length === 0) {
+        yield put({
+          type: "setSampledMachines",
+          payload: []
+        });
+        return;
+      }
+
+      // 3.对已抽检的设备单独统计
+      data = yield call(db.getPrintSampleMachineFromViewCartfinder, carts);
+      let sampledMachines = R.map(R.prop(0))(data.data);
       yield put({
         type: "setSampledMachines",
         payload: sampledMachines
@@ -204,15 +221,15 @@ export default {
     }) {
       const store = yield select(state => state.tasks);
       let {
-        dataSrc: data,
-        columns
+        dataSrc: data
       } = yield select(state => state.table);
 
       const {
         pageSize,
         page,
         sampledMachines,
-        sampledCarts
+        sampledCarts,
+        abnormalCarts
       } = store;
 
       // 车号列表，未确认是否在库
@@ -233,8 +250,6 @@ export default {
           stockData = [...stockData, ...stockItem];
         });
       }
-      console.log("在库车号列表:", stockCarts);
-
       // 自动排活
       let disData = handler.init({
         data: unStockedData,
@@ -242,6 +257,8 @@ export default {
         sampledCarts,
         stockData
       });
+
+      disData.taskInfo.abnormalCarts = abnormalCarts.length;
 
       const sampling = {
         taskInfo: {
@@ -278,16 +295,24 @@ export default {
         });
       }
 
+      let columns = yield call(db.handleColumns, {
+        dataSrc: data,
+        filteredInfo: {},
+        sortedInfo: {}
+      });
+
       yield put({
         type: "setColumns",
         payload: {
           dataClone,
-          columns: R.map(item => ({
-            title: item.title,
-            dataIndex: item.dataIndex
-          }))(columns)
+          columns
         }
       });
+
+      // R.map(item => ({
+      //   title: item.title,
+      //   dataIndex: item.dataIndex
+      // }))(columns)
 
       yield put({
         type: "save",

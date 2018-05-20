@@ -150,13 +150,28 @@ export const getViewCartfinder = async params =>
  *   @database: { 库管系统 }
  *   @desc:     { 查询批次状态 }
  */
+// export const getTbstock = async carnos =>
+//   await axios({
+//     url: "/123/231ab2ec4a/array.json",
+//     params: {
+//       carnos
+//     }
+//   }).then(res => res);
+
 export const getTbstock = async carnos =>
-  await axios({
-    url: "/123/231ab2ec4a/array.json",
-    params: {
-      carnos
-    }
-  }).then(res => res);
+  await getTbbaseCarTechnologyHistory({ carnos1: carnos, carnos2: carnos, carnos3: carnos });
+
+
+
+/**
+*   @database: { 库管系统 }
+*   @desc:     { 查询批次状态 } 
+    const { carnos1, carnos2, carnos3 } = params;
+*/
+export const getTbbaseCarTechnologyHistory = async params => await axios({
+  url: '/132/6ac1e30d85/array.json',
+  params,
+}).then(res => res);
 
 /**
 *   @database: { 质量信息系统 }

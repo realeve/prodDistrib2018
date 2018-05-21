@@ -92,6 +92,7 @@ export default {
         tstart2: tstart,
         tend2: tend
       });
+      console.log(data)
 
       let lockInfo = {
         checkByWeek: 0,
@@ -213,7 +214,7 @@ export default {
       }) => {
         const match = pathToRegexp("/" + namespace).exec(pathname);
         if (match && match[0] === "/" + namespace) {
-          const [tstart, tend] = dateRanges["本周"];
+          const [tstart, tend] = dateRanges["本月"];
           const [ts, te] = [tstart.format("YYYYMMDD"), tend.format("YYYYMMDD")];
 
           await dispatch({

@@ -135,15 +135,16 @@ function Tasks({
       return obj;
     });
 
-    if (sampledCarts.length) {
-      insertingData = insertingData.filter(
-        item => !sampledCarts.includes(item.cart_number)
-      );
-    }
-    if (insertingData.length === 0) {
-      openNotification("车号列表已经领取，不再重复领取");
-      return;
-    }
+    // 将已抽取的车号列表添加至人工拉号列表
+    // if (sampledCarts.length) {
+    //   insertingData = insertingData.filter(
+    //     item => !sampledCarts.includes(item.cart_number)
+    //   );
+    // }
+    // if (insertingData.length === 0) {
+    //   openNotification("车号列表已经领取，不再重复领取");
+    //   return;
+    // }
 
     let insertData = async () => {
       let carnos = R.compose(R.uniq, R.map(R.prop("cart_number")))(
@@ -294,11 +295,22 @@ function Tasks({
           onChange={pageChangeHandler}
           pageSizeOptions={["5", "10", "15", "20", "30", "40", "50", "100"]}
         />
-        <div style={{ marginTop: 20, marginLeft: 20 }}>
-          <Button type="primary" onClick={addTasks}>
-            批量添加任务
-          </Button>
-        </div>
+        {
+          <div
+            style={{
+              marginTop: 20,
+              marginLeft: 20
+            }}
+          >
+            {sampleStatus > 10 ? (
+              <p>本周已领取{sampleStatus}车产品，禁止重复领取</p>
+            ) : (
+              <Button type="primary" onClick={addTasks}>
+                批量添加任务
+              </Button>
+            )}
+          </div>
+        }
       </Card>
     </div>
   );

@@ -281,3 +281,15 @@ export const setPrintWmsLog = async params =>
     url: "/120/e7d88969ca.json",
     params
   }).then(res => res);
+
+/**
+ *   @database: { 机台作业 }
+ *   @desc:     { 指定车号列表生产原始信息 }
+ */
+export const getViewCartfinderByCarts = async carts =>
+  await axios({
+    url: "/133/97b29df2a0/array.json",
+    params: {
+      carts
+    }
+  }).then(res => res);

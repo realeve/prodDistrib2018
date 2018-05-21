@@ -239,9 +239,10 @@ export default {
         R.filter(R.propEq(3, "印码"))
       )(unStockedData);
 
+
       let cartList = R.compose(R.uniq, R.map(R.nth(0)))(uniqCarts);
       let stockCarts = yield call(wms.getStockStatus, cartList);
-      stockCarts = stockCarts.result;
+      stockCarts = R.uniq(stockCarts.result);
 
       let stockData = [];
       if (stockCarts.length > 0) {
@@ -251,7 +252,7 @@ export default {
         });
       }
       // 自动排活
-      let disData = handler.init({
+      let disData = yield call(handler.init, {
         data: unStockedData,
         sampledMachines,
         sampledCarts,
@@ -259,12 +260,11 @@ export default {
       });
 
       disData.taskInfo.abnormalCarts = abnormalCarts.length;
-
       const sampling = {
         taskInfo: {
           ...disData.taskInfo,
           machines: disData.machine.length,
-          stockCount: stockCarts.length
+          stockCount: R.compose(R.length, R.uniq, R.map(R.prop('carno')))(stockCarts)
         },
         weekDay: disData.weekDay,
         classDis: disData.className,

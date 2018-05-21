@@ -1,4 +1,7 @@
 import setting from "./setting";
+import {
+  getViewCartfinderByCarts
+} from './table'
 const R = require("ramda");
 
 // 数据预处理
@@ -195,18 +198,27 @@ let convertObj2Array = obj => {
   }))(keys);
 };
 
-let countMachineCheckInfo = (cartList, data) => {
+let countMachineCheckInfo = async cartList => {
   // let cartLog = R.compose(R.uniq, R.map(item => [...item.slice(0, 6), item[10]]), R.filter(item => cartList.includes(item[0])))(data)
-  let cartLog = R.filter(item => cartList.includes(item[0]))(data);
-  let className = R.countBy(R.prop(4), cartLog);
-  let machine = R.countBy(R.prop(5), cartLog);
-  let weekDay = R.countBy(R.prop(10), cartLog);
+  // let cartLog = R.filter(item => cartList.includes(item[0]))(data);
+  let {
+    data
+  } = await getViewCartfinderByCarts(cartList);
+  console.log(data)
+  console.log(cartList);
+  // 
+  console.log('从机台作业重新获取信息;')
+  console.log(data);
+
+  let className = R.countBy(R.prop(4), data);
+  let machine = R.countBy(R.prop(5), data);
+  let weekDay = R.countBy(R.prop(10), data);
   return {
     className: convertObj2Array(className),
     machine: convertObj2Array(machine),
     weekDay: convertObj2Array(weekDay),
-    log: R.filter(R.propEq(3, "印码"))(cartLog),
-    cartLog
+    log: R.filter(R.propEq(3, "印码"))(data),
+    cartLog: data
   };
 };
 
@@ -331,7 +343,7 @@ const getUnionCarts = carts => {
   return newCarts;
 };
 
-const init = ({
+const init = async ({
   data,
   sampledMachines,
   sampledCarts,
@@ -345,7 +357,6 @@ const init = ({
   // 已经领取的车号
   taskInfo.sampled = sampledCarts.length;
 
-  console.log(taskInfo);
   let taskList, sCarts;
 
   console.log('已抽取车号列表：')
@@ -365,15 +376,17 @@ const init = ({
   console.log('抽取的车号列表，附异常品：')
   console.log(sCarts);
 
+  // 未抽取的车号
+  // let stockedCartList = R.map(R.prop(0))(usedData);
+  // console.log(R.difference(sCarts, stockedCartList))
+
   // 数据汇总
   // 针对在库车号抽检
-  let count = countMachineCheckInfo(sCarts, usedData);
-
+  let count = await countMachineCheckInfo(sCarts, usedData);
   // 非在库车号显示
   // let count = countMachineCheckInfo(sCarts, data);
 
   taskList = getUnionCarts(count.log);
-
   return { ...count,
     taskList,
     taskInfo

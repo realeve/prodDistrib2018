@@ -10,7 +10,8 @@ export default {
   state: {
     dataSource: [],
     dateRange: [],
-    dataSrcNewproc: []
+    dataSrcNewproc: [],
+    dataComplete: []
   },
   reducers: {
     saveNewproc(state, {
@@ -25,11 +26,13 @@ export default {
       state, {
         payload: {
           dataSource,
+          dataComplete
         }
       }
     ) {
       return { ...state,
         dataSource,
+        dataComplete
       };
     },
     refreshTable(state, {
@@ -75,8 +78,20 @@ export default {
       };
       let dataSource = yield call(
         // getPrintSampleCartlistAll
-        db.getPrintSampleCartlist, params
+        db.getPrintSampleCartlist, { ...params,
+          status: 0
+        }
       );
+
+      // 已领用车号列表
+      let dataComplete = yield call(
+        db.getPrintSampleCartlist, { ...params,
+          status: 1
+        }
+      );
+
+      dataComplete.title = '本周已领用车号列表';
+
       let {
         header,
         data
@@ -130,6 +145,7 @@ export default {
         type: "save",
         payload: {
           dataSource,
+          dataComplete
         }
       });
     },

@@ -81,7 +81,7 @@ export const getPageData = ({ data, page, pageSize }) =>
 *   @database: { 质量管理数据库 }
 *   @desc:     { 已领取车号列表 } 
   
-    const { tstart, tend } = params;
+    const { tstart, tend ,status } = params;
 */
 export const getPrintSampleCartlist = async params =>
   await axios({

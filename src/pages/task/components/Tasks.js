@@ -10,7 +10,14 @@ import VTable from "../../../components/Table";
 const RangePicker = DatePicker.RangePicker;
 moment.locale("zh-cn");
 
-function Tasks({ dispatch, dataSource, loading, dateRange, dataSrcNewproc }) {
+function Tasks({
+  dispatch,
+  dataSource,
+  loading,
+  dateRange,
+  dataSrcNewproc,
+  dataComplete
+}) {
   const onDateChange = async (dates, dateStrings) => {
     await dispatch({
       type: "taskGet/setDateRange",
@@ -38,6 +45,7 @@ function Tasks({ dispatch, dataSource, loading, dateRange, dataSrcNewproc }) {
       </div>
       <VTable dataSrc={dataSource} />
       <VTable dataSrc={dataSrcNewproc} cartLinkMode="img" />
+      <VTable dataSrc={dataComplete} cartLinkMode="img" />
     </>
   );
 }

@@ -43,12 +43,12 @@ function HeaderMenu({ location }) {
 
         <Menu.Item key="/addcart">
           <Link to="/addcart">
-            <Icon type="exclamation-circle-o" />异常品
+            <Icon type="exclamation-circle-o" />图核异常品
           </Link>
         </Menu.Item>
         <Menu.Item key="/newproc">
           <Link to="/newproc">
-            <Icon type="clock-circle-o" />四新计划
+            <Icon type="clock-circle-o" />批量产品计划
           </Link>
         </Menu.Item>
         <SubMenu
@@ -60,12 +60,12 @@ function HeaderMenu({ location }) {
         >
           <Menu.Item key="/multiweak">
             <Link to="/multiweak">
-              <Icon type="close-circle-o" />连续废通知
+              <Icon type="close-circle-o" />机台连续废通知
             </Link>
           </Menu.Item>
           <Menu.Item key="/weak">
             <Link to="/weak">
-              <Icon type="eye-o" />机检弱项
+              <Icon type="eye-o" />机检弱项录入
             </Link>
           </Menu.Item>
           <Menu.Item key="/weaklist">

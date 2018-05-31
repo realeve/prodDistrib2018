@@ -107,7 +107,7 @@ export default {
       data = data.map(item => {
         let status = newProcCarts.includes(item[0])
         let dryingInfo = R.find(R.propEq(0, item[0]))(dryingList.data);
-        let dryingStatus = ['', '']
+        let dryingStatus = ['', '', ''];
         if (!R.isNil(dryingInfo)) {
           let {
             psname
@@ -126,7 +126,7 @@ export default {
       dataSrcNewproc.header = [...dataSrcNewproc.header.slice(0, 4), '允许拉号时间', '出库状态', '产品工序', ...dataSrcNewproc.header.slice(4)]
       dataSrcNewproc.data = dataSrcNewproc.data.map(item => {
         let dryingInfo = R.find(R.propEq(0, item[0]))(dryingList.data);
-        let dryingStatus = ['', '']
+        let dryingStatus = ['', '', ''];
         if (!R.isNil(dryingInfo)) {
           let {
             psname

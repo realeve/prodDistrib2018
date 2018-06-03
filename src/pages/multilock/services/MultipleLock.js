@@ -2,7 +2,6 @@ import {
   axios
 } from "../../../utils/axios";
 
-
 /**
 *   @database: { 质量信息系统 }
 *   @desc:     { 异常产品原因列表 } 
@@ -55,8 +54,6 @@ export const getTbstock = async carnos =>
     carnos2: carnos,
     carnos3: carnos
   });
-
-
 
 /**
 *   @database: { 库管系统 }

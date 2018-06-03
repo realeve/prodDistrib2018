@@ -1,10 +1,11 @@
 import pathToRegexp from "path-to-regexp";
-import * as db from "../services/Addcart";
+import * as db from "../services/MultipleLock";
 import dateRanges from "../../../utils/ranges";
 import wms from '../../index/services/wms';
 const R = require('ramda');
 
-const namespace = "addcart";
+const namespace = "multilock";
+
 export default {
   namespace,
   state: {
@@ -92,7 +93,6 @@ export default {
         tstart2: tstart,
         tend2: tend
       });
-      // console.log(data)
 
       let lockInfo = {
         checkByWeek: 0,
@@ -216,7 +216,7 @@ export default {
         if (match && match[0] === "/" + namespace) {
           const [tstart, tend] = dateRanges["最近一月"];
           const [ts, te] = [tstart.format("YYYYMMDD"), tend.format("YYYYMMDD")];
-
+          console.log(ts, te)
           await dispatch({
             type: "updateDateRange",
             payload: [ts, te]

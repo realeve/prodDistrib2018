@@ -41,11 +41,24 @@ function HeaderMenu({ location }) {
           </Menu.Item>
         </SubMenu>
 
-        <Menu.Item key="/addcart">
-          <Link to="/addcart">
-            <Icon type="exclamation-circle-o" />图核异常品
-          </Link>
-        </Menu.Item>
+        <SubMenu
+          title={
+            <span>
+              <Icon type="unlock" />异常品处理 <Icon type="down" />
+            </span>
+          }
+        >
+          <Menu.Item key="/addcart">
+            <Link to="/addcart">
+              <Icon type="exclamation-circle-o" />图核异常品
+            </Link>
+          </Menu.Item>
+          <Menu.Item key="/multilock">
+            <Link to="/multilock">
+              <Icon type="lock" />批量锁车/解锁
+            </Link>
+          </Menu.Item>
+        </SubMenu>
         <Menu.Item key="/newproc">
           <Link to="/newproc">
             <Icon type="clock-circle-o" />批量产品计划

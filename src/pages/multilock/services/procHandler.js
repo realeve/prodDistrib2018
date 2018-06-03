@@ -49,6 +49,11 @@ let getProcStream = id => {
       proc_stream_id: 8,
       proc_stream_name: "码后核查工艺验证",
       remark: "取消码后核查工艺验证"
+    },
+    {
+      proc_stream_id: 7,
+      proc_stream_name: "只锁车,不转异常品",
+      remark: "只锁车,不转异常品"
     }
   ];
   return R.find(R.propEq("proc_stream_id", parseInt(id, 10)))(streamInfo);

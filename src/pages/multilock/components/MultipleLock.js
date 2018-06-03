@@ -9,17 +9,22 @@ import {
   notification,
   Icon,
   Row,
-  Col
+  Col,
+  Radio
 } from "antd";
 
 import styles from "./Report.less";
 import * as lib from "../../../utils/lib";
 
 import * as db from "../services/MultipleLock";
+import handler from "../services/procHandler";
 
+import wms from "../../index/services/wms";
 const FormItem = Form.Item;
 const Option = Select.Option;
 const R = require("ramda");
+
+const reason_code = "q_batchLock";
 
 const formItemLayout = {
   labelCol: { span: 6 },
@@ -32,34 +37,9 @@ const formTailLayout = {
 
 class DynamicRule extends React.Component {
   state = {
-    processInfo: [],
     procList: [],
-    machineList: [],
-    captainList: []
-  };
-
-  insertData = async data => {
-    let res = await db.addPrintAbnormalProd(data);
-    if (!res.rows) {
-      notification.error({
-        message: "系统错误",
-        description: "数据插入失败，请联系管理员",
-        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
-      });
-      return;
-    }
-    notification.open({
-      message: "系统提示",
-      description: "数据插入成功",
-      icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
-    });
-
-    this.props.form.resetFields();
-
-    // 重载报表数据
-    this.props.dispatch({
-      type: "addcart/handleReportData"
-    });
+    cartList: [],
+    operationType: 0
   };
 
   submit = () => {
@@ -68,13 +48,158 @@ class DynamicRule extends React.Component {
         return;
       }
       let data = this.props.form.getFieldsValue();
-      data.rec_date = lib.ymd();
-      data.captain_name =
-        typeof data.captain_name === "string"
-          ? data.captain_name
-          : data.captain_name.join(",");
+      data.rec_date = lib.now();
+      handler.handleProcStream({
+        carnos: this.state.cartList,
+        proc_stream: data.proc_stream,
+        check_type: "批量车号工艺调整",
+        reason_code,
+        task_id: 0,
+        remark_info: data.reason
+      });
 
-      this.insertData(data);
+      notification.open({
+        message: "系统提示",
+        description: "工艺批量设置完毕",
+        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+      });
+
+      this.reload();
+    });
+  };
+
+  getLockCarts = () => {
+    let { reason, abnormal_type } = this.props.form.getFieldsValue();
+    let { cartList } = this.state;
+    let rec_date = lib.now();
+    let complete_status = 1,
+      proc_stream = 7; // 只锁车，不转异常品
+
+    return cartList.map(cart_number => ({
+      prod_id: cart_number[2],
+      cart_number,
+      reason,
+      abnormal_type,
+      rec_date,
+      complete_status,
+      proc_stream,
+      only_lock_cart: 1
+    }));
+  };
+
+  lockCarts = () => {
+    this.props.form.validateFields(async err => {
+      if (err) {
+        return;
+      }
+      let insertData = this.getLockCarts();
+      let { data } = await db.addLockCartlist(insertData);
+      if (data.length === 0 || data[0].affected_rows === 0) {
+        notification.open({
+          message: "系统提示",
+          description: "批量锁车失败",
+          icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+        });
+        return;
+      }
+      const carnos = this.state.cartList;
+
+      // 记录日志信息，wms提交及返回的数据全部入库
+      // 20180515调整日志添加接口
+      let logInfo = await db.addPrintWmsLog([
+        {
+          remark: JSON.stringify({ carnos, proc_stream: 7 }),
+          rec_time: lib.now()
+        }
+      ]);
+
+      // 添加日志正常？
+      if (logInfo.rows < 1 || logInfo.data[0].affected_rows < 1) {
+        console.log(logInfo);
+        return {
+          status: false
+        };
+      }
+
+      let log_id = logInfo.data[0].id;
+
+      // http://cognosdb.cdyc.cbpm:8080/wms/if/lockQ
+      // 人工批量锁车，不拉号
+      let { result } = await wms.setBlackList({
+        carnos,
+        reason_code,
+        log_id
+      });
+
+      if (result.unhandledList.length) {
+        notification.open({
+          message: "系统提示",
+          description:
+            `以下车号锁车失败(共${result.unhandledList.length}车):` +
+            result.unhandledList.join(","),
+          icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+        });
+      }
+
+      await db.setPrintWmsLog({
+        return_info: JSON.stringify(result),
+        _id: log_id
+      });
+
+      notification.open({
+        message: "系统提示",
+        description: "批量锁车成功",
+        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+      });
+
+      this.reload();
+    });
+  };
+
+  unlockCarts = () => {
+    this.props.form.validateFields(async err => {
+      if (err) {
+        return;
+      }
+
+      let { data } = await db.setPrintAbnormalProd(this.state.cartList);
+      if (data.length === 0 || data[0].affected_rows === 0) {
+        notification.open({
+          message: "系统提示",
+          description: "批量锁车失败",
+          icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+        });
+        return;
+      }
+
+      let { result } = await wms.setWhiteList(this.state.cartList);
+      if (result.unhandledList.length) {
+        notification.open({
+          message: "系统提示",
+          description:
+            `以下车号解锁失败(共${result.unhandledList.length}车):` +
+            result.unhandledList.join(","),
+          icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+        });
+      }
+
+      notification.open({
+        message: "系统提示",
+        description: "批量解锁成功",
+        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+      });
+
+      this.reload();
+    });
+  };
+
+  reload = () => {
+    // 重置数据
+    this.props.form.resetFields();
+
+    // 重载报表数据
+    this.props.dispatch({
+      type: "multilock/handleReportData"
     });
   };
 
@@ -85,225 +210,171 @@ class DynamicRule extends React.Component {
     if (val.length < 8) {
       return;
     }
+    const splitStr = val.includes("\n") ? "\n" : val.includes(",") ? "," : " ";
 
-    let { setFieldsValue } = this.props.form;
-    setFieldsValue({
-      prod_id: val[2]
-    });
+    // 过滤有效车号列表
+    const validCart = cart => /^\d{4}[A-Z]\d{3}$/.test(cart);
+    const cartList = val.split(splitStr).filter(validCart);
+    console.log(val);
 
-    if (val.length === 8) {
-      const { data } = await db.getViewCartfinder({ cart: val });
-      if (data.length === 0) {
-        notification.error({
-          message: "系统错误",
-          description: "当前车号未搜到生产信息",
-          icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
-        });
-        return;
-      }
-
-      this.setState({ processInfo: data });
-      this.handleProcessInfo(data);
-    }
+    console.log(cartList);
+    this.setState({ cartList });
   };
 
-  handleProcessInfo = data => {
-    let { setFieldsValue } = this.props.form;
-    const procList = R.compose(R.uniq, R.map(R.prop("proc_name")))(data);
-    this.setState({
-      procList
-    });
-    console.log(data);
-    const { proc_name } = data[0];
-
-    setFieldsValue({
-      proc_name: proc_name
-    });
-    this.handleProc(proc_name);
-  };
-
-  updateMachineList = data => {
-    let { setFieldsValue } = this.props.form;
-    const machineList = R.compose(R.uniq, R.map(R.prop("machine_name")))(data);
-    const captainList = R.compose(R.uniq, R.map(R.prop("captain_name")))(data);
-    this.setState({
-      machineList,
-      captainList
-    });
-    if (machineList.length) {
-      setFieldsValue({
-        machine_name: machineList[0]
-      });
-    }
-
-    if (captainList.length) {
-      setFieldsValue({
-        captain_name: captainList[0]
-      });
-    }
-
-    setFieldsValue({
-      prod_date: data[0].start_time
-    });
-  };
-
-  handleProc = proc_name => {
-    const data = R.filter(R.propEq("proc_name", proc_name))(
-      this.state.processInfo
-    );
-    this.updateMachineList(data);
+  handleOperationType = e => {
+    const operationType = e.target.value;
+    this.setState({ operationType });
   };
 
   render() {
     const { getFieldDecorator } = this.props.form;
+    const { operationType } = this.state;
+
+    let extraInfo = "";
+    switch (operationType) {
+      case 0:
+        extraInfo = "锁定一批车号，不做工艺调整。";
+        break;
+      case 1:
+        extraInfo = "解锁某批车号";
+        break;
+      default:
+        extraInfo = "将一组车号批量设定为指定工艺。";
+        break;
+    }
 
     return (
       <Form>
         <Row>
           <Col span={12}>
-            <FormItem {...formItemLayout} label="车号">
+            <FormItem
+              {...formItemLayout}
+              label="操作类型"
+              className={styles.radioButton}
+              extra={extraInfo}
+            >
+              <Radio.Group
+                value={operationType}
+                onChange={this.handleOperationType}
+              >
+                <Radio.Button value={0}>批量锁车</Radio.Button>
+                <Radio.Button value={1}>批量解锁</Radio.Button>
+                <Radio.Button value={2}>批量调整工艺</Radio.Button>
+              </Radio.Group>
+            </FormItem>
+            <FormItem
+              {...formItemLayout}
+              label="车号列表"
+              extra={
+                this.state.cartList.length > 0 && (
+                  <label>
+                    共输入{" "}
+                    <span className={styles.bold}>
+                      {this.state.cartList.length}
+                    </span>{" "}
+                    车有效车号.
+                  </label>
+                )
+              }
+            >
               {getFieldDecorator("cart_number", {
                 rules: [
                   {
                     required: true,
-                    message: "车号信息必须填写",
-                    pattern: /^\d{4}[A-Z]\d{3}$/
+                    message: "车号列表信息必须填写"
                   }
                 ]
               })(
-                <Input
-                  placeholder="请输入异常品车号"
+                <Input.TextArea
+                  rows={6}
+                  placeholder="请输入车号列表,用逗号( , )、空格(  ) 或者回车换行符号( ↵ )分开"
                   onChange={this.convertCart}
-                  maxLength="8"
                 />
               )}
             </FormItem>
-
-            <FormItem {...formItemLayout} label="问题分类">
-              {getFieldDecorator("abnormal_type", {
-                rules: [{ required: true, message: "请选择问题分类" }]
-              })(
-                <Select placeholder="请选择问题分类">
-                  {this.props.abnormalTypeList.map(({ proc_name }) => (
-                    <Option value={proc_name} key={proc_name}>
-                      {proc_name}
-                    </Option>
-                  ))}
-                </Select>
-              )}
-            </FormItem>
-            <FormItem {...formItemLayout} label="原因说明">
-              {getFieldDecorator("reason", {
-                rules: [
-                  {
-                    required: true,
-                    message: "请输入异常原因说明"
-                  }
-                ]
-              })(<Input.TextArea rows={3} placeholder="请输入异常原因说明" />)}
-            </FormItem>
-            <FormItem
-              {...formItemLayout}
-              label="工艺流程"
-              extra={
-                <label>
-                  推荐选择 <span className={styles.bold}>8位清分机全检</span>，当选择自动分配时，<span
-                    className={styles.bold}
-                  >
-                    系统将自动根据拉号情况自动分配
-                  </span>.
-                </label>
-              }
-            >
-              {getFieldDecorator("proc_stream", {
-                rules: [{ required: false, message: "请选择产品工艺流程" }]
-              })(
-                <Select placeholder="请选择产品工艺流程">
-                  {this.props.procList.map(({ value, name }) => (
-                    <Option value={value} key={value}>
-                      {name}
-                    </Option>
-                  ))}
-                </Select>
-              )}
-            </FormItem>
-
-            <FormItem {...formTailLayout}>
-              <Button type="primary" onClick={this.submit}>
-                提交
-              </Button>
-              <Button
-                style={{ marginLeft: 20 }}
-                onClick={e => this.props.form.resetFields()}
-              >
-                重置
-              </Button>
-            </FormItem>
+            {this.state.cartList.length && (
+              <FormItem {...formTailLayout}>
+                {operationType === 0 && (
+                  <Button type="danger" onClick={this.lockCarts}>
+                    <Icon type="lock" />批量锁车
+                  </Button>
+                )}
+                {operationType === 1 && (
+                  <Button type="danger" onClick={this.unlockCarts}>
+                    <Icon type="unlock" /> 批量解锁
+                  </Button>
+                )}
+                {operationType === 2 && (
+                  <Button type="danger" onClick={this.submit}>
+                    设置工艺
+                  </Button>
+                )}
+                <Button
+                  style={{ marginLeft: 20 }}
+                  onClick={e => this.props.form.resetFields()}
+                >
+                  重置
+                </Button>
+              </FormItem>
+            )}
           </Col>
-          <Col span={12}>
-            <FormItem {...formItemLayout} label="品种">
-              {getFieldDecorator("prod_id", {
-                rules: [{ required: true, message: "请选择品种" }]
-              })(
-                <Select placeholder="请选择品种">
-                  {this.props.productList.map(({ name, value }) => (
-                    <Option value={value} key={value}>
-                      {name}
-                    </Option>
-                  ))}
-                </Select>
-              )}
-            </FormItem>
-            <FormItem {...formItemLayout} label="工序">
-              {getFieldDecorator("proc_name", {
-                rules: [{ required: true, message: "请选择工序" }]
-              })(
-                <Select placeholder="请选择工序" onChange={this.handleProc}>
-                  {this.state.procList.map(item => (
-                    <Option value={item} key={item}>
-                      {item}
-                    </Option>
-                  ))}
-                </Select>
-              )}
-            </FormItem>
-            <FormItem {...formItemLayout} label="机台">
-              {getFieldDecorator("machine_name", {
-                rules: [{ required: true, message: "请选择机台" }]
-              })(
-                <Select placeholder="请选择机台">
-                  {this.state.machineList.map(item => (
-                    <Option value={item} key={item}>
-                      {item}
-                    </Option>
-                  ))}
-                </Select>
-              )}
-            </FormItem>
-            <FormItem {...formItemLayout} label="机长">
-              {getFieldDecorator("captain_name", {
-                rules: [{ required: true, message: "请选择机长" }]
-              })(
-                <Select mode="multiple" placeholder="请选择机长">
-                  {this.state.captainList.map(item => (
-                    <Option value={item} key={item}>
-                      {item}
-                    </Option>
-                  ))}
-                </Select>
-              )}
-            </FormItem>
-            <FormItem {...formItemLayout} label="生产日期">
-              {getFieldDecorator("prod_date", {
-                rules: [
-                  {
-                    required: true,
-                    message: "请输入生产日期"
+          {operationType !== 1 && (
+            <Col span={12}>
+              {operationType === 2 && (
+                <FormItem
+                  {...formItemLayout}
+                  label="工艺流程"
+                  extra={
+                    <label>
+                      推荐选择{" "}
+                      <span className={styles.bold}>8位清分机全检</span>，当选择自动分配时，<span
+                        className={styles.bold}
+                      >
+                        系统将自动根据拉号情况自动分配
+                      </span>.
+                    </label>
                   }
-                ]
-              })(<Input disabled />)}
-            </FormItem>
-          </Col>
+                >
+                  {getFieldDecorator("proc_stream", {
+                    rules: [{ required: true, message: "请选择产品工艺流程" }]
+                  })(
+                    <Select placeholder="请选择产品工艺流程">
+                      {this.props.procList.map(({ value, name }) => (
+                        <Option value={value} key={value}>
+                          {name}
+                        </Option>
+                      ))}
+                    </Select>
+                  )}
+                </FormItem>
+              )}
+              {operationType === 0 && (
+                <FormItem {...formItemLayout} label="原因">
+                  {getFieldDecorator("abnormal_type", {
+                    rules: [{ required: true, message: "请选择原因" }]
+                  })(
+                    <Select placeholder="请选择原因">
+                      {this.props.abnormalTypeList.map(({ proc_name }) => (
+                        <Option value={proc_name} key={proc_name}>
+                          {proc_name}
+                        </Option>
+                      ))}
+                    </Select>
+                  )}
+                </FormItem>
+              )}
+              <FormItem {...formItemLayout} label="备注">
+                {getFieldDecorator("reason", {
+                  rules: [
+                    {
+                      required: true,
+                      message: "其它备注说明"
+                    }
+                  ]
+                })(<Input.TextArea rows={3} placeholder="请输入备注说明" />)}
+              </FormItem>
+            </Col>
+          )}
         </Row>
       </Form>
     );
@@ -313,19 +384,12 @@ class DynamicRule extends React.Component {
 const WrappedDynamicRule = Form.create()(DynamicRule);
 
 function MultipleLock(props) {
-  let { checkByWeek, abnormal } = props.lockInfo;
   return (
     <div className={styles.container}>
       <Card
         title={
           <div className={styles.header}>
-            <h2>添加异常品车号</h2>
-            <p className={styles.desc}>
-              本周人工拉号已添加{parseInt(checkByWeek, 10) +
-                parseInt(abnormal, 10)}车(日常抽检:{checkByWeek}，异常品及四新:{
-                abnormal
-              })
-            </p>
+            <h2>批量车号锁车/解锁/工艺调整</h2>
           </div>
         }
         loading={props.loading}

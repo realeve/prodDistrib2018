@@ -26,7 +26,10 @@ class Index extends Component {
         curPageName = "数据报表";
         break;
       case "addcart":
-        curPageName = "图核异常品";
+        curPageName = "图像核查异常品";
+        break;
+      case "multilock":
+        curPageName = "批量锁车/解锁/工艺调整";
         break;
       case "newproc":
         curPageName = "批量产品计划";

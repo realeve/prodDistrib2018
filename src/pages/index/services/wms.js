@@ -160,6 +160,10 @@ let reasonCode = [{
   {
     reason_code: "q_abnormalProd",
     reason_desc: "异常品锁车"
+  },
+  {
+    reason_code: "q_batchLock",
+    reason_desc: "人工批量锁车,不拉号"
   }
 ];
 
@@ -279,6 +283,7 @@ let setProcs = async ({
 };
 
 // 3 锁车原因列表
+// http://cognosdb.cdyc.cbpm:8080/wms/if/lockQ
 let getBlackReason = async () => {
   let data = await axios({
     method: "post",
@@ -296,6 +301,7 @@ let getBlackReason = async () => {
 
 // 4 添加锁车原因
 // 状态码，锁车描述
+// http://cognosdb.cdyc.cbpm:8080/wms/if/lockR?reason_code=q_batchLock&reason_desc=人工批量锁车,不拉号
 let addBlackReason = async ({
   reason_code,
   reason_desc

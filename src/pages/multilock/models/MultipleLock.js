@@ -11,12 +11,7 @@ export default {
   state: {
     dataSource: [],
     dateRange: [],
-    abnormalTypeList: [],
-    abnormalWMS: [],
-    lockInfo: {
-      checkByWeek: 0,
-      abnormal: 0
-    }
+    abnormalTypeList: []
   },
   reducers: {
     save(state, {
@@ -43,26 +38,6 @@ export default {
         ...state,
         abnormalTypeList
       };
-    },
-    saveWMS(state, {
-      payload: {
-        abnormalWMS
-      }
-    }) {
-      return {
-        ...state,
-        abnormalWMS
-      }
-    },
-    saveLockInfo(state, {
-      payload: {
-        lockInfo
-      }
-    }) {
-      return {
-        ...state,
-        lockInfo
-      }
     }
   },
   effects: {
@@ -76,48 +51,6 @@ export default {
         payload: dateRange
       });
     },
-    * getLockCart(payload, {
-      call,
-      put,
-      select
-    }) {
-      const [ts, te] = dateRanges["本周"];
-      const [tstart, tend] = [ts.format("YYYYMMDD"), te.format("YYYYMMDD")];
-
-      // 获取每周人工拉号锁车产品信息
-      let {
-        data
-      } = yield call(db.getPrintSampleCartlist, {
-        tstart,
-        tend,
-        tstart2: tstart,
-        tend2: tend
-      });
-
-      let lockInfo = {
-        checkByWeek: 0,
-        abnormal: 0
-      }
-
-      data.forEach(({
-        num,
-        type
-      }) => {
-        if (type === '1') {
-          lockInfo.checkByWeek = num;
-        } else {
-          lockInfo.abnormal = num;
-        }
-      })
-
-      yield put({
-        type: 'saveLockInfo',
-        payload: {
-          lockInfo
-        }
-      })
-
-    },
     * handleReportData(payload, {
       call,
       put,
@@ -130,13 +63,6 @@ export default {
         }
       });
 
-      yield put({
-        type: 'saveWMS',
-        payload: {
-          abnormalWMS: []
-        }
-      })
-
       const store = yield select(state => state[namespace]);
       const {
         dateRange
@@ -144,7 +70,8 @@ export default {
 
       let dataSource = yield call(db.getViewPrintAbnormalProd, {
         tstart: dateRange[0],
-        tend: dateRange[1]
+        tend: dateRange[1],
+        only_lock_cart: 1
       });
 
       // 车号列表
@@ -157,18 +84,17 @@ export default {
         item[6] = wms.getLockReason(item[6]);
         return item;
       })
-
       // 将库管系统数据合并
-      dataSource.header = [...dataSource.header.slice(0, 8), '锁车状态(库管系统)', '工艺(库管系统)', '完成状态(调度服务)', ...dataSource.header.slice(9, 11)]
+      dataSource.header = [...dataSource.header.slice(0, 4), '锁车状态(库管系统)', '工艺(库管系统)', '完成状态(调度服务)', ...dataSource.header.slice(5, 8)]
       dataSource.data = dataSource.data.map(item => {
-        let iTemp = item.slice(0, 8);
+        let iTemp = item.slice(0, 4);
         let lockStatus = abnormalWMS.data.filter(wmsItem => wmsItem[2] === item[1]);
         if (lockStatus.length === 0) {
           iTemp = [...iTemp, '', ''];
         } else {
           iTemp = [...iTemp, lockStatus[0][5], lockStatus[0][7]];
         }
-        return [...iTemp, ...item.slice(8, 11)];
+        return [...iTemp, ...item.slice(4, 8)];
       });
 
       yield put({
@@ -178,18 +104,6 @@ export default {
         }
       });
 
-      yield put({
-        type: 'saveWMS',
-        payload: {
-          abnormalWMS
-        }
-      })
-      yield put({
-        type: "setLoading",
-        payload: {
-          loading: false,
-        }
-      });
     },
     * getProc(payload, {
       put,
@@ -216,7 +130,6 @@ export default {
         if (match && match[0] === "/" + namespace) {
           const [tstart, tend] = dateRanges["最近一月"];
           const [ts, te] = [tstart.format("YYYYMMDD"), tend.format("YYYYMMDD")];
-          console.log(ts, te)
           await dispatch({
             type: "updateDateRange",
             payload: [ts, te]
@@ -224,14 +137,9 @@ export default {
           dispatch({
             type: "handleReportData"
           });
-
           dispatch({
             type: "getProc"
           });
-
-          dispatch({
-            type: 'getLockCart'
-          })
         }
       });
     }

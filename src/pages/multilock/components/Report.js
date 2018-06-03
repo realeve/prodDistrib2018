@@ -10,14 +10,14 @@ import VTable from "../../../components/Table";
 const RangePicker = DatePicker.RangePicker;
 moment.locale("zh-cn");
 
-function Addcart({ dispatch, dataSource, loading, dateRange, abnormalWMS }) {
+function MultiLock({ dispatch, dataSource, loading, dateRange }) {
   const onDateChange = async (dates, dateStrings) => {
     await dispatch({
-      type: "addcart/setDateRange",
+      type: "multilock/setDateRange",
       payload: dateStrings
     });
     dispatch({
-      type: "addcart/handleReportData"
+      type: "multilock/handleReportData"
     });
   };
   // console.log("载入状态:", loading);
@@ -37,17 +37,16 @@ function Addcart({ dispatch, dataSource, loading, dateRange, abnormalWMS }) {
           />
         </div>
       </div>
-      <VTable dataSrc={dataSource} cartLinkMode="img" />
-      <VTable dataSrc={abnormalWMS} />
+      <VTable dataSrc={dataSource} />
     </>
   );
 }
 
 function mapStateToProps(state) {
   return {
-    loading: state.loading.models.addcart,
-    ...state.addcart
+    loading: state.loading.models.multilock,
+    ...state.multilock
   };
 }
 
-export default connect(mapStateToProps)(Addcart);
+export default connect(mapStateToProps)(MultiLock);

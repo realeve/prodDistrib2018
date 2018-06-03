@@ -14,15 +14,14 @@ export const getPrintAbnormalProd = async () =>
 
 /**
 *   @database: { 质量信息系统 }
-*   @desc:     { 异常产品车号列表 } 
-  
-    const { tstart, tend } = params;
+*   @desc:     { 批量工艺流程处理 } 
+    const { tstart, tend, only_lock_cart } = params;
 */
-export const getViewPrintAbnormalProd = async params =>
-  await axios({
-    url: "/73/2dcf6571e6/array.json",
-    params
-  }).then(res => res);
+export const getViewPrintAbnormalProd = async params => await axios({
+  url: '/137/d473b0d66a/array.json',
+  params
+}).then(res => res);
+
 
 /**
 *   @database: { 质量信息系统 }
@@ -65,13 +64,84 @@ const getTbbaseCarTechnologHistory = async params => await axios({
   params,
 }).then(res => res);
 
+
 /**
 *   @database: { 质量信息系统 }
-*   @desc:     { 人工拉号车号万数汇总 } 
-    const { tstart, tend, tstart2, tend2 } = params;
-*/
-export const getPrintSampleCartlist = async params =>
+*   @desc:     { 批量添加批量锁车车号列表 } 
+	以下参数在建立过程中与系统保留字段冲突，已自动替换:
+	@desc:批量插入数据时，约定使用二维数组values参数，格式为[{prod_id,cart_number,rec_date,reason,only_lock_cart,abnormal_type, complete_status, proc_stream }]，数组的每一项表示一条数据*/
+export const addLockCartlist = async values => await axios({
+  method: 'post',
+  data: {
+    values,
+    id: 138,
+    nonce: '1d999548c0'
+  },
+}).then(res => res);
+
+
+/**
+*   @database: { 质量信息系统 }
+*   @desc:     { 批量记录库管系统日志信息 } 
+	以下参数在建立过程中与系统保留字段冲突，已自动替换:
+	@desc:批量插入数据时，约定使用二维数组values参数，格式为[{remark,rec_time }]，数组的每一项表示一条数据*/
+export const addPrintWmsLog = async values =>
   await axios({
-    url: "/124/cd6e54e7e3.json",
+    method: "post",
+    data: {
+      values,
+      id: 91,
+      nonce: "f0500427cb"
+    }
+  }).then(res => res);
+
+/**
+ *   @database: { 质量信息系统 }
+ *   @desc:     { 批量解锁 } 
+ */
+export const setPrintAbnormalProd = async values => await axios({
+  url: '/139/00cbb681ae.json',
+  params: {
+    values
+  },
+}).then(res => res);
+
+/**
+ *   @database: { 机台作业 }
+ *   @desc:     { 车号查冠字 }
+ */
+export const getViewCartfinderGZ = async carnos =>
+  await axios({
+    url: "/105/153ec8ad02.json",
+    params: {
+      carnos
+    }
+  }).then(res => res);
+
+
+/**
+*   @database: { 质量信息系统 }
+*   @desc:     { 批量批量插入立体库四新计划工艺流转信息 } 
+	以下参数在建立过程中与系统保留字段冲突，已自动替换:
+	@desc:批量插入数据时，约定使用二维数组values参数，格式为[{cart_number,gz_num,proc_plan,proc_real,rec_time }]，数组的每一项表示一条数据*/
+export const addPrintWmsProclist = async values =>
+  await axios({
+    method: 'post',
+    data: {
+      values,
+      id: 140,
+      nonce: '1d8a3759f2'
+    }
+  }).then(res => res);
+
+
+/**
+*   @database: { 质量信息系统 }
+*   @desc:     { 更新wms日志信息 } 
+    const { return_info, _id } = params;
+*/
+export const setPrintWmsLog = async params =>
+  await axios({
+    url: "/120/e7d88969ca.json",
     params
   }).then(res => res);

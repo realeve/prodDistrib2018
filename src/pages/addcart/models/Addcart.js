@@ -144,7 +144,8 @@ export default {
 
       let dataSource = yield call(db.getViewPrintAbnormalProd, {
         tstart: dateRange[0],
-        tend: dateRange[1]
+        tend: dateRange[1],
+        only_lock_cart: 0
       });
 
       // 车号列表

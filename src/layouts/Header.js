@@ -50,12 +50,12 @@ function HeaderMenu({ location }) {
         >
           <Menu.Item key="/addcart">
             <Link to="/addcart">
-              <Icon type="exclamation-circle-o" />图核异常品
+              <Icon type="exclamation-circle-o" />图像核查异常品
             </Link>
           </Menu.Item>
           <Menu.Item key="/multilock">
             <Link to="/multilock">
-              <Icon type="lock" />批量锁车/解锁
+              <Icon type="lock" />批量锁车/解锁/工艺调整
             </Link>
           </Menu.Item>
         </SubMenu>

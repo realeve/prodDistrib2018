@@ -1,8 +1,8 @@
 import pathToRegexp from "path-to-regexp";
 import * as db from "../services/tasks";
 import dateRanges from "../../../utils/ranges";
-import wms from '../../index/services/wms'
-const R = require('ramda');
+import wms from "../../index/services/wms";
+const R = require("ramda");
 
 const namespace = "taskGet";
 export default {
@@ -14,38 +14,31 @@ export default {
     dataComplete: []
   },
   reducers: {
-    saveNewproc(state, {
-      payload: dataSrcNewproc
-    }) {
+    saveNewproc(state, { payload: dataSrcNewproc }) {
       return {
         ...state,
         dataSrcNewproc
-      }
+      };
     },
     save(
-      state, {
-        payload: {
-          dataSource,
-          dataComplete
-        }
+      state,
+      {
+        payload: { dataSource, dataComplete }
       }
     ) {
-      return { ...state,
+      return {
+        ...state,
         dataSource,
         dataComplete
       };
     },
-    refreshTable(state, {
-      payload: dataSource
-    }) {
+    refreshTable(state, { payload: dataSource }) {
       return {
         ...state,
         dataSource
       };
     },
-    setDateRange(state, {
-      payload: dateRange
-    }) {
+    setDateRange(state, { payload: dateRange }) {
       return {
         ...state,
         dateRange
@@ -53,93 +46,101 @@ export default {
     }
   },
   effects: {
-    * updateDateRange({
-      payload: dateRange
-    }, {
-      put
-    }) {
+    *updateDateRange({ payload: dateRange }, { put }) {
       yield put({
         type: "setDateRange",
         payload: dateRange
       });
     },
-    * handleTaskData(payload, {
-      call,
-      put,
-      select
-    }) {
+    *handleTaskData(payload, { call, put, select }) {
       const store = yield select(state => state[namespace]);
-      const {
-        dateRange
-      } = store;
+      const { dateRange } = store;
       let params = {
         tstart: dateRange[0],
         tend: dateRange[1]
       };
       let dataSource = yield call(
         // getPrintSampleCartlistAll
-        db.getPrintSampleCartlist, { ...params,
+        db.getPrintSampleCartlist,
+        {
+          ...params,
           status: 0
         }
       );
 
       // 已领用车号列表
-      let dataComplete = yield call(
-        db.getPrintSampleCartlist, { ...params,
-          status: 1
-        }
-      );
+      let dataComplete = yield call(db.getPrintSampleCartlist, {
+        ...params,
+        status: 1
+      });
 
-      dataComplete.title = '本周已领用车号列表';
+      dataComplete.title = "本周已领用车号列表";
 
-      let {
-        header,
-        data
-      } = dataSource;
-      dataSource.header = [header[0], '四新或异常品', '允许拉号时间', '出库状态', '产品工序', ...header.slice(1)];
+      let { header, data } = dataSource;
+      dataSource.header = [
+        header[0],
+        "四新或异常品",
+        "允许拉号时间",
+        "出库状态",
+        "产品工序",
+        ...header.slice(1)
+      ];
       let manulCarts = R.map(R.nth(0))(data);
       let dataSrcNewproc = yield call(db.getPrintWmsProclist, params);
-      let newProcCarts = R.map(R.nth(0))(dataSrcNewproc.data)
+      let newProcCarts = R.map(R.nth(0))(dataSrcNewproc.data);
 
       // 产品干燥状态
-      let dryingList = yield call(db.getTbDryingstatusTask, [...manulCarts, ...newProcCarts]);
+      let dryingList = yield call(db.getTbDryingstatusTask, [
+        ...manulCarts,
+        ...newProcCarts
+      ]);
 
       data = data.map(item => {
-        let status = newProcCarts.includes(item[0])
+        let status = newProcCarts.includes(item[0]);
         let dryingInfo = R.find(R.propEq(0, item[0]))(dryingList.data);
-        let dryingStatus = ['', '', ''];
+        let dryingStatus = ["", "", ""];
         if (!R.isNil(dryingInfo)) {
-          let {
-            psname
-          } = wms.getProcStatus(dryingInfo[1]);
+          let { psname } = wms.getProcStatus(dryingInfo[1]);
 
-          dryingStatus = [dryingInfo[2], dryingInfo[3] === '1' ? '允许出库' : '禁止出库', psname]
+          dryingStatus = [
+            dryingInfo[2],
+            dryingInfo[3] === "1" ? "允许出库" : "禁止出库",
+            psname
+          ];
         }
         return [item[0], status, ...dryingStatus, ...item.slice(1)];
-      })
+      });
       data = data.sort((a, b) => a[1] - b[1]);
       dataSource.data = data.map(item => {
-        item[1] = item[1] ? '是' : '否'
+        item[1] = item[1] ? "是" : "否";
         return item;
-      })
+      });
 
-      dataSrcNewproc.header = [...dataSrcNewproc.header.slice(0, 4), '允许拉号时间', '出库状态', '产品工序', ...dataSrcNewproc.header.slice(4)]
+      dataSrcNewproc.header = [
+        ...dataSrcNewproc.header.slice(0, 4),
+        "允许拉号时间",
+        "出库状态",
+        "产品工序",
+        ...dataSrcNewproc.header.slice(4)
+      ];
       dataSrcNewproc.data = dataSrcNewproc.data.map(item => {
         let dryingInfo = R.find(R.propEq(0, item[0]))(dryingList.data);
-        let dryingStatus = ['', '', ''];
+        let dryingStatus = ["", "", ""];
         if (!R.isNil(dryingInfo)) {
-          let {
+          let { psname } = wms.getProcStatus(dryingInfo[1]);
+          dryingStatus = [
+            dryingInfo[2],
+            dryingInfo[3] === "1" ? "允许出库" : "禁止出库",
             psname
-          } = wms.getProcStatus(dryingInfo[1])
-          dryingStatus = [dryingInfo[2], dryingInfo[3] === '1' ? '允许出库' : '禁止出库', psname]
+          ];
         }
         return [...item.slice(0, 4), ...dryingStatus, ...item.slice(4)];
-      })
+      });
 
       yield put({
         type: "saveNewproc",
         payload: dataSrcNewproc
-      })
+      });
 
       yield put({
         type: "save",
@@ -148,17 +149,11 @@ export default {
           dataComplete
         }
       });
-    },
+    }
   },
   subscriptions: {
-    setup({
-      dispatch,
-      history
-    }) {
-      return history.listen(async ({
-        pathname,
-        query
-      }) => {
+    setup({ dispatch, history }) {
+      return history.listen(async ({ pathname, query }) => {
         const match = pathToRegexp("/task").exec(pathname);
         if (match && match[0] === "/task") {
           const [tstart, tend] = dateRanges["最近一月"];

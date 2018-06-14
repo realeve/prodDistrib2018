@@ -17,6 +17,8 @@ import moment from "moment";
 import "moment/locale/zh-cn";
 import * as db from "../services/multiweak";
 
+import VTable from "../../../components/Table";
+
 import styles from "./Report.less";
 import * as lib from "../../../utils/lib";
 import fakeTypes from "../../../utils/fakeTypes";
@@ -80,6 +82,11 @@ class DynamicRule extends React.Component {
     });
 
     this.clearData();
+
+    // 重载报表数据
+    this.props.dispatch({
+      type: "multiweak/getData"
+    });
   };
 
   // 重置所有数据
@@ -403,13 +410,16 @@ class DynamicRule extends React.Component {
 const WrappedDynamicRule = Form.create()(DynamicRule);
 
 const multiweak = props => (
-  <Card
-    title={<h3 className={styles.header}>连续废信息通知</h3>}
-    loading={props.loading}
-    style={{ width: "100%" }}
-  >
-    <WrappedDynamicRule {...props} />
-  </Card>
+  <>
+    <Card
+      title={<h3 className={styles.header}>连续废信息通知</h3>}
+      loading={props.loading}
+      style={{ width: "100%" }}
+    >
+      <WrappedDynamicRule {...props} />
+    </Card>
+    <VTable dataSrc={props.dataWeakList} />
+  </>
 );
 
 function mapStateToProps(state) {

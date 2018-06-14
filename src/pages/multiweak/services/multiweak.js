@@ -1,4 +1,6 @@
-import { axios } from "../../../utils/axios";
+import {
+  axios
+} from "../../../utils/axios";
 
 /**
 *   @database: { 机台作业 }
@@ -23,3 +25,14 @@ export const addPrintMachinecheckMultiweak = async params =>
     url: "/83/3475990fbf.json",
     params
   }).then(res => res);
+
+
+/**
+*   @database: { 质量信息系统 }
+*   @desc:     { 机台连续废通知产品列表 } 
+    const { tstart, tend } = params;
+*/
+export const getViewPrintMachinecheckMultiweak = async params => await axios({
+  url: '/148/c882234fd8/array.json',
+  params,
+}).then(res => res);

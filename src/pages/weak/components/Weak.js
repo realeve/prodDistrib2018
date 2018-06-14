@@ -58,7 +58,8 @@ class DynamicRule extends React.Component {
       noticeInfo: "",
       dataCart: {
         rows: 0
-      }
+      },
+      print_time: ""
     };
 
     // react 16.3中的用法，目前webpack报错
@@ -193,7 +194,8 @@ class DynamicRule extends React.Component {
       noticeInfo: "",
       dataCart: {
         rows: 0
-      }
+      },
+      print_time: ""
     });
   };
 
@@ -207,7 +209,8 @@ class DynamicRule extends React.Component {
       level_type: this.state.level_type,
       img_url: this.props.imgUrl,
       rec_time: lib.now(),
-      captain_name
+      captain_name,
+      print_time: this.state.print_time
     });
     return data;
   };
@@ -243,9 +246,10 @@ class DynamicRule extends React.Component {
 
     // let prodInfo = this.props.productList.find(item => item.value === prod_id);
 
-    let prod = R.compose(R.prop("name"), R.find(R.propEq("value", prod_id)))(
-      this.props.productList
-    );
+    let prod = R.compose(
+      R.prop("name"),
+      R.find(R.propEq("value", prod_id))
+    )(this.props.productList);
 
     let params = lib.handleGZInfo({ code: value, prod });
     params.prod = prod;
@@ -358,12 +362,22 @@ class DynamicRule extends React.Component {
   changeProc = v => {
     let { prodInfo, fakeTypes } = this.state;
     let proc = v.target.value;
-    let machineList = R.compose(
-      R.uniq,
-      R.map(R.prop("MACHINENAME")),
+    let cartInfos = R.compose(
+      R.project(["MACHINENAME", "STARTDATE"]),
       R.filter(R.propEq("PROCNAME", proc))
     )(prodInfo);
-    this.setState({ machineList });
+    let machineList = R.compose(
+      R.uniq,
+      R.map(R.prop("MACHINENAME"))
+    )(cartInfos);
+
+    let print_time = R.compose(
+      R.head,
+      R.uniq,
+      R.map(R.prop("STARTDATE"))
+    )(cartInfos);
+
+    this.setState({ machineList, print_time });
 
     const { setFieldsValue } = this.props.form;
 

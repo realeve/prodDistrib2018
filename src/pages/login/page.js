@@ -3,9 +3,12 @@ import Login from "ant-design-pro/lib/Login";
 import { Alert, Checkbox, Layout } from "antd";
 import styles from "./index.less";
 
+import router from "umi/router";
+
 const { Footer } = Layout;
 
 const { Tab, UserName, Password, Submit } = Login;
+const _lsKey = "_userSetting";
 
 class LoginDemo extends Component {
   state = {
@@ -13,41 +16,86 @@ class LoginDemo extends Component {
     type: "tab1",
     autoLogin: true
   };
-  onSubmit = (err, values) => {
+
+  onSubmit = async (err, values) => {
     console.log("value collected ->", {
       ...values,
       autoLogin: this.state.autoLogin
     });
-    if (this.state.type === "tab1") {
-      this.setState(
-        {
-          notice: ""
-        },
-        () => {
-          if (
-            !err &&
-            (values.username !== "admin" || values.password !== "888888")
-          ) {
-            setTimeout(() => {
-              this.setState({
-                notice: "账号或密码错误！"
-              });
-            }, 500);
-          }
-        }
-      );
+
+    if (values.username === "admin") {
+      this.handleAutoLogin(values);
+      this.login();
+      return;
+    }
+
+    this.setState({
+      notice: "账号或密码错误！"
+    });
+  };
+
+  encodeStr = values => {
+    values.token =
+      new Date().getTime() +
+      encodeURI("印钞产品工艺流转计划跟踪系统").replace(/\%/g, "");
+    return btoa(encodeURI(JSON.stringify(values)));
+  };
+
+  decodeStr = str => JSON.parse(decodeURI(atob(str)));
+
+  saveUserSetting = values => {
+    window.localStorage.setItem(_lsKey, this.encodeStr(values));
+  };
+
+  getUserSetting = () => {
+    let _userSetting = window.localStorage.getItem(_lsKey);
+    if (_userSetting == null) {
+      return { success: false };
+    }
+    return {
+      data: this.decodeStr(_userSetting),
+      success: true
+    };
+  };
+
+  clearUserSetting = () => {
+    window.localStorage.removeItem(_lsKey);
+  };
+
+  changeAutoLogin = e => {
+    let { checked } = e.target;
+    this.setState({
+      autoLogin: checked
+    });
+    if (!checked) {
+      this.clearUserSetting();
     }
   };
-  onTabChange = key => {
-    this.setState({
-      type: key
-    });
+
+  handleAutoLogin = values => {
+    if (this.state.autoLogin) {
+      this.saveUserSetting(values);
+    } else {
+      this.clearUserSetting();
+    }
   };
-  changeAutoLogin = e => {
-    this.setState({
-      autoLogin: e.target.checked
-    });
-  };
+
+  login() {
+    setTimeout(() => {
+      router.push("/");
+    }, 1000);
+  }
+
+  componentWillMount() {
+    // if (this.state.autoLogin) {
+    //   this.login();
+    // }
+    // let { setFieldsValue } = this.props.form;
+    // setFieldsValue({
+    //   username: "zhangsan"
+    // });
+  }
+
   render() {
     const loginStyle = {
       style: { float: "right" },
@@ -76,11 +124,7 @@ class LoginDemo extends Component {
             </div>
           </div>
           <div className={styles.main}>
-            <Login
-              defaultActiveKey={this.state.type}
-              onTabChange={this.onTabChange}
-              onSubmit={this.onSubmit}
-            >
+            <Login defaultActiveKey={this.state.type} onSubmit={this.onSubmit}>
               <Tab key="tab1" tab="系统登录">
                 {this.state.notice && (
                   <Alert

@@ -1,5 +1,6 @@
-import { Menu, Icon } from "antd";
+import { Menu, Icon, Spin, Dropdown, Avatar } from "antd";
 import Link from "umi/link";
+import router from "umi/router";
 
 import { Layout } from "antd";
 import styles from "./header.less";
@@ -8,6 +9,34 @@ const { Header } = Layout;
 const SubMenu = Menu.SubMenu;
 
 function HeaderMenu({ location }) {
+  const handleMenuClick = ({ key }) => {
+    if (key === "login") {
+      router.push("/login");
+      return;
+    }
+    if (key === "user") {
+      window.location.href = "http://10.8.2.133/setting/user";
+    }
+  };
+
+  const menu = (
+    <Menu className={styles.menu} selectedKeys={[]} onClick={handleMenuClick}>
+      <Menu.Item key="user">
+        <Icon type="user" />个人中心
+      </Menu.Item>
+      <Menu.Divider />
+      <Menu.Item key="login">
+        <Icon type="login" />退出登录
+      </Menu.Item>
+    </Menu>
+  );
+
+  const currentUser = {
+    name: "张三",
+    avatar:
+      "https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png"
+  };
+
   return (
     <Header className={styles.header}>
       <div className={styles.logo}>ProdDist</div>
@@ -88,6 +117,22 @@ function HeaderMenu({ location }) {
           </Menu.Item>
         </SubMenu>
       </Menu>
+      {currentUser.name ? (
+        <div className={styles.right}>
+          <Dropdown overlay={menu}>
+            <span className={`${styles.action} ${styles.account}`}>
+              <Avatar
+                size="large"
+                className={styles.avatar}
+                src={currentUser.avatar}
+              />
+              <span className={styles.name}>{currentUser.name}</span>
+            </span>
+          </Dropdown>
+        </div>
+      ) : (
+        <Spin size="default" className={styles.spin} />
+      )}
     </Header>
   );
 }

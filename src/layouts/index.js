@@ -5,6 +5,7 @@ import "ant-design-pro/dist/ant-design-pro.css"; // 统一引入样式
 import styles from "./index.less";
 import Header from "./Header";
 import withRouter from "umi/withRouter";
+import { TransitionGroup, CSSTransition } from "react-transition-group";
 
 import { Layout, Breadcrumb, BackTop } from "antd";
 const { Content, Footer } = Layout;
@@ -63,16 +64,25 @@ class Index extends Component {
       return children;
     }
 
+    // timeout={500}
     return (
       <Layout className={styles.main}>
         <Header location={location} />
-        <Content className={styles.container}>
-          <Breadcrumb className={styles.breadCrumb}>
-            <Breadcrumb.Item>主页</Breadcrumb.Item>
-            <Breadcrumb.Item>{this.state.curPageName}</Breadcrumb.Item>
-          </Breadcrumb>
-          <div className={styles.content}>{children}</div>
-        </Content>
+        <TransitionGroup>
+          <CSSTransition
+            key={location.key}
+            classNames="ani-left"
+            timeout={{ enter: 800, exit: 800 }}
+          >
+            <Content className={styles.container}>
+              <Breadcrumb className={styles.breadCrumb}>
+                <Breadcrumb.Item>主页</Breadcrumb.Item>
+                <Breadcrumb.Item>{this.state.curPageName}</Breadcrumb.Item>
+              </Breadcrumb>
+              <div className={styles.content}>{children}</div>
+            </Content>
+          </CSSTransition>
+        </TransitionGroup>
         <BackTop />
         <Footer className={styles.footer}>
           cbpc ©2018 All rights reserved.
@@ -83,3 +93,11 @@ class Index extends Component {
 }
 
 export default withRouter(Index);
+
+// export default withRouter(({ location }) => (
+//   <TransitionGroup>
+//     <CSSTransition key={location.key} classNames="fade" timeout={300}>
+//       {Index}
+//     </CSSTransition>
+//   </TransitionGroup>
+// ));

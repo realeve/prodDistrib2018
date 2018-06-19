@@ -22,7 +22,6 @@ import handler from "../services/procHandler";
 import wms from "../../index/services/wms";
 const FormItem = Form.Item;
 const Option = Select.Option;
-const R = require("ramda");
 
 const reason_code = "q_batchLock";
 

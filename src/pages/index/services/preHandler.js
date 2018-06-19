@@ -19,176 +19,176 @@ const preHandle = data => {
 };
 
 // 统计各工序已开印机台数量
-const handleMachines = data => {
-  let getMachines = R.compose(
-    R.uniq,
-    R.map(item => ({
-      proc: item[3],
-      machine: item[5]
-    }))
-  );
-  let uniqMachines = getMachines(data);
-  let procs = R.countBy(R.prop("proc"))(uniqMachines);
-  let count = R.compose(
-    R.map(item => ({
-      name: item,
-      num: procs[item]
-    })),
-    R.keys
-  )(procs);
-  return {
-    count,
-    data: uniqMachines
-  };
-};
+// const handleMachines = data => {
+//   let getMachines = R.compose(
+//     R.uniq,
+//     R.map(item => ({
+//       proc: item[3],
+//       machine: item[5]
+//     }))
+//   );
+//   let uniqMachines = getMachines(data);
+//   let procs = R.countBy(R.prop("proc"))(uniqMachines);
+//   let count = R.compose(
+//     R.map(item => ({
+//       name: item,
+//       num: procs[item]
+//     })),
+//     R.keys
+//   )(procs);
+//   return {
+//     count,
+//     data: uniqMachines
+//   };
+// };
 
-// 印码抽取
-const step1 = (machines, proc, data) => {
-  //印码机台列表
-  let machineList = R.compose(
-    R.map(R.prop("machine")),
-    R.filter(R.propEq("proc", proc))
-  )(machines.data);
+// // // 印码抽取
+// // const step1 = (machines, proc, data) => {
+// //   //印码机台列表
+// //   let machineList = R.compose(
+// //     R.map(R.prop("machine")),
+// //     R.filter(R.propEq("proc", proc))
+// //   )(machines.data);
 
-  let findMahine = machine => R.filter(R.whereEq({
-    5: machine
-  }))(data);
-  let cartsByMachine = R.map(findMahine, machineList);
-  return R.map(item =>
-    R.compose(
-      R.prop(0),
-      R.sortBy(R.prop(8)),
-      R.filter(R.whereEq({
-        9: item[0][9]
-      }))
-    )(item)
-  )(cartsByMachine);
-};
+// //   let findMahine = machine => R.filter(R.whereEq({
+// //     5: machine
+// //   }))(data);
+// //   let cartsByMachine = R.map(findMahine, machineList);
+// //   return R.map(item =>
+// //     R.compose(
+// //       R.prop(0),
+// //       R.sortBy(R.prop(8)),
+// //       R.filter(R.whereEq({
+// //         9: item[0][9]
+// //       }))
+// //     )(item)
+// //   )(cartsByMachine);
+// // };
 
-// 指定车号列表中覆盖了多少设备
-let getMachinesOfCarts = (carts, data) => {
-  let cartList = R.map(R.prop(0))(carts);
-  let isInCart = item => cartList.includes(item[0]);
-  return R.compose(R.uniq, R.map(R.prop(5)), R.filter(isInCart))(data);
-};
+// // // // 指定车号列表中覆盖了多少设备
+// // // let getMachinesOfCarts = (carts, data) => {
+// // //   let cartList = R.map(R.prop(0))(carts);
+// // //   let isInCart = item => cartList.includes(item[0]);
+// // //   return R.compose(R.uniq, R.map(R.prop(5)), R.filter(isInCart))(data);
+// // // };
 
-// 更新各机台抽检情况
-let updateMachines = (machines, checkedMachines) => {
-  let handleMachine = item => {
-    item.status = checkedMachines.includes(item.machine);
-    return item;
-  };
-  return R.map(handleMachine)(machines);
-};
+// // // // 更新各机台抽检情况
+// // // let updateMachines = (machines, checkedMachines) => {
+// // //   let handleMachine = item => {
+// // //     item.status = checkedMachines.includes(item.machine);
+// // //     return item;
+// // //   };
+// // //   return R.map(handleMachine)(machines);
+// // // };
 
-let refreshMachineStatus = (taskList, machines, data) => {
-  // 已抽取的车号列表
-  let checkedMachines = getMachinesOfCarts(taskList, data);
-  machines.data = updateMachines(machines.data, checkedMachines); //.filter(item => item.proc != '');
-  return machines;
-};
+// let refreshMachineStatus = (taskList, machines, data) => {
+//   // 已抽取的车号列表
+//   let checkedMachines = getMachinesOfCarts(taskList, data);
+//   machines.data = updateMachines(machines.data, checkedMachines); //.filter(item => item.proc != '');
+//   return machines;
+// };
 
-let checkStep2 = (machines, data) => {
-  // 优化前：第2步追加的机台(预计11台)
-  let unCheckedMachines = R.compose(
-    R.map(R.prop("machine")),
-    R.reject(R.prop("status"))
-  )(machines);
-  // console.log(
-  //   `准备抽检这些机台(${unCheckedMachines.length})：`,
-  //   unCheckedMachines
-  // );
-  // 获取指定设备中班最后一万产品
-  let findMachine = machine => R.filter(R.whereEq({
-    5: machine
-  }))(data);
-  let cartsByMachine = R.map(findMachine, unCheckedMachines);
-  return R.map(R.compose(R.prop(0), R.sort(R.descend(R.prop(8)))))(
-    cartsByMachine
-  );
-};
+// let checkStep2 = (machines, data) => {
+//   // 优化前：第2步追加的机台(预计11台)
+//   let unCheckedMachines = R.compose(
+//     R.map(R.prop("machine")),
+//     R.reject(R.prop("status"))
+//   )(machines);
+//   // console.log(
+//   //   `准备抽检这些机台(${unCheckedMachines.length})：`,
+//   //   unCheckedMachines
+//   // );
+//   // 获取指定设备中班最后一万产品
+//   let findMachine = machine => R.filter(R.whereEq({
+//     5: machine
+//   }))(data);
+//   let cartsByMachine = R.map(findMachine, unCheckedMachines);
+//   return R.map(R.compose(R.prop(0), R.sort(R.descend(R.prop(8)))))(
+//     cartsByMachine
+//   );
+// };
 
-let getUnCheckedMachines = R.compose(
-  R.map(R.prop("machine")),
-  R.reject(R.prop("status"))
-);
-let step2 = (taskList, machines, data) => {
-  let unCheckedMachines = getUnCheckedMachines(machines.data);
-  while (unCheckedMachines.length) {
-    let appendList = checkStep2(machines.data, data);
-    taskList = [...taskList, appendList[0]];
-    machines = refreshMachineStatus(taskList, machines, data);
-    unCheckedMachines = getUnCheckedMachines(machines.data);
-    // console.log(unCheckedMachines);
-    // console.log('还剩', unCheckedMachines.length, '未抽检')
-  }
-  return taskList;
-};
+// let getUnCheckedMachines = R.compose(
+//   R.map(R.prop("machine")),
+//   R.reject(R.prop("status"))
+// );
+// let step2 = (taskList, machines, data) => {
+//   let unCheckedMachines = getUnCheckedMachines(machines.data);
+//   while (unCheckedMachines.length) {
+//     let appendList = checkStep2(machines.data, data);
+//     taskList = [...taskList, appendList[0]];
+//     machines = refreshMachineStatus(taskList, machines, data);
+//     unCheckedMachines = getUnCheckedMachines(machines.data);
+//     // console.log(unCheckedMachines);
+//     // console.log('还剩', unCheckedMachines.length, '未抽检')
+//   }
+//   return taskList;
+// };
 
-let step3 = (machines, data) => {
-  // 需要调试
-  let lastCart = R.compose(
-    R.reject(R.whereEq({
-      3: "印码"
-    })),
-    R.filter(R.whereEq({
-      9: setting.firstDay
-    }))
-  )(data);
-  let uniqMachine = R.compose(R.uniq, R.map(R.prop(5)))(lastCart);
-  // console.log("周一生产的所有产品:", lastCart);
-  // console.log("以上产品共包含在这些机台中：", uniqMachine);
-  let findMachine = machine => R.filter(R.whereEq({
-    5: machine
-  }))(lastCart);
-  let getLastCart = R.compose(
-    R.prop(0),
-    R.sort(R.descend(R.prop(8))),
-    findMachine
-  );
+// let step3 = (machines, data) => {
+//   // 需要调试
+//   let lastCart = R.compose(
+//     R.reject(R.whereEq({
+//       3: "印码"
+//     })),
+//     R.filter(R.whereEq({
+//       9: setting.firstDay
+//     }))
+//   )(data);
+//   let uniqMachine = R.compose(R.uniq, R.map(R.prop(5)))(lastCart);
+//   // console.log("周一生产的所有产品:", lastCart);
+//   // console.log("以上产品共包含在这些机台中：", uniqMachine);
+//   let findMachine = machine => R.filter(R.whereEq({
+//     5: machine
+//   }))(lastCart);
+//   let getLastCart = R.compose(
+//     R.prop(0),
+//     R.sort(R.descend(R.prop(8))),
+//     findMachine
+//   );
 
-  // let getFirstCart = R.compose(R.prop(0), R.sortBy(R.prop(8)), findMachine);
-  return R.map(getLastCart, uniqMachine);
-};
+//   // let getFirstCart = R.compose(R.prop(0), R.sortBy(R.prop(8)), findMachine);
+//   return R.map(getLastCart, uniqMachine);
+// };
 
-let getCheckedCarts = (data, taskInfo) => {
-  // 非重复机台
-  let machines = handleMachines(data);
-  // console.log("本周产品共涉及以下机台：", machines);
+// let getCheckedCarts = (data, taskInfo) => {
+//   // 非重复机台
+//   let machines = handleMachines(data);
+//   // console.log("本周产品共涉及以下机台：", machines);
 
-  let proc = "印码";
-  let taskList = step1(machines, proc, data);
-  // console.log("第1步抽检列表:", taskList);
-  machines = refreshMachineStatus(taskList, machines, data);
-  // console.log(machines);
+//   let proc = "印码";
+//   let taskList = step1(machines, proc, data);
+//   // console.log("第1步抽检列表:", taskList);
+//   machines = refreshMachineStatus(taskList, machines, data);
+//   // console.log(machines);
 
-  let appendList = step2(taskList, machines, data);
-  // console.log(
-  //   `第2步追加的机台(预计${appendList.length - taskList.length}台):`,
-  //   appendList.slice(taskList.length, appendList.length)
-  // );
+//   let appendList = step2(taskList, machines, data);
+//   // console.log(
+//   //   `第2步追加的机台(预计${appendList.length - taskList.length}台):`,
+//   //   appendList.slice(taskList.length, appendList.length)
+//   // );
 
-  taskList = appendList;
-  // console.log("当前所抽检的车号列表为：", taskList);
-  machines = refreshMachineStatus(taskList, machines, data);
-  // 是否已经抽检够对应的数量
-  if (taskList.length >= taskInfo.checks) {
-    return taskList;
-    // return appendList.slice(0, taskInfo.checks);
-  }
+//   taskList = appendList;
+//   // console.log("当前所抽检的车号列表为：", taskList);
+//   machines = refreshMachineStatus(taskList, machines, data);
+//   // 是否已经抽检够对应的数量
+//   if (taskList.length >= taskInfo.checks) {
+//     return taskList;
+//     // return appendList.slice(0, taskInfo.checks);
+//   }
 
-  // 继续按规则3抽检
-  appendList = step3(machines.data, data);
-  // console.log("第3步追加的机台:", appendList);
-  taskList = [...taskList, ...appendList];
-  // console.log("当前所抽检的车号列表为：", taskList);
-  machines = refreshMachineStatus(taskList, machines, data);
-  // 是否已经抽检够对应的数量
-  if (taskList.length >= taskInfo.checks) {
-    return taskList.slice(0, taskInfo.checks);
-  }
-  return taskList;
-};
+//   // 继续按规则3抽检
+//   appendList = step3(machines.data, data);
+//   // console.log("第3步追加的机台:", appendList);
+//   taskList = [...taskList, ...appendList];
+//   // console.log("当前所抽检的车号列表为：", taskList);
+//   machines = refreshMachineStatus(taskList, machines, data);
+//   // 是否已经抽检够对应的数量
+//   if (taskList.length >= taskInfo.checks) {
+//     return taskList.slice(0, taskInfo.checks);
+//   }
+//   return taskList;
+// };
 
 let convertObj2Array = obj => {
   const keys = R.keys(obj);

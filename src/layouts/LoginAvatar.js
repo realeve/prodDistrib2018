@@ -1,6 +1,6 @@
 import { Menu, Icon, Spin, Dropdown, Avatar } from "antd";
 import router from "umi/router";
-import styles from "./header.less";
+import styles from "./LoginAvatar.less";
 
 function LoginAvatar() {
   const handleMenuClick = ({ key }) => {

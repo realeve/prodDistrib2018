@@ -34,6 +34,9 @@ class Index extends Component {
       case "newproc":
         curPageName = "批量产品计划";
         break;
+      case "login":
+        curPageName = "登录";
+        break;
       case "":
       default:
         curPageName = "添加任务";
@@ -55,6 +58,10 @@ class Index extends Component {
 
   render() {
     const { location, children } = this.props;
+
+    if (location.pathname === "/login") {
+      return children;
+    }
 
     return (
       <Layout className={styles.main}>

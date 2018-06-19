@@ -72,7 +72,7 @@ class Index extends Component {
           <CSSTransition
             key={location.key}
             classNames="ani-left"
-            timeout={{ enter: 800, exit: 800 }}
+            timeout={{ enter: 400, exit: 300 }}
           >
             <Content className={styles.container}>
               <Breadcrumb className={styles.breadCrumb}>

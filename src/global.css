@@ -52,7 +52,7 @@ body,
 }
 
 .ani-right-exit {
-  z-index: 10000;
+  z-index: 1;
   opacity: 1;
   transform: translateX(0);
 }

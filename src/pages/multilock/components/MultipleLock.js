@@ -54,7 +54,8 @@ class DynamicRule extends React.Component {
         check_type: "批量车号工艺调整",
         reason_code,
         task_id: 0,
-        remark_info: data.reason
+        remark_info: data.reason,
+        user_name: this.props.userSetting.name
       });
 
       notification.open({
@@ -82,7 +83,8 @@ class DynamicRule extends React.Component {
       rec_date,
       complete_status,
       proc_stream,
-      only_lock_cart: 1
+      only_lock_cart: 1,
+      user_name: this.props.userSetting.name
     }));
   };
 

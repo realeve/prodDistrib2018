@@ -19,11 +19,12 @@ function Tasks({
   page,
   pageSize,
   loading,
-  filteredInfo,
+  // filteredInfo,
   columns,
   sampling,
   sampleStatus,
-  sampledCarts
+  // sampledCarts,
+  userSetting
 }) {
   // 页码更新
   const pageChangeHandler = page => {
@@ -35,7 +36,7 @@ function Tasks({
 
   // 分页数
   const onShowSizeChange = async (current, nextPageSize) => {
-    let newPage = Math.floor(pageSize * current / nextPageSize);
+    let newPage = Math.floor((pageSize * current) / nextPageSize);
     await dispatch({
       type: "tasks/changePageSize",
       payload: nextPageSize
@@ -147,9 +148,10 @@ function Tasks({
     // }
 
     let insertData = async () => {
-      let carnos = R.compose(R.uniq, R.map(R.prop("cart_number")))(
-        insertingData
-      );
+      let carnos = R.compose(
+        R.uniq,
+        R.map(R.prop("cart_number"))
+      )(insertingData);
 
       // 20180515调整日志添加接口
       let logInfo = await db.addPrintWmsLog([
@@ -199,6 +201,10 @@ function Tasks({
       );
 
       if (insertingData.length) {
+        insertingData = insertingData.map(item => {
+          item.user_name = userSetting.name;
+          return item;
+        });
         let data = await db.addPrintSampleCartlist(insertingData);
         if (data.rows) {
           openNotification("车号列表领取成功");
@@ -319,7 +325,8 @@ function Tasks({
 function mapStateToProps(state) {
   return {
     loading: state.loading.models.tasks,
-    ...state.tasks
+    ...state.tasks,
+    ...state.common
   };
 }
 

@@ -210,7 +210,8 @@ class DynamicRule extends React.Component {
       img_url: this.props.imgUrl,
       rec_time: lib.now(),
       captain_name,
-      print_time: this.state.print_time
+      print_time: this.state.print_time,
+      user_name: this.props.userSetting.name
     });
     return data;
   };
@@ -654,7 +655,7 @@ function mapStateToProps(state) {
   return {
     loading: state.loading.models.weak,
     ...state.weak,
-    productList: state.common.productList
+    ...state.common
   };
 }
 

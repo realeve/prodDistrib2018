@@ -21,6 +21,7 @@ import * as db from "../services/Newproc";
 
 import styles from "./Report.less";
 import * as lib from "../../../utils/lib";
+import VTable from "../../../components/Table";
 
 const { RangePicker } = DatePicker;
 moment.locale("zh-cn");
@@ -44,7 +45,10 @@ class DynamicRule extends React.Component {
     const deptList =
       R.isNil(props.machineList) || props.machineList.length === 0
         ? []
-        : R.compose(R.uniq, R.map(R.prop("dept_name")))(props.machineList);
+        : R.compose(
+            R.uniq,
+            R.map(R.prop("dept_name"))
+          )(props.machineList);
     this.state = {
       date_type: 0,
       procTipInfo: "",
@@ -107,6 +111,7 @@ class DynamicRule extends React.Component {
     }
 
     Reflect.deleteProperty(data, "rec_date");
+    data.user_name = this.props.userSetting.name;
     return data;
   };
 
@@ -523,6 +528,7 @@ function newproc(props) {
       >
         <WrappedDynamicRule {...props} />
       </Card>
+      <VTable dataSrc={props.dataSrc} />
     </div>
   );
 }
@@ -532,7 +538,8 @@ function mapStateToProps(state) {
     loading: state.loading.models.newproc,
     ...state.newproc,
     productList: state.common.productList,
-    procStreamList: state.common.procList
+    procStreamList: state.common.procList,
+    userSetting: state.common.userSetting
   };
 }
 

@@ -73,7 +73,8 @@ let recordRealProc = async (
   remark,
   check_type,
   task_id,
-  remark_info
+  remark_info,
+  user_name
 ) => {
   let rec_time = lib.now();
   console.log("此处读取产品冠字信息");
@@ -96,7 +97,8 @@ let recordRealProc = async (
       rec_time,
       check_type,
       task_id,
-      remark: remark_info
+      remark: remark_info,
+      user_name
     };
   });
   await db.addPrintWmsProclist(insertData);
@@ -215,7 +217,8 @@ let handleProcStream = async ({
   check_type,
   reason_code,
   task_id,
-  remark_info
+  remark_info,
+  user_name
 }) => {
   if (carnos.length === 0) {
     return {
@@ -270,7 +273,8 @@ let handleProcStream = async ({
       remark,
       check_type,
       task_id,
-      remark_info
+      remark_info,
+      user_name
     );
   }
 

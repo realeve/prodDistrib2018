@@ -63,7 +63,7 @@ class DynamicRule extends React.Component {
     if (typeof data.remark === "undefined") {
       data.remark = "";
     }
-
+    data.user_name = this.props.userSetting.name;
     let insertRes = await db.addPrintMachinecheckMultiweak(data);
 
     if (!insertRes.rows) {
@@ -426,7 +426,7 @@ function mapStateToProps(state) {
   return {
     loading: state.loading.models.multiweak,
     ...state.multiweak,
-    productList: state.common.productList
+    ...state.common
   };
 }
 

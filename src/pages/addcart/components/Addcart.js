@@ -73,6 +73,7 @@ class DynamicRule extends React.Component {
         typeof data.captain_name === "string"
           ? data.captain_name
           : data.captain_name.join(",");
+      data.user_name = this.props.userSetting.name;
 
       this.insertData(data);
     });
@@ -109,7 +110,10 @@ class DynamicRule extends React.Component {
 
   handleProcessInfo = data => {
     let { setFieldsValue } = this.props.form;
-    const procList = R.compose(R.uniq, R.map(R.prop("proc_name")))(data);
+    const procList = R.compose(
+      R.uniq,
+      R.map(R.prop("proc_name"))
+    )(data);
     this.setState({
       procList
     });
@@ -124,8 +128,14 @@ class DynamicRule extends React.Component {
 
   updateMachineList = data => {
     let { setFieldsValue } = this.props.form;
-    const machineList = R.compose(R.uniq, R.map(R.prop("machine_name")))(data);
-    const captainList = R.compose(R.uniq, R.map(R.prop("captain_name")))(data);
+    const machineList = R.compose(
+      R.uniq,
+      R.map(R.prop("machine_name"))
+    )(data);
+    const captainList = R.compose(
+      R.uniq,
+      R.map(R.prop("captain_name"))
+    )(data);
     this.setState({
       machineList,
       captainList

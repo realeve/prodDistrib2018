@@ -7,7 +7,7 @@ import LoginAvatar from "./LoginAvatar";
 const { Header } = Layout;
 const SubMenu = Menu.SubMenu;
 
-function HeaderMenu({ location }) {
+function HeaderMenu({ location, avatar }) {
   return (
     <Header className={styles.header}>
       <div className={styles.logo}>ProdDist</div>
@@ -88,7 +88,7 @@ function HeaderMenu({ location }) {
           </Menu.Item>
         </SubMenu>
       </Menu>
-      <LoginAvatar />
+      <LoginAvatar avatar={avatar} />
     </Header>
   );
 }

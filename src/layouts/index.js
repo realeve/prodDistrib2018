@@ -1,13 +1,14 @@
 import React, { Component } from "react";
-
+import router from "umi/router";
+import { connect } from "dva";
 import "ant-design-pro/dist/ant-design-pro.css"; // 统一引入样式
-
 import styles from "./index.less";
 import Header from "./Header";
-import withRouter from "umi/withRouter";
+// import withRouter from "umi/withRouter";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
-
 import { Layout, Breadcrumb, BackTop } from "antd";
+import userTool from "../utils/users";
+
 const { Content, Footer } = Layout;
 
 class Index extends Component {
@@ -55,11 +56,23 @@ class Index extends Component {
   componentWillMount() {
     this.handleBreadName(this.props);
     document.title = "印钞产品工艺流转计划跟踪系统";
+
+    // handle login
+    let { data, success } = userTool.getUserSetting();
+    if (!success || !data.autoLogin) {
+      router.push("/login");
+      return;
+    }
+    this.props.dispatch({
+      type: "common/setStore",
+      payload: {
+        userSetting: data.setting
+      }
+    });
   }
 
   render() {
-    const { location, children } = this.props;
-
+    const { location, children, userSetting } = this.props;
     if (location.pathname === "/login") {
       return children;
     }
@@ -67,7 +80,7 @@ class Index extends Component {
     // timeout={500}
     return (
       <Layout className={styles.main}>
-        <Header location={location} />
+        <Header location={location} avatar={userSetting} />
         <TransitionGroup>
           <CSSTransition
             key={location.key}
@@ -92,12 +105,11 @@ class Index extends Component {
   }
 }
 
-export default withRouter(Index);
+function mapStateToProps(state) {
+  return {
+    ...state.common
+  };
+}
 
-// export default withRouter(({ location }) => (
-//   <TransitionGroup>
-//     <CSSTransition key={location.key} classNames="fade" timeout={300}>
-//       {Index}
-//     </CSSTransition>
-//   </TransitionGroup>
-// ));
+// export default withRouter(Index);
+export default connect(mapStateToProps)(Index);

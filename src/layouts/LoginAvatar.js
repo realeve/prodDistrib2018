@@ -2,10 +2,19 @@ import { Menu, Icon, Spin, Dropdown, Avatar } from "antd";
 import router from "umi/router";
 import styles from "./LoginAvatar.less";
 
-function LoginAvatar() {
+function LoginAvatar({ avatar }) {
+  const currentUser = {
+    name: avatar.name,
+    avatar: "http://10.8.2.133" + avatar.avatar
+  };
+
+  if (!currentUser.name) {
+    return <Spin size="default" className={styles.spin} />;
+  }
+
   const handleMenuClick = ({ key }) => {
     if (key === "login") {
-      router.push("/login");
+      router.push("/login?autoLogin=0");
       return;
     }
     if (key === "user") {
@@ -24,16 +33,6 @@ function LoginAvatar() {
       </Menu.Item>
     </Menu>
   );
-
-  const currentUser = {
-    name: "张三",
-    avatar:
-      "https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png"
-  };
-
-  if (!currentUser.name) {
-    return <Spin size="default" className={styles.spin} />;
-  }
 
   return (
     <div className={styles.right}>

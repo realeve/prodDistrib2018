@@ -1,14 +1,13 @@
 import React, { Component } from "react";
-import Login from "ant-design-pro/lib/Login";
-import { Alert, Checkbox, Layout } from "antd";
-import styles from "./index.less";
-
 import router from "umi/router";
+import { Alert, Checkbox, Layout } from "antd";
+import Login from "ant-design-pro/lib/Login";
+import styles from "./index.less";
+import * as db from "./service";
+import userTool from "../../utils/users";
 
 const { Footer } = Layout;
-
 const { Tab, UserName, Password, Submit } = Login;
-const _lsKey = "_userSetting";
 
 class LoginDemo extends Component {
   state = {
@@ -17,49 +16,8 @@ class LoginDemo extends Component {
     autoLogin: true
   };
 
-  onSubmit = async (err, values) => {
-    console.log("value collected ->", {
-      ...values,
-      autoLogin: this.state.autoLogin
-    });
-
-    if (values.username === "admin") {
-      this.handleAutoLogin(values);
-      this.login();
-      return;
-    }
-
-    this.setState({
-      notice: "账号或密码错误！"
-    });
-  };
-
-  encodeStr = values => {
-    values.token =
-      new Date().getTime() +
-      encodeURI("印钞产品工艺流转计划跟踪系统").replace(/\%/g, "");
-    return btoa(encodeURI(JSON.stringify(values)));
-  };
-
-  decodeStr = str => JSON.parse(decodeURI(atob(str)));
-
-  saveUserSetting = values => {
-    window.localStorage.setItem(_lsKey, this.encodeStr(values));
-  };
-
-  getUserSetting = () => {
-    let _userSetting = window.localStorage.getItem(_lsKey);
-    if (_userSetting == null) {
-      return { success: false };
-    }
-    return {
-      data: this.decodeStr(_userSetting),
-      success: true
-    };
-  };
-
-  clearUserSetting = () => {
-    window.localStorage.removeItem(_lsKey);
+  onSubmit = (err, values) => {
+    this.login(values);
   };
 
   changeAutoLogin = e => {
@@ -68,41 +26,54 @@ class LoginDemo extends Component {
       autoLogin: checked
     });
     if (!checked) {
-      this.clearUserSetting();
+      userTool.clearUserSetting();
     }
   };
 
   handleAutoLogin = values => {
     if (this.state.autoLogin) {
-      this.saveUserSetting(values);
+      userTool.saveUserSetting(values);
     } else {
-      this.clearUserSetting();
+      userTool.clearUserSetting();
     }
   };
 
-  login() {
-    setTimeout(() => {
+  async login(values) {
+    let userInfo = await db.getUser(values);
+    const autoLogin = this.state.autoLogin;
+
+    if (userInfo.rows > 0) {
+      this.handleAutoLogin({ values, setting: userInfo.data[0], autoLogin });
       router.push("/");
-    }, 1000);
+      return;
+    }
+
+    this.setState({
+      notice: "账号或密码错误！"
+    });
   }
 
   componentWillMount() {
-    // if (this.state.autoLogin) {
-    //   this.login();
-    // }
-    // let { setFieldsValue } = this.props.form;
-    // setFieldsValue({
-    //   username: "zhangsan"
-    // });
+    let { data, success } = userTool.getUserSetting();
+    if (!success || !data.autoLogin) {
+      return;
+    }
+    const query = this.props.location.query;
+    if (query.autoLogin === "0") {
+      return;
+    }
+    this.login(data.values);
   }
 
   render() {
     const loginStyle = {
       style: { float: "right" },
-      href: "http://10.8.2.133/login",
+      href: "http://10.8.2.133/welcome/logout",
       rel: "noopener noreferrer",
       target: "_blank"
     };
+    const { autoLogin } = this.state;
+
     return (
       <div className={styles.container}>
         <div className={styles.content}>
@@ -135,14 +106,19 @@ class LoginDemo extends Component {
                     closable
                   />
                 )}
-                <UserName name="username" placeholder="用户名" />
-                <Password name="password" placeholder="密码" />
+                <UserName
+                  name="username"
+                  placeholder="用户名"
+                  autoComplete="true"
+                />
+                <Password
+                  name="password"
+                  placeholder="密码"
+                  autoComplete="true"
+                />
               </Tab>
               <div>
-                <Checkbox
-                  checked={this.state.autoLogin}
-                  onChange={this.changeAutoLogin}
-                >
+                <Checkbox checked={autoLogin} onChange={this.changeAutoLogin}>
                   自动登录
                 </Checkbox>
                 <a {...loginStyle}>忘记密码</a>

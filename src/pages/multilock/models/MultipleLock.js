@@ -107,7 +107,6 @@ export default {
     },
     * getProc(payload, {
       put,
-      select,
       call
     }) {
       let proc = yield call(db.getPrintAbnormalProd);

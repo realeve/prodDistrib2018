@@ -1,4 +1,6 @@
+import pathToRegexp from "path-to-regexp";
 import * as db from "../services/Proclist";
+import userTool from '../utils/users';
 
 const namespace = "common";
 export default {
@@ -10,7 +12,8 @@ export default {
       uid: '',
       name: '',
       avatar: ''
-    }
+    },
+    inited: false
   },
   reducers: {
     setStore(state, {
@@ -24,8 +27,17 @@ export default {
   effects: {
     * getProclist(payload, {
       put,
-      call
+      call,
+      select
     }) {
+      const store = yield select(state => state[namespace]);
+      const {
+        inited
+      } = store;
+      if (inited) {
+        return;
+      }
+
       let {
         data
       } = yield call(db.getPrintNewprocType);
@@ -38,8 +50,17 @@ export default {
     },
     * getProduct(payload, {
       put,
-      call
+      call,
+      select
     }) {
+      const store = yield select(state => state[namespace]);
+      const {
+        inited
+      } = store;
+      if (inited) {
+        return;
+      }
+
       let {
         data
       } = yield call(db.getProduct);
@@ -59,13 +80,31 @@ export default {
       dispatch,
       history
     }) {
-      return history.listen(async () => {
-        dispatch({
+      return history.listen(async ({
+        pathname,
+        query
+      }) => {
+        const match = pathToRegexp("/login").exec(pathname);
+        if (match && match[0] === "/login") {
+          return;
+        }
+
+        userTool.saveLastRouter(pathname);
+
+        await dispatch({
           type: "getProclist"
         });
-        dispatch({
+
+        await dispatch({
           type: "getProduct"
         });
+
+        dispatch({
+          type: "setStore",
+          payload: {
+            inited: true
+          }
+        })
       });
     }
   }

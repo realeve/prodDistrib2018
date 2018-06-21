@@ -74,7 +74,17 @@ class Index extends Component {
   render() {
     const { location, children, userSetting } = this.props;
     if (location.pathname === "/login") {
-      return children;
+      return (
+        <TransitionGroup>
+          <CSSTransition
+            key={location.key}
+            classNames="fade"
+            timeout={{ enter: 1200, exit: 300 }}
+          >
+            {children}
+          </CSSTransition>
+        </TransitionGroup>
+      );
     }
 
     // timeout={500}

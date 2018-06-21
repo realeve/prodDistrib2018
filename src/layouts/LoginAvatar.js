@@ -1,6 +1,7 @@
 import { Menu, Icon, Spin, Dropdown, Avatar } from "antd";
 import router from "umi/router";
 import styles from "./LoginAvatar.less";
+import userTool from "../utils/users";
 
 function LoginAvatar({ avatar }) {
   const currentUser = {
@@ -14,11 +15,12 @@ function LoginAvatar({ avatar }) {
 
   const handleMenuClick = ({ key }) => {
     if (key === "login") {
+      // userTool.clearUserSetting();
       router.push("/login?autoLogin=0");
       return;
     }
     if (key === "user") {
-      window.location.href = "http://10.8.2.133/setting/user";
+      window.location.href = "http://10.8.2.133/settings/account";
     }
   };
 

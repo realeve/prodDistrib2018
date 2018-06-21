@@ -29,8 +29,20 @@ const getUserSetting = () => {
 const clearUserSetting = () => {
   window.localStorage.removeItem(_lsKey);
 };
+
+const saveLastRouter = pathname => {
+  window.localStorage.setItem('_lastRouter', pathname)
+}
+
+const readLastRouter = () => {
+  let router = window.localStorage.getItem('_lastRouter');
+  return router == null ? '/' : router;
+}
+
 export default {
   saveUserSetting,
   getUserSetting,
-  clearUserSetting
+  clearUserSetting,
+  saveLastRouter,
+  readLastRouter
 }

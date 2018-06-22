@@ -68,13 +68,12 @@ class DynamicRule extends React.Component {
         return;
       }
       let data = this.props.form.getFieldsValue();
-      data.rec_date = lib.ymd();
+      data.rec_date = lib.now();
       data.captain_name =
         typeof data.captain_name === "string"
           ? data.captain_name
           : data.captain_name.join(",");
       data.user_name = this.props.userSetting.name;
-
       this.insertData(data);
     });
   };

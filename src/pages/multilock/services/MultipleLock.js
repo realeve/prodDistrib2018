@@ -60,8 +60,13 @@ export const getTbstock = async carnos =>
     const { carnos1, carnos2, carnos3 } = params;
 */
 const getTbbaseCarTechnologHistory = async params => await axios({
-  url: '/132/6ac1e30d85/array.json',
-  params,
+  // url: '/132/6ac1e30d85/array.json',
+  method: "post",
+  data: { ...params,
+    id: 132,
+    nonce: "6ac1e30d85",
+    mode: 'array'
+  },
 }).then(res => res);
 
 

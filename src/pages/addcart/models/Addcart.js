@@ -160,7 +160,7 @@ export default {
       })
 
       // 将库管系统数据合并
-      dataSource.header = [...dataSource.header.slice(0, 8), '锁车状态(库管系统)', '工艺(库管系统)', '完成状态(调度服务)', ...dataSource.header.slice(9, 11)]
+      dataSource.header = [...dataSource.header.slice(0, 8), '锁车状态(库管系统)', '工艺(库管系统)', '完成状态(调度服务)', ...dataSource.header.slice(9, 12)]
       dataSource.data = dataSource.data.map(item => {
         let iTemp = item.slice(0, 8);
         let lockStatus = abnormalWMS.data.filter(wmsItem => wmsItem[2] === item[1]);
@@ -169,7 +169,7 @@ export default {
         } else {
           iTemp = [...iTemp, lockStatus[0][5], lockStatus[0][7]];
         }
-        return [...iTemp, ...item.slice(8, 11)];
+        return [...iTemp, ...item.slice(8, 12)];
       });
 
       yield put({

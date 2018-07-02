@@ -71,6 +71,8 @@ export default {
       let dataSource = yield call(db.getViewPrintAbnormalProd, {
         tstart: dateRange[0],
         tend: dateRange[1],
+        tstart2: dateRange[0],
+        tend2: dateRange[1],
         only_lock_cart: 1
       });
 
@@ -85,7 +87,7 @@ export default {
         return item;
       })
       // 将库管系统数据合并
-      dataSource.header = [...dataSource.header.slice(0, 4), '锁车状态(库管系统)', '工艺(库管系统)', '完成状态(调度服务)', ...dataSource.header.slice(5, 8)]
+      dataSource.header = [...dataSource.header.slice(0, 4), '锁车状态(库管系统)', '工艺(库管系统)', '完成状态(调度服务)', ...dataSource.header.slice(5, 9)]
       dataSource.data = dataSource.data.map(item => {
         let iTemp = item.slice(0, 4);
         let lockStatus = abnormalWMS.data.filter(wmsItem => wmsItem[2] === item[1]);
@@ -94,7 +96,7 @@ export default {
         } else {
           iTemp = [...iTemp, lockStatus[0][5], lockStatus[0][7]];
         }
-        return [...iTemp, ...item.slice(4, 8)];
+        return [...iTemp, ...item.slice(4, 9)];
       });
 
       yield put({

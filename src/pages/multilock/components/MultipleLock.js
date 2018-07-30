@@ -168,13 +168,18 @@ class DynamicRule extends React.Component {
 
   unlockCarts = () => {
     this.setState({ submitting: true });
+    let { reason } = this.props.form.getFieldsValue();
     this.props.form.validateFields(async err => {
       if (err) {
         this.setState({ submitting: false });
         return;
       }
 
-      let { data } = await db.setPrintAbnormalProd(this.state.cartList);
+      // 解锁添加原因
+      let { data } = await db.setPrintAbnormalProd({
+        values: this.state.cartList,
+        remark: reason
+      });
       this.setState({ submitting: false });
 
       // if (data.length === 0 || data[0].affected_rows === 0) {
@@ -344,63 +349,61 @@ class DynamicRule extends React.Component {
               </FormItem>
             )}
           </Col>
-          {operationType !== 1 && (
-            <Col span={12}>
-              {operationType === 2 && (
-                <FormItem
-                  {...formItemLayout}
-                  label="工艺流程"
-                  extra={
-                    <label>
-                      推荐选择{" "}
-                      <span className={styles.bold}>8位清分机全检</span>，当选择自动分配时，<span
-                        className={styles.bold}
-                      >
-                        系统将自动根据拉号情况自动分配
-                      </span>.
-                    </label>
-                  }
-                >
-                  {getFieldDecorator("proc_stream", {
-                    rules: [{ required: true, message: "请选择产品工艺流程" }]
-                  })(
-                    <Select placeholder="请选择产品工艺流程">
-                      {this.props.procList.map(({ value, name }) => (
-                        <Option value={value} key={value}>
-                          {name}
-                        </Option>
-                      ))}
-                    </Select>
-                  )}
-                </FormItem>
-              )}
-              {operationType === 0 && (
-                <FormItem {...formItemLayout} label="原因">
-                  {getFieldDecorator("abnormal_type", {
-                    rules: [{ required: true, message: "请选择原因" }]
-                  })(
-                    <Select placeholder="请选择原因">
-                      {this.props.abnormalTypeList.map(({ proc_name }) => (
-                        <Option value={proc_name} key={proc_name}>
-                          {proc_name}
-                        </Option>
-                      ))}
-                    </Select>
-                  )}
-                </FormItem>
-              )}
-              <FormItem {...formItemLayout} label="备注">
-                {getFieldDecorator("reason", {
-                  rules: [
-                    {
-                      required: true,
-                      message: "其它备注说明"
-                    }
-                  ]
-                })(<Input.TextArea rows={3} placeholder="请输入备注说明" />)}
+          <Col span={12}>
+            {operationType === 2 && (
+              <FormItem
+                {...formItemLayout}
+                label="工艺流程"
+                extra={
+                  <label>
+                    推荐选择 <span className={styles.bold}>8位清分机全检</span>，当选择自动分配时，<span
+                      className={styles.bold}
+                    >
+                      系统将自动根据拉号情况自动分配
+                    </span>.
+                  </label>
+                }
+              >
+                {getFieldDecorator("proc_stream", {
+                  rules: [{ required: true, message: "请选择产品工艺流程" }]
+                })(
+                  <Select placeholder="请选择产品工艺流程">
+                    {this.props.procList.map(({ value, name }) => (
+                      <Option value={value} key={value}>
+                        {name}
+                      </Option>
+                    ))}
+                  </Select>
+                )}
               </FormItem>
-            </Col>
-          )}
+            )}
+            {operationType === 0 && (
+              <FormItem {...formItemLayout} label="原因">
+                {getFieldDecorator("abnormal_type", {
+                  rules: [{ required: true, message: "请选择原因" }]
+                })(
+                  <Select placeholder="请选择原因">
+                    {this.props.abnormalTypeList.map(({ proc_name }) => (
+                      <Option value={proc_name} key={proc_name}>
+                        {proc_name}
+                      </Option>
+                    ))}
+                  </Select>
+                )}
+              </FormItem>
+            )}
+
+            <FormItem {...formItemLayout} label="备注">
+              {getFieldDecorator("reason", {
+                rules: [
+                  {
+                    required: true,
+                    message: "其它备注说明"
+                  }
+                ]
+              })(<Input.TextArea rows={3} placeholder="请输入备注说明" />)}
+            </FormItem>
+          </Col>
         </Row>
       </Form>
     );

@@ -104,11 +104,9 @@ export const addPrintWmsLog = async values =>
  *   @database: { 质量信息系统 }
  *   @desc:     { 批量解锁 } 
  */
-export const setPrintAbnormalProd = async values => await axios({
+export const setPrintAbnormalProd = async params => await axios({
     url: '/139/00cbb681ae.json',
-    params: {
-        values
-    },
+    params
 }).then(res => res);
 
 /**

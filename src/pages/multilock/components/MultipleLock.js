@@ -38,12 +38,16 @@ class DynamicRule extends React.Component {
   state = {
     procList: [],
     cartList: [],
-    operationType: 0
+    operationType: 0,
+    submitting: false
   };
 
   submit = () => {
+    this.setState({ submitting: true });
+
     this.props.form.validateFields(err => {
       if (err) {
+        this.setState({ submitting: false });
         return;
       }
       let data = this.props.form.getFieldsValue();
@@ -89,8 +93,10 @@ class DynamicRule extends React.Component {
   };
 
   lockCarts = () => {
+    this.setState({ submitting: true });
     this.props.form.validateFields(async err => {
       if (err) {
+        this.setState({ submitting: false });
         return;
       }
       let insertData = this.getLockCarts();
@@ -101,6 +107,7 @@ class DynamicRule extends React.Component {
           description: "批量锁车失败",
           icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
         });
+        this.setState({ submitting: false });
         return;
       }
       const carnos = this.state.cartList;
@@ -117,6 +124,7 @@ class DynamicRule extends React.Component {
       // 添加日志正常？
       if (logInfo.rows < 1 || logInfo.data[0].affected_rows < 1) {
         console.log(logInfo);
+        this.setState({ submitting: false });
         return {
           status: false
         };
@@ -158,8 +166,10 @@ class DynamicRule extends React.Component {
   };
 
   unlockCarts = () => {
+    this.setState({ submitting: true });
     this.props.form.validateFields(async err => {
       if (err) {
+        this.setState({ submitting: false });
         return;
       }
 
@@ -170,6 +180,7 @@ class DynamicRule extends React.Component {
           description: "批量锁车失败",
           icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
         });
+        this.setState({ submitting: false });
         return;
       }
 
@@ -202,6 +213,7 @@ class DynamicRule extends React.Component {
     this.props.dispatch({
       type: "multilock/handleReportData"
     });
+    this.setState({ submitting: false });
   };
 
   convertCart = async e => {
@@ -296,17 +308,27 @@ class DynamicRule extends React.Component {
             {this.state.cartList.length && (
               <FormItem {...formTailLayout}>
                 {operationType === 0 && (
-                  <Button type="danger" onClick={this.lockCarts}>
-                    <Icon type="lock" />批量锁车
+                  <Button
+                    type="danger"
+                    disabled={this.state.submitting}
+                    onClick={this.lockCarts}
+                  >
+                    <Icon type={this.state.submitting ? "loading" : "lock"} />批量锁车
                   </Button>
                 )}
                 {operationType === 1 && (
-                  <Button type="danger" onClick={this.unlockCarts}>
-                    <Icon type="unlock" /> 批量解锁
+                  <Button
+                    type="danger"
+                    disabled={this.state.submitting}
+                    onClick={this.unlockCarts}
+                  >
+                    <Icon type={this.state.submitting ? "loading" : "unlock"} />
+                    批量解锁
                   </Button>
                 )}
                 {operationType === 2 && (
                   <Button type="danger" onClick={this.submit}>
+                    {this.state.submitting === true && <Icon type="loading" />}
                     设置工艺
                   </Button>
                 )}

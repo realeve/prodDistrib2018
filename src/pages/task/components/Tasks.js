@@ -1,11 +1,13 @@
 import React from "react";
 import { connect } from "dva";
-import { DatePicker } from "antd";
+import { DatePicker, Button, Modal } from "antd";
 import moment from "moment";
 import "moment/locale/zh-cn";
 import styles from "./Tasks.less";
 import dateRanges from "../../../utils/ranges";
 import VTable from "../../../components/Table";
+import * as db from "../services/tasks";
+const confirm = Modal.confirm;
 
 const RangePicker = DatePicker.RangePicker;
 moment.locale("zh-cn");
@@ -28,6 +30,31 @@ function Tasks({
     });
   };
 
+  const callback = text => {
+    confirm({
+      title: "系统提示",
+      content: `本功能仅用于系统未正常执行自动领取状态，是否继续？`,
+      maskClosable: true,
+      onOk: async () => {
+        db.unlockCart(text).then(res => {
+          // 刷新数据
+          dispatch({
+            type: "taskGet/handleTaskData"
+          });
+        });
+      }
+    });
+  };
+
+  // 在行末添加操作列
+  const actions = [
+    {
+      title: "手动领用", //标题
+      dataCol: 0, // 需要处理的数据列序号
+      render: text => <Button onClick={() => callback(text)}>{text}</Button>
+    }
+  ];
+
   return (
     <>
       <div className="header">
@@ -43,7 +70,7 @@ function Tasks({
           />
         </div>
       </div>
-      <VTable dataSrc={dataSource} />
+      <VTable dataSrc={dataSource} actions={actions} />
       <VTable dataSrc={dataSrcNewproc} cartLinkMode="img" />
       <VTable dataSrc={dataComplete} cartLinkMode="img" />
     </>

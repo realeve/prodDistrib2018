@@ -44,12 +44,12 @@ class Tables extends Component {
   init = async () => {
     const { page, pageSize } = this.state;
     let data = this.dataSrc;
-    const { source, timing } = data;
+    const { source, time } = data;
 
     this.setState({
       total: this.dataSrc.rows,
       source,
-      timing
+      timing: time
     });
 
     let dataSource = [];
@@ -107,7 +107,7 @@ class Tables extends Component {
   // 分页数量调整
   onShowSizeChange = async (current, nextPageSize) => {
     let newPage = Math.max(
-      Math.floor(this.state.pageSize * current / nextPageSize),
+      Math.floor((this.state.pageSize * current) / nextPageSize),
       1
     );
     await this.setState({
@@ -254,13 +254,28 @@ class Tables extends Component {
     );
   };
 
+  // 为每行增加自定义附加操作
+  appendActions = columns => {
+    if (!this.props.actions) {
+      return columns;
+    }
+
+    let actions = this.props.actions.map(({ title, dataCol, render }, idx) => ({
+      title,
+      key: "col" + (columns.length + idx),
+      dataIndex: "col" + (columns.length + idx),
+      render: (text, record) => render(record["col" + dataCol])
+    }));
+    return [...columns, ...actions];
+  };
+
   getTBody = () => {
     const {
       loading,
       columns,
       dataSource,
-      // source,
-      // timing,
+      source,
+      timing,
       total,
       page,
       pageSize
@@ -269,13 +284,13 @@ class Tables extends Component {
       <>
         <Table
           loading={loading}
-          columns={columns}
+          columns={this.appendActions(columns)}
           dataSource={dataSource}
           rowKey="key"
           pagination={false}
           size="medium"
           onChange={this.handleChange}
-          // footer={() => `${source} (共耗时${timing})`}
+          footer={() => `${source} (共耗时${timing})`}
         />
         <Pagination
           className="ant-table-pagination"
@@ -330,7 +345,8 @@ Tables.defaultProps = {
     header: []
   },
   loading: false,
-  cartLinkMode: "search"
+  cartLinkMode: "search",
+  actions: false
 };
 
 export default Tables;

@@ -74,7 +74,7 @@ const getTbbaseCarTechnologHistory = async params => await axios({
 *   @database: { 质量信息系统 }
 *   @desc:     { 批量添加批量锁车车号列表 } 
 	以下参数在建立过程中与系统保留字段冲突，已自动替换:
-	@desc:批量插入数据时，约定使用二维数组values参数，格式为[{prod_id,cart_number,rec_date,reason,only_lock_cart,abnormal_type, complete_status, proc_stream }]，数组的每一项表示一条数据*/
+	@desc:批量插入数据时，约定使用二维数组values参数，格式为[{prod_id,cart_number,unlock_date,rec_date,reason,only_lock_cart,abnormal_type, complete_status, proc_stream }]，数组的每一项表示一条数据*/
 export const addLockCartlist = async values => await axios({
     method: 'post',
     data: {
@@ -148,3 +148,14 @@ export const setPrintWmsLog = async params =>
         url: "/120/e7d88969ca.json",
         params
     }).then(res => res);
+
+/**
+ *   @database: { 质量信息系统 }
+ *   @desc:     { 获取当前用户锁车列表 } 
+ */
+export const getLockedUsers = async values => await axios({
+    url: '/159/e3e4d8dd13/array.json',
+    params: {
+        values
+    },
+}).then(res => res);

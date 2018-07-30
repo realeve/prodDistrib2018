@@ -10,14 +10,17 @@ import {
   Icon,
   Row,
   Col,
-  Radio
+  Radio,
+  DatePicker
 } from "antd";
 
 import styles from "./Report.less";
 import * as lib from "../../../utils/lib";
+import userLib from "../../../utils/users";
 
 import * as db from "../services/MultipleLock";
 import handler from "../services/procHandler";
+import moment from "moment";
 
 import wms from "../../index/services/wms";
 const FormItem = Form.Item;
@@ -39,8 +42,17 @@ class DynamicRule extends React.Component {
     procList: [],
     cartList: [],
     operationType: 0,
-    submitting: false
+    submitting: false,
+    user_name: "",
+    unValidCarts: []
   };
+
+  componentDidMount() {
+    let { data } = userLib.getUserSetting();
+    this.setState({
+      user_name: data.setting.name
+    });
+  }
 
   submit = () => {
     this.setState({ submitting: true });
@@ -73,7 +85,11 @@ class DynamicRule extends React.Component {
   };
 
   getLockCarts = () => {
-    let { reason, abnormal_type } = this.props.form.getFieldsValue();
+    let {
+      reason,
+      abnormal_type,
+      unlock_date
+    } = this.props.form.getFieldsValue();
     let { cartList } = this.state;
     let rec_date = lib.now();
     let complete_status = 1,
@@ -88,18 +104,24 @@ class DynamicRule extends React.Component {
       complete_status,
       proc_stream,
       only_lock_cart: 1,
-      user_name: this.props.userSetting.name
+      user_name: this.props.userSetting.name,
+      unlock_date: moment(unlock_date).format("YYYY-MM-DD")
     }));
   };
+
+  submitted() {
+    this.setState({ submitting: false });
+  }
 
   lockCarts = () => {
     this.setState({ submitting: true });
     this.props.form.validateFields(async err => {
       if (err) {
-        this.setState({ submitting: false });
+        this.submitted();
         return;
       }
       let insertData = this.getLockCarts();
+
       let { data } = await db.addLockCartlist(insertData);
       if (data.length === 0 || data[0].affected_rows === 0) {
         notification.open({
@@ -107,7 +129,7 @@ class DynamicRule extends React.Component {
           description: "批量锁车失败",
           icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
         });
-        this.setState({ submitting: false });
+        this.submitted();
         return;
       }
 
@@ -125,7 +147,7 @@ class DynamicRule extends React.Component {
       // 添加日志正常？
       if (logInfo.rows < 1 || logInfo.data[0].affected_rows < 1) {
         console.log(logInfo);
-        this.setState({ submitting: false });
+        this.submitted();
         return {
           status: false
         };
@@ -161,14 +183,32 @@ class DynamicRule extends React.Component {
         description: "批量锁车成功",
         icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
       });
-
       this.reload();
     });
   };
 
-  unlockCarts = () => {
+  handleLockedUsers = async values => {
+    // 管理员能解锁所有车号
+    if (lib.adminUserList.includes(this.state.user_name)) {
+      return values;
+    }
+
+    let { data } = await db.getLockedUsers(values);
+    // 其它人员仅允许解锁自己的产品
+    let validData = data.filter(item => this.state.user_name === item[1]);
+
+    // 禁止解锁的车号列表
+    this.setState({
+      unValidCarts: data.filter(item => item[1] !== this.state.user_name)
+    });
+    return validData;
+  };
+
+  unlockCarts = async () => {
     this.setState({ submitting: true });
     let { reason } = this.props.form.getFieldsValue();
+    let cartList = await this.handleLockedUsers(this.state.cartList);
+
     this.props.form.validateFields(async err => {
       if (err) {
         this.setState({ submitting: false });
@@ -176,12 +216,14 @@ class DynamicRule extends React.Component {
       }
 
       // 解锁添加原因
-      let { data } = await db.setPrintAbnormalProd({
-        values: this.state.cartList,
+      db.setPrintAbnormalProd({
+        values: cartList,
         remark: reason
+      }).then(res => {
+        this.setState({ submitting: false });
       });
-      this.setState({ submitting: false });
 
+      // let { data } =
       // if (data.length === 0 || data[0].affected_rows === 0) {
       //   this.setState({ submitting: false });
       //   notification.open({
@@ -221,7 +263,7 @@ class DynamicRule extends React.Component {
     this.props.dispatch({
       type: "multilock/handleReportData"
     });
-    this.setState({ submitting: false });
+    // this.setState({ submitting: false });
   };
 
   convertCart = async e => {
@@ -236,9 +278,7 @@ class DynamicRule extends React.Component {
     // 过滤有效车号列表
     const validCart = cart => /^\d{4}[A-Z]\d{3}$/.test(cart);
     const cartList = val.split(splitStr).filter(validCart);
-    console.log(val);
 
-    console.log(cartList);
     this.setState({ cartList });
   };
 
@@ -257,7 +297,8 @@ class DynamicRule extends React.Component {
         extraInfo = "锁定一批车号，不做工艺调整。";
         break;
       case 1:
-        extraInfo = "解锁某批车号";
+        extraInfo =
+          "当前状态下仅允许解锁本人锁车的产品列表，其它车号请联系相关人员。";
         break;
       default:
         extraInfo = "将一组车号批量设定为指定工艺。";
@@ -313,7 +354,50 @@ class DynamicRule extends React.Component {
                 />
               )}
             </FormItem>
-            {this.state.cartList.length && (
+            <FormItem
+              {...formItemLayout}
+              label="截止日期"
+              extra="从这一天开始，产品若未解锁，系统将推送解锁提示"
+            >
+              {getFieldDecorator("unlock_date", {
+                rules: [
+                  {
+                    required: true,
+                    message: "必须输入解锁日期提示"
+                  }
+                ],
+                initialValue: moment().add(1, "weeks")
+              })(
+                <DatePicker
+                  format="YYYYMMDD"
+                  // onChange={(e, pushMsgAt) => this.setState({ pushMsgAt })}
+                  locale={{
+                    rangePlaceholder: "在某日开始推送解锁提示"
+                  }}
+                />
+              )}
+            </FormItem>
+            {operationType === 1 &&
+              this.state.unValidCarts.length > 0 && (
+                <div>
+                  <p className="ant-col-18 ant-col-offset-6 ant-form-item-control-wrapper">
+                    以下车号系统禁止解锁：
+                  </p>
+                  {this.state.unValidCarts.map((item, idx) => (
+                    <p
+                      className="ant-col-18 ant-col-offset-6 ant-form-item-control-wrapper"
+                      key={idx}
+                    >
+                      {idx + 1}.<span>{item[0]}</span>,请联系{" "}
+                      <span style={{ color: "#f23", fontWeight: "bold" }}>
+                        {item[1]}
+                      </span>
+                    </p>
+                  ))}
+                </div>
+              )}
+
+            {this.state.cartList.length > 0 && (
               <FormItem {...formTailLayout}>
                 {operationType === 0 && (
                   <Button

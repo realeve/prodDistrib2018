@@ -6,6 +6,10 @@ import "moment/locale/zh-cn";
 import styles from "./Report.less";
 import dateRanges from "../../../utils/ranges";
 import VTable from "../../../components/Table";
+import userLib from "../../../utils/users";
+let { data } = userLib.getUserSetting();
+let user_name = data.setting.name;
+const R = require("ramda");
 
 const RangePicker = DatePicker.RangePicker;
 moment.locale("zh-cn");
@@ -20,8 +24,21 @@ function MultiLock({ dispatch, dataSource, loading, dateRange }) {
       type: "multilock/handleReportData"
     });
   };
-  // console.log("载入状态:", loading);
-  //  loading={loading}
+
+  let myList = R.clone(dataSource);
+  let theOthersList = R.clone(dataSource);
+  if (myList.data) {
+    myList.data = myList.data.filter(item => item.col10 === user_name);
+    myList.title = "我的锁车列表";
+    myList.rows = myList.data.length;
+
+    theOthersList.data = theOthersList.data.filter(
+      item => item.col10 !== user_name
+    );
+    // theOthersList.title = "我的锁车列表";
+    theOthersList.rows = theOthersList.data.length;
+  }
+
   return (
     <>
       <div className={styles.header}>
@@ -37,7 +54,9 @@ function MultiLock({ dispatch, dataSource, loading, dateRange }) {
           />
         </div>
       </div>
-      <VTable dataSrc={dataSource} />
+      {myList.data && myList.data.length > 0 && <VTable dataSrc={myList} />}
+      {theOthersList.data &&
+        theOthersList.data.length > 0 && <VTable dataSrc={theOthersList} />}
     </>
   );
 }

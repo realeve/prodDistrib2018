@@ -1,10 +1,16 @@
 import Report from "./components/Report";
 import Addcart from "./components/Addcart";
+
+import * as lib from "../../utils/lib";
+import userLib from "../../utils/users";
+
+let { data } = userLib.getUserSetting();
+// 一般人员不再显示图像异常品添加列表
+let isAdmin = lib.imgAdmin.includes(data.setting.name);
 export default () => {
   return (
     <>
-      <Addcart />
-      <Report />
+      {isAdmin && <Addcart />} <Report />
     </>
   );
 };

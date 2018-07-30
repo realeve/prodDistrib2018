@@ -1,9 +1,9 @@
 import pathToRegexp from "path-to-regexp";
 import * as db from "../services/Newproc";
 import dateRanges from "../../../utils/ranges";
-import {
-  DEV
-} from '../../../utils/axios';
+// import {
+//   DEV
+// } from '../../../utils/axios';
 
 const namespace = "newproc";
 export default {
@@ -15,23 +15,16 @@ export default {
     machineList: []
   },
   reducers: {
-    setStore(state, {
-      payload
-    }) {
-      return { ...state,
+    setStore(state, { payload }) {
+      return {
+        ...state,
         ...payload
       };
-    },
+    }
   },
   effects: {
-    * handleReportData(payload, {
-      call,
-      put,
-      select
-    }) {
-      const {
-        dateRange
-      } = yield select(state => state[namespace]);
+    *handleReportData(payload, { call, put, select }) {
+      const { dateRange } = yield select(state => state[namespace]);
 
       let dataSrc = yield call(db.getViewPrintNewprocPlan, {
         tstart: dateRange[0],
@@ -45,25 +38,16 @@ export default {
         }
       });
     },
-    * getMachineList(payload, {
-      call,
-      put
-    }) {
-      let {
-        data
-      } = yield call(db.getTBBASEMACHINEINFO);
+    *getMachineList(payload, { call, put }) {
+      let { data } = yield call(db.getTBBASEMACHINEINFO);
       yield put({
         type: "setStore",
         payload: {
-          machienList: data
+          machineList: data
         }
       });
     },
-    * getProc(payload, {
-      put,
-      select,
-      call
-    }) {
+    *getProc(payload, { put, select, call }) {
       // let proc = yield call(db.getPrintAbnormalProd);
       // yield put({
       //   type: "setProc",
@@ -72,7 +56,8 @@ export default {
       yield put({
         type: "setStore",
         payload: {
-          procList: [{
+          procList: [
+            {
               proc_name: "新设备"
             },
             {
@@ -96,14 +81,8 @@ export default {
     }
   },
   subscriptions: {
-    setup({
-      dispatch,
-      history
-    }) {
-      return history.listen(async ({
-        pathname,
-        query
-      }) => {
+    setup({ dispatch, history }) {
+      return history.listen(async ({ pathname, query }) => {
         const match = pathToRegexp("/" + namespace).exec(pathname);
         if (match && match[0] === "/" + namespace) {
           const [tstart, tend] = dateRanges["最近一月"];
@@ -119,11 +98,14 @@ export default {
             type: "handleReportData"
           });
 
-          if (!DEV) {
-            dispatch({
-              type: "getMachineList"
-            });
-          }
+          // if (!DEV) {
+          //   dispatch({
+          //     type: "getMachineList"
+          //   });
+          // }
+          dispatch({
+            type: "getMachineList"
+          });
 
           dispatch({
             type: "getProc"

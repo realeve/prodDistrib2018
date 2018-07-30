@@ -175,13 +175,13 @@ class DynamicRule extends React.Component {
 
       let { data } = await db.setPrintAbnormalProd(this.state.cartList);
       if (data.length === 0 || data[0].affected_rows === 0) {
-        notification.open({
-          message: "系统提示",
-          description: "批量锁车失败",
-          icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
-        });
         this.setState({ submitting: false });
-        return;
+        // notification.open({
+        //   message: "系统提示",
+        //   description: "批量解锁失败",
+        //   icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+        // });
+        // return;
       }
 
       let { result } = await wms.setWhiteList(this.state.cartList);

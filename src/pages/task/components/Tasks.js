@@ -31,18 +31,20 @@ function Tasks({
   };
 
   const callback = text => {
+    const onOk = () => {
+      db.unlockCart(text).then(res => {
+        // 刷新数据
+        dispatch({
+          type: "taskGet/handleTaskData"
+        });
+      });
+    };
+
     confirm({
       title: "系统提示",
       content: `本功能仅用于系统未正常执行自动领取状态，是否继续？`,
       maskClosable: true,
-      onOk: async () => {
-        db.unlockCart(text).then(res => {
-          // 刷新数据
-          dispatch({
-            type: "taskGet/handleTaskData"
-          });
-        });
-      }
+      onOk
     });
   };
 

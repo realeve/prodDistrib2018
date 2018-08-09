@@ -260,11 +260,11 @@ class Tables extends Component {
       return columns;
     }
 
-    let actions = this.props.actions.map(({ title, dataCol, render }, idx) => ({
+    let actions = this.props.actions.map(({ title, render }, idx) => ({
       title,
       key: "col" + (columns.length + idx),
       dataIndex: "col" + (columns.length + idx),
-      render: (text, record) => render(record["col" + dataCol])
+      render: (text, record) => render(record)
     }));
     return [...columns, ...actions];
   };

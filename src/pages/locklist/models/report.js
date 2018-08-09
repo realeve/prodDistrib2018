@@ -1,0 +1,53 @@
+import pathToRegexp from "path-to-regexp";
+import * as db from "../services/report";
+
+const namespace = "locklist";
+export default {
+    namespace,
+    state: {
+        dataSrc: []
+    },
+    reducers: {
+        setStore(state, {
+            payload
+        }) {
+            return {
+                ...state,
+                ...payload
+            };
+        }
+    },
+    effects: {
+        * handleReportData(payload, {
+            call,
+            put,
+            select
+        }) {
+            let dataSrc = yield call(db.getVwBlacklist);
+            yield put({
+                type: "setStore",
+                payload: {
+                    dataSrc
+                }
+            });
+        },
+    },
+    subscriptions: {
+        setup({
+            dispatch,
+            history
+        }) {
+            return history.listen(async({
+                pathname,
+                query
+            }) => {
+                const match = pathToRegexp("/" + namespace).exec(pathname);
+                if (match && match[0] === "/" + namespace) {
+                    dispatch({
+                        type: "handleReportData"
+                    });
+                }
+            });
+        }
+    }
+};

@@ -354,29 +354,31 @@ class DynamicRule extends React.Component {
                 />
               )}
             </FormItem>
-            <FormItem
-              {...formItemLayout}
-              label="截止日期"
-              extra="从这一天开始，产品若未解锁，系统将推送解锁提示"
-            >
-              {getFieldDecorator("unlock_date", {
-                rules: [
-                  {
-                    required: true,
-                    message: "必须输入解锁日期提示"
-                  }
-                ],
-                initialValue: moment().add(1, "weeks")
-              })(
-                <DatePicker
-                  format="YYYYMMDD"
-                  // onChange={(e, pushMsgAt) => this.setState({ pushMsgAt })}
-                  locale={{
-                    rangePlaceholder: "在某日开始推送解锁提示"
-                  }}
-                />
-              )}
-            </FormItem>
+            {operationType === 0 && (
+              <FormItem
+                {...formItemLayout}
+                label="截止日期"
+                extra="从这一天开始，产品若未解锁，系统将推送解锁提示"
+              >
+                {getFieldDecorator("unlock_date", {
+                  rules: [
+                    {
+                      required: true,
+                      message: "必须输入解锁日期提示"
+                    }
+                  ],
+                  initialValue: moment().add(1, "weeks")
+                })(
+                  <DatePicker
+                    format="YYYYMMDD"
+                    // onChange={(e, pushMsgAt) => this.setState({ pushMsgAt })}
+                    locale={{
+                      rangePlaceholder: "在某日开始推送解锁提示"
+                    }}
+                  />
+                )}
+              </FormItem>
+            )}
             {operationType === 1 &&
               this.state.unValidCarts.length > 0 && (
                 <div>
@@ -388,7 +390,8 @@ class DynamicRule extends React.Component {
                       className="ant-col-18 ant-col-offset-6 ant-form-item-control-wrapper"
                       key={idx}
                     >
-                      {idx + 1}.<span>{item[0]}</span>,请联系{" "}
+                      {idx + 1}.<span>{item[0]}</span>
+                      ,请联系{" "}
                       <span style={{ color: "#f23", fontWeight: "bold" }}>
                         {item[1]}
                       </span>
@@ -405,7 +408,8 @@ class DynamicRule extends React.Component {
                     disabled={this.state.submitting}
                     onClick={this.lockCarts}
                   >
-                    <Icon type={this.state.submitting ? "loading" : "lock"} />批量锁车
+                    <Icon type={this.state.submitting ? "loading" : "lock"} />
+                    批量锁车
                   </Button>
                 )}
                 {operationType === 1 && (
@@ -440,11 +444,12 @@ class DynamicRule extends React.Component {
                 label="工艺流程"
                 extra={
                   <label>
-                    推荐选择 <span className={styles.bold}>8位清分机全检</span>，当选择自动分配时，<span
-                      className={styles.bold}
-                    >
+                    推荐选择 <span className={styles.bold}>8位清分机全检</span>
+                    ，当选择自动分配时，
+                    <span className={styles.bold}>
                       系统将自动根据拉号情况自动分配
-                    </span>.
+                    </span>
+                    .
                   </label>
                 }
               >

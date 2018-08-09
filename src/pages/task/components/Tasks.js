@@ -52,8 +52,9 @@ function Tasks({
   const actions = [
     {
       title: "手动领用", //标题
-      dataCol: 0, // 需要处理的数据列序号
-      render: text => <Button onClick={() => callback(text)}>{text}</Button>
+      render: record => (
+        <Button onClick={() => callback(record.col0)}>{record.col0}</Button>
+      )
     }
   ];
 

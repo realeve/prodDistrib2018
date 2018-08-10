@@ -207,7 +207,7 @@ class DynamicRule extends React.Component {
   unlockCarts = async () => {
     this.setState({ submitting: true });
     let { reason } = this.props.form.getFieldsValue();
-    let cartList = await this.handleLockedUsers(this.state.cartList);
+    let carts = await this.handleLockedUsers(this.state.cartList);
 
     this.props.form.validateFields(async err => {
       if (err) {
@@ -217,7 +217,7 @@ class DynamicRule extends React.Component {
 
       // 解锁添加原因
       db.setPrintAbnormalProd({
-        values: cartList,
+        carts,
         remark: reason
       }).then(res => {
         this.setState({ submitting: false });

@@ -101,13 +101,15 @@ export const addPrintWmsLog = async values =>
     }).then(res => res);
 
 /**
- *   @database: { 质量信息系统 }
- *   @desc:     { 批量解锁 } 
- */
+*   @database: { 质量信息系统 }
+*   @desc:     { 批量解锁 } 
+    const { remark, carts } = params;
+*/
 export const setPrintAbnormalProd = async params => await axios({
     url: '/139/00cbb681ae.json',
-    params
+    params,
 }).then(res => res);
+
 
 /**
  *   @database: { 机台作业 }

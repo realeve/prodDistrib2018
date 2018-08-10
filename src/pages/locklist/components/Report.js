@@ -1,32 +1,145 @@
 import React from "react";
 import { connect } from "dva";
-import { Button, Modal } from "antd";
+import { Button, Modal, Input, notification, Icon } from "antd";
 import VTable from "../../../components/Table";
 import * as db from "../services/report";
 
 import userLib from "../../../utils/users";
+import wms from "../../index/services/wms";
+import prodNode from "../../task/services/tasks";
 
 let userSetting = userLib.getUserSetting();
 let userName = userSetting.data.setting.name;
-const confirm = Modal.confirm;
 
-function Tasks({ dispatch, dataSrc, dateRange, loading }) {
-  const callback = text => {
-    const onOk = () => {
-      console.log(text);
-      // db.unlockCart(text).then(res => {
-      //   // 刷新数据
-      //   dispatch({
-      //     type: "locklist/handleTaskData"
-      //   });
-      // });
-    };
+function Tasks({
+  dispatch,
+  dataSrc,
+  dateRange,
+  loading,
+  visible,
+  remark,
+  confirmLoading,
+  cart_number,
+  lock_type
+}) {
+  const handleCancel = () => {
+    dispatch({
+      type: "locklist/setStore",
+      payload: {
+        visible: false
+      }
+    });
+  };
 
-    confirm({
-      title: "系统提示",
-      content: `确定解锁本车?`,
-      maskClosable: true,
-      onOk
+  const showModal = cart => {
+    dispatch({
+      type: "locklist/setStore",
+      payload: {
+        visible: true,
+        cart_number: cart
+      }
+    });
+  };
+
+  const callback = record => {
+    let cart = record.col0;
+    let lockType = 0;
+    if (
+      record.col7.includes("批量锁车.不拉号") ||
+      record.col7.includes("四新验证")
+    ) {
+      lockType = 1;
+      showModal(cart);
+    } else if (record.col7.includes("人工大张日常抽检")) {
+      lockType = 2;
+      Modal.confirm({
+        title: "系统提示",
+        content: `本万产品属于每周大张抽检产品，解锁会导致无法完成抽检工艺，是否继续？`,
+        maskClosable: true,
+        onOk: () => {
+          showModal(cart);
+        }
+      });
+    } else if (record.col7.includes("异常品")) {
+      Modal.error({
+        title: "系统提示",
+        content: "异常品禁止解锁..."
+      });
+    }
+
+    // 更新锁车类型
+    dispatch({
+      type: "locklist/setStore",
+      payload: {
+        lock_type: lockType
+      }
+    });
+  };
+
+  const handleOk = async () => {
+    dispatch({
+      type: "locklist/setStore",
+      payload: {
+        confirmLoading: true
+      }
+    });
+
+    // 非法进入
+    if (lock_type == 0) {
+      return;
+    }
+
+    console.log({ remark, cart_number, lock_type });
+    // 仅解锁
+    if (lock_type == 1) {
+      // 解锁添加原因
+      db.setPrintAbnormalProd({
+        carts: cart_number,
+        remark
+      }).then(res => {
+        unLoading();
+      });
+      let { result } = await wms.setWhiteList([cart_number]);
+      showUnlockResult(result);
+    }
+
+    // 取消人工验证，解锁
+    if (lock_type == 2) {
+      prodNode.unlockCart(cart_number).then(res => {
+        unLoading();
+      });
+    }
+  };
+
+  const showUnlockResult = result => {
+    if (result.unhandledList.length) {
+      notification.open({
+        message: "系统提示",
+        description: `解锁失败`,
+        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+      });
+    }
+    notification.open({
+      message: "系统提示",
+      description: "解锁成功",
+      icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+    });
+  };
+
+  const unLoading = () => {
+    dispatch({
+      type: "locklist/setStore",
+      payload: {
+        confirmLoading: false,
+        visible: false
+      }
+    });
+    reload();
+  };
+
+  const reload = () => {
+    dispatch({
+      type: "locklist/handleReportData"
     });
   };
 
@@ -43,7 +156,36 @@ function Tasks({ dispatch, dataSrc, dateRange, loading }) {
     }
   ];
 
-  return <VTable dataSrc={dataSrc} actions={actions} />;
+  const inputChange = ({ target }) => {
+    dispatch({
+      type: "locklist/setStore",
+      payload: {
+        remark: target.value
+      }
+    });
+  };
+
+  return (
+    <div>
+      <Modal
+        title="产品解锁"
+        visible={visible}
+        onOk={handleOk}
+        confirmLoading={confirmLoading}
+        onCancel={handleCancel}
+      >
+        <p>
+          <Input.TextArea
+            rows={3}
+            onChange={inputChange}
+            defaultValue={remark}
+            placeholder="请输入解锁原因"
+          />
+        </p>
+      </Modal>
+      <VTable dataSrc={dataSrc} actions={actions} />
+    </div>
+  );
 }
 
 function mapStateToProps(state) {

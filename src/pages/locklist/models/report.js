@@ -5,7 +5,12 @@ const namespace = "locklist";
 export default {
     namespace,
     state: {
-        dataSrc: []
+        dataSrc: [],
+        visible: false,
+        confirmLoading: false,
+        remark: '',
+        cart_number: '',
+        lock_type: 0
     },
     reducers: {
         setStore(state, {

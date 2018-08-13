@@ -103,9 +103,9 @@ function Tasks({
       showUnlockResult(result);
     }
 
-    // 取消人工验证，解锁
+    // 取消人工验证，解锁.不增加机台领用记录
     if (lock_type == 2) {
-      prodNode.unlockCart(cart_number).then(res => {
+      prodNode.unlockCart(cart_number, 0).then(res => {
         unLoading();
       });
     }

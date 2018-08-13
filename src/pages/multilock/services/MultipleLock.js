@@ -161,3 +161,14 @@ export const getLockedUsers = async values => await axios({
         values
     },
 }).then(res => res);
+
+/**
+ *   @database: { 质量信息系统 }
+ *   @desc:     { 指定车号列表是否是本周人工拉号任务 } 
+ */
+export const getPrintSampleCartlist = async cart_number => await axios({
+    url: '/164/abd796c14c.json',
+    params: {
+        cart_number
+    },
+}).then(res => res);

@@ -37,6 +37,8 @@ const formTailLayout = {
   wrapperCol: { span: 18, offset: 6 }
 };
 
+const R = require("ramda");
+
 class DynamicRule extends React.Component {
   state = {
     procList: [],
@@ -44,7 +46,8 @@ class DynamicRule extends React.Component {
     operationType: 0,
     submitting: false,
     user_name: "",
-    unValidCarts: []
+    unValidCarts: [],
+    manualCheckCarts: []
   };
 
   componentDidMount() {
@@ -268,8 +271,8 @@ class DynamicRule extends React.Component {
 
   convertCart = async e => {
     e.preventDefault();
+    this.setState({ manualCheckCarts: [] });
     let val = e.target.value.toUpperCase().trim();
-    e.target.value = val;
     if (val.length < 8) {
       return;
     }
@@ -277,9 +280,17 @@ class DynamicRule extends React.Component {
 
     // 过滤有效车号列表
     const validCart = cart => /^\d{4}[A-Z]\d{3}$/.test(cart);
-    const cartList = val.split(splitStr).filter(validCart);
+    let cartList = val.split(splitStr).filter(validCart);
 
-    this.setState({ cartList });
+    // 当前产品是否是本周人工拉号产品
+    let { data } = await db.getPrintSampleCartlist(cartList);
+    let manualCheckCarts = R.compose(
+      R.map(R.prop("cart_number")),
+      R.filter(R.propEq("status", "1"))
+    )(data);
+    cartList = R.reject(item => R.contains(item, manualCheckCarts))(cartList);
+    this.setState({ cartList, manualCheckCarts });
+    this.props.form.setFieldsValue({ cart_number: cartList.join(",") });
   };
 
   handleOperationType = e => {
@@ -328,15 +339,29 @@ class DynamicRule extends React.Component {
               {...formItemLayout}
               label="车号列表"
               extra={
-                this.state.cartList.length > 0 && (
-                  <label>
-                    共输入{" "}
-                    <span className={styles.bold}>
-                      {this.state.cartList.length}
-                    </span>{" "}
-                    车有效车号.
-                  </label>
-                )
+                <div>
+                  {this.state.cartList.length > 0 && (
+                    <label>
+                      共输入
+                      <span className={styles.bold}>
+                        {this.state.cartList.length}
+                      </span>
+                      车有效车号.
+                    </label>
+                  )}
+                  {this.state.manualCheckCarts.length > 0 && (
+                    <p>
+                      以下车号属于本周人工拉号产品，禁止
+                      {operationType === 0
+                        ? "锁车(拉号期间无法成功锁车，完工后系统会重新锁定)"
+                        : "解锁(拉号未完工产品应继续拉号，此时解锁会导致未完工产品付下工序)"}
+                      ：
+                      <span className={styles.bold}>
+                        {this.state.manualCheckCarts.join(",")}
+                      </span>
+                    </p>
+                  )}
+                </div>
               }
             >
               {getFieldDecorator("cart_number", {
@@ -350,7 +375,7 @@ class DynamicRule extends React.Component {
                 <Input.TextArea
                   rows={6}
                   placeholder="请输入车号列表,用逗号( , )、空格(  ) 或者回车换行符号( ↵ )分开"
-                  onChange={this.convertCart}
+                  onBlur={this.convertCart}
                 />
               )}
             </FormItem>

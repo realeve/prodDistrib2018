@@ -209,8 +209,8 @@ class DynamicRule extends React.Component {
 
   unlockCarts = async () => {
     this.setState({ submitting: true });
-    let { reason } = this.props.form.getFieldsValue();
-    let carts = await this.handleLockedUsers(this.state.cartList);
+    let { reason, cart_number } = this.props.form.getFieldsValue();
+    let carts = await this.handleLockedUsers(cart_number.split(","));
 
     this.props.form.validateFields(async err => {
       if (err) {

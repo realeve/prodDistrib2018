@@ -288,7 +288,10 @@ class DynamicRule extends React.Component {
       R.map(R.prop("cart_number")),
       R.filter(R.propEq("status", "1"))
     )(data);
-    cartList = R.reject(item => R.contains(item, manualCheckCarts))(cartList);
+
+    // 求两数组差值
+    cartList = R.difference(cartList, manualCheckCarts);
+    // cartList = R.reject(item => R.contains(item, manualCheckCarts))(cartList);
     this.setState({ cartList, manualCheckCarts });
     this.props.form.setFieldsValue({ cart_number: cartList.join(",") });
   };

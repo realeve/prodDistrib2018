@@ -282,6 +282,13 @@ class DynamicRule extends React.Component {
     const validCart = cart => /^\d{4}[A-Z]\d{3}$/.test(cart);
     let cartList = val.split(splitStr).filter(validCart);
 
+    // 批量调整工艺时不做后续过滤
+    if (this.state.operationType === 2) {
+      this.setState({ cartList });
+      this.props.form.setFieldsValue({ cart_number: val });
+      return;
+    }
+
     // 当前产品是否是本周人工拉号产品
     let { data } = await db.getPrintSampleCartlist(cartList);
     let manualCheckCarts = R.compose(

@@ -71,10 +71,10 @@ export const getTbDryingstatusTask = async carnos =>
     }).then(res => res);
 
 
-export const unlockCart = async(carno, update_machine = 1) => await axios({
+export const unlockCart = async(cart, update_machine = 1) => await axios({
     url: 'http://10.8.1.27:4000/api/manual_status',
     params: {
-        carno,
+        cart,
         update_machine
     }
 }).then(res => res);

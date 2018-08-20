@@ -17,9 +17,15 @@ const isFilterColumn = (data, key) => {
       if (isNum || isTime) {
         isValid = false;
       }
+      if (item.includes("image")) {
+        isValid = false;
+      }
     }
   };
-  let uniqColumn = R.compose(R.uniq, R.map(R.prop(key)))(data);
+  let uniqColumn = R.compose(
+    R.uniq,
+    R.map(R.prop(key))
+  )(data);
   R.map(handleItem)(uniqColumn);
   return {
     uniqColumn,
@@ -29,7 +35,7 @@ const isFilterColumn = (data, key) => {
 
 export function handleColumns(
   { dataSrc, filteredInfo },
-  cartLinkMode = "search"
+  cartLinkPrefix = "//10.8.2.133/search#"
 ) {
   let { data, header, rows } = dataSrc;
   let showURL = typeof data !== "undefined" && rows > 0;
@@ -59,10 +65,7 @@ export function handleColumns(
     const isCart = lib.isCart(tdValue);
     if (lib.isReel(tdValue) || isCart) {
       item.render = text => {
-        let url = lib.searchUrl;
-        if (isCart && cartLinkMode !== "search") {
-          url = lib.imgUrl;
-        }
+        let url = cartLinkPrefix;
         const attrs = {
           href: url + text,
           target: "_blank"
@@ -78,12 +81,16 @@ export function handleColumns(
         text = R.isNil(text) ? "" : text;
         let isImg =
           String(text).includes("image/") || String(text).includes("/file/");
+        let isBase64Image =
+          String(text).includes("data:image/") &&
+          String(text).includes(";base64");
+        let hostUrl = isBase64Image ? "" : uploadHost;
         return !isImg ? (
           text
         ) : (
           <img
             className={styles.imgContent}
-            src={`${uploadHost}${text}`}
+            src={`${hostUrl}${text}`}
             alt={text}
           />
         );

@@ -105,6 +105,12 @@ function HeaderMenu({ location, avatar }) {
             </Link>
           </Menu.Item>
         </SubMenu>
+        <Menu.Item key="/seriousimg">
+          <Link to="/seriousimg">
+            <Icon type="home" />
+            严重废锁图分析
+          </Link>
+        </Menu.Item>
       </Menu>
       <LoginAvatar avatar={avatar} />
     </Header>

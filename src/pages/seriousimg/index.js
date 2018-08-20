@@ -1,11 +1,11 @@
 import React from "react";
 import { connect } from "dva";
+import { DatePicker } from "antd";
+import * as db from "./db";
+import styles from "./index.less";
 
 import VTable from "../../components/Table";
-
-import { DatePicker } from "antd";
-import * as db from "./services/table";
-import styles from "./index.less";
+// import ImgList from "./imgList";
 
 import dateRanges from "../../utils/ranges";
 import moment from "moment";
@@ -14,20 +14,13 @@ moment.locale("zh-cn");
 
 const RangePicker = DatePicker.RangePicker;
 
-function Tables({ dispatch, tid, dateRange, dataSrc, loading }) {
+function Tables({ dispatch, dateRange, loading, dataSrc, seriousImg }) {
   const onDateChange = async (dates, dateStrings) => {
     const [tstart, tend] = dateStrings;
-    await dispatch(db.getQueryConfig({ tid, tstart, tend }));
-    await dispatch({
-      type: "tasks/fetchSampledData",
-      payload: { tstart, tend }
-    });
-    await dispatch({
-      type: "tasks/handleTaskData"
-    });
+    await dispatch(db.getQueryConfig({ tstart, tend }));
     dispatch({
-      type: "tableConf/setDateRange",
-      payload: dateStrings
+      type: "seriousimg/setStore",
+      payload: { dateRange: dateStrings }
     });
   };
 
@@ -44,19 +37,21 @@ function Tables({ dispatch, tid, dateRange, dataSrc, loading }) {
           }}
         />
       </div>
-      <VTable
-        dataSrc={dataSrc}
-        loading={loading}
-        cartLinkPrefix="//10.8.2.133/search/image/#"
-      />
+
+      <VTable dataSrc={dataSrc} loading={loading} />
+      <h2 style={{ marginTop: 30 }}>
+        注：下列严重废锁图功能目前仍在测试中，判废结果数据尚未同步。
+      </h2>
+      <VTable dataSrc={seriousImg} loading={loading} />
+
+      {/* <ImgList dataSrc={seriousImg} /> */}
     </>
   );
 }
 
 function mapStateToProps(state) {
   return {
-    ...state.tableConf,
-    dataSrc: state.table.dataSrc
+    ...state.seriousimg
   };
 }
 

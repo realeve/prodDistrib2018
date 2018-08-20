@@ -1,0 +1,38 @@
+.container {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+}
+
+.img {
+  &-item {
+    margin: 10px;
+    position: relative;
+  }
+  &-data {
+    width: 240px;
+    height: 160px; // box-shadow: 5px 5px 0px rgba(119, 119, 119, 0.2);
+    box-shadow: 0 0 14px rgba(164, 154, 154, 0.95);
+  }
+  &-desc {
+    padding: 5px;
+    width: 100%;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.36);
+    position: absolute;
+    bottom: -13px;
+  }
+  &-desc li {
+    display: flex;
+    justify-content: space-between;
+  }
+  &-desc li a {
+    color: #fff;
+    font-weight: bold;
+  }
+  .realfake {
+    font-weight: bold;
+    color: #d23;
+  }
+}

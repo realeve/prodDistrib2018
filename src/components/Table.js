@@ -73,7 +73,7 @@ class Tables extends Component {
         dataSrc: data,
         filteredInfo: {}
       },
-      this.props.cartLinkMode
+      this.props.cartLinkPrefix
     );
     this.setState({
       columns,
@@ -91,6 +91,9 @@ class Tables extends Component {
       return;
     }
     this.dataSrc = nextProps.dataSrc;
+    this.setState({
+      source: nextProps.dataSrc.source
+    });
     this.init();
   }
 
@@ -345,7 +348,7 @@ Tables.defaultProps = {
     header: []
   },
   loading: false,
-  cartLinkMode: "search",
+  cartLinkPrefix: "//10.8.2.133/search#",
   actions: false
 };
 

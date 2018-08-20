@@ -75,8 +75,14 @@ function Tasks({
         </div>{" "}
       </div>{" "}
       <VTable dataSrc={dataSource} actions={actions} />{" "}
-      <VTable dataSrc={dataSrcNewproc} cartLinkMode="img" />
-      <VTable dataSrc={dataComplete} cartLinkMode="img" />
+      <VTable
+        dataSrc={dataSrcNewproc}
+        cartLinkPrefix="//10.8.2.133/search/image/#"
+      />
+      <VTable
+        dataSrc={dataComplete}
+        cartLinkPrefix="//10.8.2.133/search/image/#"
+      />
     </>
   );
 }

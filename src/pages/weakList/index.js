@@ -46,7 +46,11 @@ function Tables({
         />
       </div>
 
-      <VTable dataSrc={dataSrc} loading={loading} cartLinkMode="img" />
+      <VTable
+        dataSrc={dataSrc}
+        loading={loading}
+        cartLinkPrefix="//10.8.2.133/search/image/#"
+      />
       <VTable dataSrc={dataCount} loading={loading} />
       <VTable dataSrc={dataCount2} loading={loading} />
       <VTable dataSrc={dataCount3} loading={loading} />

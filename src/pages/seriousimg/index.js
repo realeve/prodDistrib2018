@@ -14,7 +14,14 @@ moment.locale("zh-cn");
 
 const RangePicker = DatePicker.RangePicker;
 
-function Tables({ dispatch, dateRange, loading, dataSrc, seriousImg }) {
+function Tables({
+  dispatch,
+  dateRange,
+  loading,
+  dataSrc,
+  seriousImg,
+  seriousImgCount
+}) {
   const onDateChange = async (dates, dateStrings) => {
     const [tstart, tend] = dateStrings;
     await dispatch(db.getQueryConfig({ tstart, tend }));
@@ -39,11 +46,8 @@ function Tables({ dispatch, dateRange, loading, dataSrc, seriousImg }) {
       </div>
 
       <VTable dataSrc={dataSrc} loading={loading} />
-      <h2 style={{ marginTop: 30 }}>
-        注：下列严重废锁图功能目前仍在测试中，判废结果数据尚未同步。
-      </h2>
+      <VTable dataSrc={seriousImgCount} />
       <VTable dataSrc={seriousImg} loading={loading} />
-
       {/* <ImgList dataSrc={seriousImg} /> */}
     </>
   );

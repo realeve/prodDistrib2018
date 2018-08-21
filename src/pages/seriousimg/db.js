@@ -36,3 +36,14 @@ export const getSeriousImgStatus = async carts => await axios({
         carts
     },
 }).then(res => res);
+
+/**
+ *   @database: { 质量信息系统_图像库 }
+ *   @desc:     { 码后核查严重废锁图各区域报错情况 } 
+ */
+export const getSeriousImgCount = async carts => await axios({
+    url: '/178/005fdd6e3f/array.json',
+    params: {
+        carts
+    },
+}).then(res => res);

@@ -240,23 +240,6 @@ class Tables extends Component {
     );
   };
 
-  TableTitle = () => {
-    // const dateRange = this.config.params;
-    const { title } = this.dataSrc;
-    return (
-      title && (
-        <div className={styles.tips}>
-          <div className={styles.title}>{title}</div>
-          {/* {dateRange.tstart && (
-            <small>
-              时间范围 : {dateRange.tstart} 至 {dateRange.tend}
-            </small>
-          )} */}
-        </div>
-      )
-    );
-  };
-
   // 为每行增加自定义附加操作
   appendActions = columns => {
     if (!this.props.actions) {
@@ -314,12 +297,27 @@ class Tables extends Component {
 
   render() {
     const tBody = this.getTBody();
+
+    // const dateRange = this.config.params;
+    /* {dateRange.tstart && (
+            <small>
+              时间范围 : {dateRange.tstart} 至 {dateRange.tend}
+            </small>
+          )} */
+    const { title, subTitle } = this.dataSrc;
+    const TableTitle = title && (
+      <div className={styles.tips}>
+        <div className={styles.title}>{title}</div>
+        {subTitle && <div className={styles.subTitle}>{subTitle}</div>}
+      </div>
+    );
+
     return (
       <Card
         title={
           <div className={styles.header}>
             {this.Action()}
-            {this.TableTitle()}
+            {TableTitle}
             <div className={styles.search}>
               <Search
                 placeholder="输入任意值过滤数据"

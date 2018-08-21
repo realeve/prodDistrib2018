@@ -10,6 +10,7 @@ export default {
         dateRange: [],
         dataSrc: [],
         seriousImg: [],
+        seriousImgCount: []
     },
     reducers: {
         setStore(state, {
@@ -65,11 +66,19 @@ export default {
             })
 
             seriousImg.header = ['id', '车号', '检测站', '宏区编号', '缺陷图', '开位', '判废结果'];
+
+            let seriousImgCount = yield call(db.getSeriousImgCount, carts);
+            let realFake = R.filter(R.propEq(2, '实废'))(seriousImgCount.data)
+            let sum = R.compose(R.sum, R.map(item => parseInt(item, 10)), R.map(R.nth(3)))(seriousImgCount.data);
+            let realFakeCount = R.compose(R.sum, R.map(item => parseInt(item, 10)), R.map(R.nth(3)))(realFake);
+            let subTitle = `实废:${realFakeCount},已判废:${sum},误废:${sum-realFakeCount},准确率:${(realFakeCount/sum*100).toFixed(2)}%`;
+            seriousImgCount.subTitle = subTitle;
             yield put({
                 type: "setStore",
                 payload: {
                     dataSrc,
-                    seriousImg
+                    seriousImg,
+                    seriousImgCount
                 }
             });
         }

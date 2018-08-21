@@ -61,6 +61,7 @@ function Tables({
 
 function mapStateToProps(state) {
   return {
+    loading: state.loading.models.weaklist,
     ...state.weaklistConf,
     ...state.weaklist
   };

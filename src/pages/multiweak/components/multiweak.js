@@ -50,6 +50,12 @@ class DynamicRule extends React.Component {
     kInfoList: []
   };
 
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      loading: nextProps.loading
+    });
+  }
+
   componentDidMount() {
     let kInfoList = [];
     for (let i = 1; i < 41; i++) {
@@ -418,7 +424,7 @@ const multiweak = props => (
     >
       <WrappedDynamicRule {...props} />
     </Card>
-    <VTable dataSrc={props.dataWeakList} />
+    <VTable dataSrc={props.dataWeakList} loading={props.loading} />
   </>
 );
 

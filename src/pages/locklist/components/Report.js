@@ -183,7 +183,7 @@ function Tasks({
           />
         </p>
       </Modal>
-      <VTable dataSrc={dataSrc} actions={actions} />
+      <VTable dataSrc={dataSrc} actions={actions} loading={loading} />
     </div>
   );
 }

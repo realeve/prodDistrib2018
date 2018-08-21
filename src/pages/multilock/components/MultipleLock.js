@@ -57,6 +57,12 @@ class DynamicRule extends React.Component {
     });
   }
 
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      loading: nextProps.loading
+    });
+  }
+
   submit = () => {
     this.setState({ submitting: true });
 

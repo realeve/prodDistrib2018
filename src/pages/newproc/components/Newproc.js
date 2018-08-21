@@ -132,6 +132,12 @@ class DynamicRule extends React.Component {
     });
   }
 
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      loading: nextProps.loading
+    });
+  }
+
   machineChange = async machine_name => {
     // message.success("机台改变时读取近期印刷的品种");
 
@@ -227,11 +233,12 @@ class DynamicRule extends React.Component {
           label="工艺流程"
           extra={
             <label>
-              推荐选择 <span className={styles.bold}>8位清分机全检</span>,当选择自动分配时，<span
-                className={styles.bold}
-              >
+              推荐选择 <span className={styles.bold}>8位清分机全检</span>
+              ,当选择自动分配时，
+              <span className={styles.bold}>
                 系统将自动根据拉号情况自动分配
-              </span>.
+              </span>
+              .
             </label>
           }
         >
@@ -346,11 +353,12 @@ class DynamicRule extends React.Component {
           label="工艺流程"
           extra={
             <label>
-              推荐选择 <span className={styles.bold}>8位清分机全检</span>,当选择自动分配时，<span
-                className={styles.bold}
-              >
+              推荐选择 <span className={styles.bold}>8位清分机全检</span>
+              ,当选择自动分配时，
+              <span className={styles.bold}>
                 系统将自动根据拉号情况自动分配
-              </span>.
+              </span>
+              .
             </label>
           }
         >
@@ -528,7 +536,7 @@ function newproc(props) {
       >
         <WrappedDynamicRule {...props} />
       </Card>
-      <VTable dataSrc={props.dataSrc} />
+      <VTable dataSrc={props.dataSrc} loading={props.loading} />
     </div>
   );
 }

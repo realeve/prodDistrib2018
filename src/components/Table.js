@@ -87,6 +87,9 @@ class Tables extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    this.setState({
+      loading: nextProps.loading
+    });
     if (R.equals(nextProps.dataSrc, this.dataSrc)) {
       return;
     }

@@ -54,9 +54,12 @@ function MultiLock({ dispatch, dataSource, loading, dateRange }) {
           />
         </div>
       </div>
-      {myList.data && myList.data.length > 0 && <VTable dataSrc={myList} />}
+      {myList.data &&
+        myList.data.length > 0 && <VTable dataSrc={myList} loading={loading} />}
       {theOthersList.data &&
-        theOthersList.data.length > 0 && <VTable dataSrc={theOthersList} />}
+        theOthersList.data.length > 0 && (
+          <VTable dataSrc={theOthersList} loading={loading} />
+        )}
     </>
   );
 }

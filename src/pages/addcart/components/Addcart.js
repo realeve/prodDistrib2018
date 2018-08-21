@@ -38,6 +38,12 @@ class DynamicRule extends React.Component {
     captainList: []
   };
 
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      loading: nextProps.loading
+    });
+  }
+
   insertData = async data => {
     let res = await db.addPrintAbnormalProd(data);
     if (!res.rows) {
@@ -216,11 +222,12 @@ class DynamicRule extends React.Component {
               label="工艺流程"
               extra={
                 <label>
-                  推荐选择 <span className={styles.bold}>8位清分机全检</span>，当选择自动分配时，<span
-                    className={styles.bold}
-                  >
+                  推荐选择 <span className={styles.bold}>8位清分机全检</span>
+                  ，当选择自动分配时，
+                  <span className={styles.bold}>
                     系统将自动根据拉号情况自动分配
-                  </span>.
+                  </span>
+                  .
                 </label>
               }
             >
@@ -330,10 +337,12 @@ function Addcart(props) {
           <div className={styles.header}>
             <h2>添加异常品车号</h2>
             <p className={styles.desc}>
-              本周人工拉号已添加{parseInt(checkByWeek, 10) +
-                parseInt(abnormal, 10)}车(日常抽检:{checkByWeek}，异常品及四新:{
-                abnormal
-              })
+              本周人工拉号已添加
+              {parseInt(checkByWeek, 10) + parseInt(abnormal, 10)}
+              车(日常抽检:
+              {checkByWeek}
+              ，异常品及四新:
+              {abnormal})
             </p>
           </div>
         }

@@ -31,6 +31,7 @@ export default {
             call,
             put
         }) {
+            console.log(params);
             let dataSrc = yield call(db.getMahoudata, params);
             let carts = yield call(db.getUniqCarts, dataSrc.data);
             let seriousImg = yield call(db.getSeriousImg, carts);

@@ -1,7 +1,6 @@
 import React from "react";
 import { connect } from "dva";
 import { DatePicker } from "antd";
-import * as db from "./db";
 import styles from "./index.less";
 
 import VTable from "../../components/Table";
@@ -24,7 +23,10 @@ function Tables({
 }) {
   const onDateChange = async (dates, dateStrings) => {
     const [tstart, tend] = dateStrings;
-    await dispatch(db.getQueryConfig({ tstart, tend }));
+    dispatch({
+      type: "seriousimg/fetchAPIData",
+      payload: { params: { tstart, tend } }
+    });
     dispatch({
       type: "seriousimg/setStore",
       payload: { dateRange: dateStrings }
@@ -46,7 +48,7 @@ function Tables({
       </div>
 
       <VTable dataSrc={dataSrc} loading={loading} />
-      <VTable dataSrc={seriousImgCount} />
+      <VTable dataSrc={seriousImgCount} loading={loading} />
       <VTable dataSrc={seriousImg} loading={loading} />
       {/* <ImgList dataSrc={seriousImg} /> */}
     </>
@@ -55,6 +57,7 @@ function Tables({
 
 function mapStateToProps(state) {
   return {
+    loading: state.loading.models.seriousimg,
     ...state.seriousimg
   };
 }

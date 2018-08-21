@@ -59,12 +59,19 @@ class DynamicRule extends React.Component {
       dataCart: {
         rows: 0
       },
-      print_time: ""
+      print_time: "",
+      loading: props.loading
     };
 
     // react 16.3中的用法，目前webpack报错
     // this.base64Input = React.createRef();
     this.base64URI = "";
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      loading: nextProps.loading
+    });
   }
 
   setTextInputRef = e => {
@@ -456,7 +463,7 @@ class DynamicRule extends React.Component {
       <>
         <Card
           title={<h3 className={styles.header}>机检弱项记废信息</h3>}
-          loading={this.props.loading}
+          loading={this.state.loading}
           style={{ width: "100%" }}
         >
           <Form>
@@ -634,7 +641,7 @@ class DynamicRule extends React.Component {
           </Form>
         </Card>
         {this.state.dataCart.rows > 0 && (
-          <VTable dataSrc={this.state.dataCart} />
+          <VTable loading={this.state.loading} dataSrc={this.state.dataCart} />
         )}
       </>
     );

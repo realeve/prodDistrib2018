@@ -71,15 +71,17 @@ function Tasks({
             locale={{
               rangePlaceholder: ["开始日期", "结束日期"]
             }}
-          />{" "}
-        </div>{" "}
-      </div>{" "}
-      <VTable dataSrc={dataSource} actions={actions} />{" "}
+          />
+        </div>
+      </div>
+      <VTable loading={loading} dataSrc={dataSource} actions={actions} />{" "}
       <VTable
+        loading={loading}
         dataSrc={dataSrcNewproc}
         cartLinkPrefix="//10.8.2.133/search/image/#"
       />
       <VTable
+        loading={loading}
         dataSrc={dataComplete}
         cartLinkPrefix="//10.8.2.133/search/image/#"
       />

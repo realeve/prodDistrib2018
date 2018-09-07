@@ -21,7 +21,9 @@ function Tables({
   dataCount,
   dataCount2,
   dataCount3,
-  dataCount4
+  dataCount4,
+  dataCount5,
+  dataCount6
 }) {
   const onDateChange = async (dates, dateStrings) => {
     const [tstart, tend] = dateStrings;
@@ -55,6 +57,8 @@ function Tables({
       <VTable dataSrc={dataCount2} loading={loading} />
       <VTable dataSrc={dataCount3} loading={loading} />
       <VTable dataSrc={dataCount4} loading={loading} />
+      <VTable dataSrc={dataCount5} loading={loading} />
+      <VTable dataSrc={dataCount6} loading={loading} />
     </>
   );
 }

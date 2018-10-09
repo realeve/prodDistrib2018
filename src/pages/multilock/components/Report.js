@@ -1,27 +1,27 @@
-import React from "react";
-import { connect } from "dva";
-import { DatePicker } from "antd";
-import moment from "moment";
-import "moment/locale/zh-cn";
-import styles from "./Report.less";
-import dateRanges from "../../../utils/ranges";
-import VTable from "../../../components/Table";
-import userLib from "../../../utils/users";
-let { data } = userLib.getUserSetting();
-let user_name = data.setting.name;
-const R = require("ramda");
+import React from 'react';
+import { connect } from 'dva';
+import { DatePicker } from 'antd';
+import moment from 'moment';
+import 'moment/locale/zh-cn';
+import styles from './Report.less';
+import dateRanges from '../../../utils/ranges';
+import VTable from '../../../components/Table';
+import userLib from '../../../utils/users';
+let { data, success } = userLib.getUserSetting();
+let user_name = success ? data.setting.name : '';
+const R = require('ramda');
 
 const RangePicker = DatePicker.RangePicker;
-moment.locale("zh-cn");
+moment.locale('zh-cn');
 
 function MultiLock({ dispatch, dataSource, loading, dateRange }) {
   const onDateChange = async (dates, dateStrings) => {
     await dispatch({
-      type: "multilock/setDateRange",
+      type: 'multilock/setDateRange',
       payload: dateStrings
     });
     dispatch({
-      type: "multilock/handleReportData"
+      type: 'multilock/handleReportData'
     });
   };
 
@@ -29,7 +29,7 @@ function MultiLock({ dispatch, dataSource, loading, dateRange }) {
   let theOthersList = R.clone(dataSource);
   if (myList.data) {
     myList.data = myList.data.filter(item => item.col10 === user_name);
-    myList.title = "我的锁车列表";
+    myList.title = '我的锁车列表';
     myList.rows = myList.data.length;
 
     theOthersList.data = theOthersList.data.filter(
@@ -49,7 +49,7 @@ function MultiLock({ dispatch, dataSource, loading, dateRange }) {
             onChange={onDateChange}
             defaultValue={[moment(dateRange[0]), moment(dateRange[1])]}
             locale={{
-              rangePlaceholder: ["开始日期", "结束日期"]
+              rangePlaceholder: ['开始日期', '结束日期']
             }}
           />
         </div>

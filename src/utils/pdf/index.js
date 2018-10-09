@@ -1,28 +1,28 @@
-import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "./vfs_fonts";
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from './vfs_fonts';
 
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
+pdfMake.vfs = pdfFonts;
 pdfMake.fonts = {
   方正细等线简体: {
-    normal: "方正细等线简体.ttf",
-    bold: "方正细等线简体.ttf",
-    italics: "方正细等线简体.ttf",
-    bolditalics: "方正细等线简体.ttf"
+    normal: '方正细等线简体.ttf',
+    bold: '方正细等线简体.ttf',
+    italics: '方正细等线简体.ttf',
+    bolditalics: '方正细等线简体.ttf'
   }
 };
 
 const pdf = config => {
   let defaultConfig = {
-    orientation: "portrait",
-    pageSize: "A4",
-    download: "open",
+    orientation: 'portrait',
+    pageSize: 'A4',
+    download: 'open',
     title: document.title,
-    extension: ".pdf",
-    filename: "*"
+    extension: '.pdf',
+    filename: '*'
   };
 
   config = Object.assign(defaultConfig, config);
-  config.extension = ".pdf";
+  config.extension = '.pdf';
 
   let data = config;
   let rows = [];
@@ -31,8 +31,8 @@ const pdf = config => {
     rows.push(
       data.header.map(d => {
         return {
-          text: typeof d === "string" ? d : d + "",
-          style: "tableHeader"
+          text: typeof d === 'string' ? d : d + '',
+          style: 'tableHeader'
         };
       })
     );
@@ -42,8 +42,8 @@ const pdf = config => {
     rows.push(
       item.map(d => {
         return {
-          text: typeof d === "string" ? d : d + "",
-          style: i % 2 ? "tableBodyEven" : "tableBodyOdd"
+          text: typeof d === 'string' ? d : d + '',
+          style: i % 2 ? 'tableBodyEven' : 'tableBodyOdd'
         };
       })
     );
@@ -53,8 +53,8 @@ const pdf = config => {
     rows.push(
       data.footer.map(d => {
         return {
-          text: typeof d === "string" ? d : d + "",
-          style: "tableFooter"
+          text: typeof d === 'string' ? d : d + '',
+          style: 'tableFooter'
         };
       })
     );
@@ -69,16 +69,16 @@ const pdf = config => {
           headerRows: 1,
           body: rows
         },
-        layout: "headerLineOnly"
+        layout: 'headerLineOnly'
       }
     ],
     styles: {
       tableHeader: {
         bold: true,
         fontSize: 12,
-        color: "#2d4154", //'white',
-        fillColor: "white", //'#2d4154',
-        alignment: "center",
+        color: '#2d4154', //'white',
+        fillColor: 'white', //'#2d4154',
+        alignment: 'center',
         margin: [8, 3, 8, 3]
       },
       tableBodyEven: {
@@ -87,33 +87,33 @@ const pdf = config => {
       },
       tableBodyOdd: {
         fontSize: 10,
-        fillColor: "#f3f3f3",
+        fillColor: '#f3f3f3',
         margin: [8, 3, 8, 3]
       },
       tableFooter: {
         bold: true,
         fontSize: 12,
-        color: "white",
-        fillColor: "#2d4154",
+        color: 'white',
+        fillColor: '#2d4154',
         margin: [8, 3, 8, 3]
       },
       title: {
-        alignment: "center",
+        alignment: 'center',
         fontSize: 20
       },
       message: {}
     },
     defaultStyle: {
       fontSize: 10,
-      font: "方正细等线简体"
+      font: '方正细等线简体'
     }
   };
 
   if (config.message) {
     doc.content.push({
       text: config.message,
-      style: "message",
-      alignment: "left",
+      style: 'message',
+      alignment: 'left',
       margin: [0, 20, 0, 6]
     });
   }
@@ -121,7 +121,7 @@ const pdf = config => {
   if (config.title) {
     doc.content.unshift({
       text: config.title,
-      style: "title",
+      style: 'title',
       margin: [0, 0, 0, 6]
     });
   }
@@ -130,7 +130,7 @@ const pdf = config => {
     config.customize(doc);
   }
 
-  if (config.download === "open") {
+  if (config.download === 'open') {
     pdfMake.createPdf(doc).open();
   } else {
     pdfMake.createPdf(doc).download(config.title + config.extension);

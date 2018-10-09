@@ -1,15 +1,16 @@
-import React from "react";
-import { connect } from "dva";
-import { Button, Modal, Input, notification, Icon } from "antd";
-import VTable from "../../../components/Table";
-import * as db from "../services/report";
+import React from 'react';
+import { connect } from 'dva';
+import { Button, Modal, Input, notification, Icon } from 'antd';
+import VTable from '../../../components/Table';
+import * as db from '../services/report';
 
-import userLib from "../../../utils/users";
-import wms from "../../index/services/wms";
-import prodNode from "../../task/services/tasks";
+import userLib from '../../../utils/users';
+import wms from '../../index/services/wms';
+import prodNode from '../../task/services/tasks';
 
 let userSetting = userLib.getUserSetting();
-let userName = userSetting.data.setting.name;
+let { success } = userSetting;
+let userName = success ? userSetting.data.setting.name : '';
 
 function Tasks({
   dispatch,
@@ -24,7 +25,7 @@ function Tasks({
 }) {
   const handleCancel = () => {
     dispatch({
-      type: "locklist/setStore",
+      type: 'locklist/setStore',
       payload: {
         visible: false
       }
@@ -33,7 +34,7 @@ function Tasks({
 
   const showModal = cart => {
     dispatch({
-      type: "locklist/setStore",
+      type: 'locklist/setStore',
       payload: {
         visible: true,
         cart_number: cart
@@ -45,31 +46,31 @@ function Tasks({
     let cart = record.col0;
     let lockType = 0;
     if (
-      record.col7.includes("批量锁车.不拉号") ||
-      record.col7.includes("四新验证")
+      record.col7.includes('批量锁车.不拉号') ||
+      record.col7.includes('四新验证')
     ) {
       lockType = 1;
       showModal(cart);
-    } else if (record.col7.includes("人工大张日常抽检")) {
+    } else if (record.col7.includes('人工大张日常抽检')) {
       lockType = 2;
       Modal.confirm({
-        title: "系统提示",
+        title: '系统提示',
         content: `本万产品属于每周大张抽检产品，解锁会导致无法完成抽检工艺，是否继续？`,
         maskClosable: true,
         onOk: () => {
           showModal(cart);
         }
       });
-    } else if (record.col7.includes("异常品")) {
+    } else if (record.col7.includes('异常品')) {
       Modal.error({
-        title: "系统提示",
-        content: "异常品禁止解锁..."
+        title: '系统提示',
+        content: '异常品禁止解锁...'
       });
     }
 
     // 更新锁车类型
     dispatch({
-      type: "locklist/setStore",
+      type: 'locklist/setStore',
       payload: {
         lock_type: lockType
       }
@@ -78,7 +79,7 @@ function Tasks({
 
   const handleOk = async () => {
     dispatch({
-      type: "locklist/setStore",
+      type: 'locklist/setStore',
       payload: {
         confirmLoading: true
       }
@@ -114,21 +115,21 @@ function Tasks({
   const showUnlockResult = result => {
     if (result.unhandledList.length) {
       notification.open({
-        message: "系统提示",
+        message: '系统提示',
         description: `解锁失败`,
-        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+        icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
       });
     }
     notification.open({
-      message: "系统提示",
-      description: "解锁成功",
-      icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+      message: '系统提示',
+      description: '解锁成功',
+      icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
     });
   };
 
   const unLoading = () => {
     dispatch({
-      type: "locklist/setStore",
+      type: 'locklist/setStore',
       payload: {
         confirmLoading: false,
         visible: false
@@ -139,14 +140,14 @@ function Tasks({
 
   const reload = () => {
     dispatch({
-      type: "locklist/handleReportData"
+      type: 'locklist/handleReportData'
     });
   };
 
   // 在行末添加操作列
   const actions = [
     {
-      title: "解锁", //标题
+      title: '解锁', //标题
       render: record =>
         record.col8 === userName && (
           <Button type="primary" onClick={() => callback(record)}>
@@ -158,7 +159,7 @@ function Tasks({
 
   const inputChange = ({ target }) => {
     dispatch({
-      type: "locklist/setStore",
+      type: 'locklist/setStore',
       payload: {
         remark: target.value
       }
@@ -172,8 +173,7 @@ function Tasks({
         visible={visible}
         onOk={handleOk}
         confirmLoading={confirmLoading}
-        onCancel={handleCancel}
-      >
+        onCancel={handleCancel}>
         <p>
           <Input.TextArea
             rows={3}

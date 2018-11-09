@@ -11,6 +11,8 @@ import {
   Switch
 } from 'antd';
 import styles from './style.less';
+import classNames from 'classnames/bind';
+const cx = classNames.bind(styles);
 const R = require('ramda');
 const Option = Select.Option;
 
@@ -28,17 +30,22 @@ class MachineItem extends Component {
   mapStateToProps = (props) => {
     let res = R.clone(props.machine);
     res.status = Boolean(parseInt(res.status, 10));
+    res.last_produce_date = false;
     if (R.isNil(res.prod_id)) {
       let data = R.find(R.propEq('machine_id', res.machine_id))(
         props.produceProdList
       );
       if (!R.isNil(data)) {
+        res.last_produce_date = data.last_produce_date;
         data = R.find(R.propEq('name', data.prod_name))(props.productList);
         res.prod_id = data.value;
       }
     }
     if (R.isNil(res.prod_id)) {
       res.status = false;
+    }
+    if (R.isNil(res.proc_type_id)) {
+      res.proc_type_id = '0';
     }
     return res;
   };
@@ -63,32 +70,36 @@ class MachineItem extends Component {
 
   render() {
     let { machine, productList, procTypeList, workTypeList } = this.props;
+    let { last_produce_date, status } = this.state;
+
+    const ActionTool = (
+      <div className={styles.header}>
+        <div>
+          <h4 className={styles.header}>{machine.machine_name}</h4>
+          <small>最近生产：{last_produce_date || '近一月未生产'}</small>
+        </div>
+        <div>
+          <Button size="small" icon="plus" onClick={() => this.copySetting()} />
+          <Button
+            size="small"
+            icon="close"
+            type="danger"
+            style={{ marginLeft: 10 }}
+            onClick={() => this.removeSetting()}
+          />
+        </div>
+      </div>
+    );
+
     return (
-      <Col span={8} className={styles.machine}>
-        <Card
-          title={
-            <div className={styles.header}>
-              <h4 className={styles.header}>{machine.machine_name}</h4>
-              <div>
-                <Button
-                  size="small"
-                  icon="plus"
-                  onClick={() => this.copySetting()}
-                />
-                <Button
-                  size="small"
-                  icon="close"
-                  type="danger"
-                  style={{ marginLeft: 10 }}
-                  onClick={() => this.removeSetting()}
-                />
-              </div>
-            </div>
-          }>
+      <Col
+        span={8}
+        className={cx({ machine: true, disabled: !this.state.status })}>
+        <Card title={ActionTool}>
           <div className={styles.inlineForm}>
             <label>产品品种：</label>
             <Select
-              disabled={!this.state.status}
+              disabled={!status}
               value={this.state.prod_id}
               className={styles.item}
               onChange={(prod_id) => this.setState({ prod_id })}
@@ -103,7 +114,7 @@ class MachineItem extends Component {
           <div className={styles.inlineForm}>
             <label>班次：</label>
             <Select
-              disabled={!this.state.status}
+              disabled={!status}
               value={this.state.worktype_id}
               onChange={(worktype_id) => this.setState({ worktype_id })}
               className={styles.item}
@@ -118,7 +129,7 @@ class MachineItem extends Component {
           <div className={styles.inlineForm}>
             <label>工艺：</label>
             <Select
-              disabled={!this.state.status}
+              disabled={!status}
               value={this.state.proc_type_id}
               onChange={(proc_type_id) => this.setState({ proc_type_id })}
               className={styles.item}
@@ -133,7 +144,7 @@ class MachineItem extends Component {
           <div className={styles.inlineForm}>
             <label>大万数：</label>
             <Input
-              disabled={!this.state.status}
+              disabled={!status}
               type="number"
               className={styles.item}
               value={this.state.num}
@@ -144,7 +155,7 @@ class MachineItem extends Component {
           <div className={styles.inlineForm}>
             <label>开包量阈值：</label>
             <Input
-              disabled={!this.state.status}
+              disabled={!status}
               type="number"
               className={styles.item}
               value={this.state.limit}
@@ -155,7 +166,7 @@ class MachineItem extends Component {
             />
           </div>
           <div className={styles.inlineForm}>
-            <label>启用该设备</label>
+            <label>设备状态</label>
             <Switch
               checkedChildren="开机"
               unCheckedChildren="停机"
@@ -165,7 +176,10 @@ class MachineItem extends Component {
             />
           </div>
           <div className={styles.action}>
-            <Button type="primary" onClick={() => this.submit()}>
+            <Button
+              type="primary"
+              disabled={!status}
+              onClick={() => this.submit()}>
               保存
             </Button>
           </div>

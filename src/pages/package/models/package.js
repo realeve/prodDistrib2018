@@ -29,7 +29,8 @@ export default {
           machineList,
           procTypeList,
           workTypeList,
-          produceProdList
+          produceProdList,
+          lockList
         }
       });
     }

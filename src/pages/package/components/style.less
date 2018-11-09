@@ -1,0 +1,51 @@
+// .container {
+//   margin-top: 20px;
+// }
+.machine {
+  padding: 5px;
+  .disabled {
+    :global {
+      .ant-card {
+        background: #f2f2f2;
+        cursor: not-allowed;
+      }
+    }
+  }
+  :global {
+    .ant-card-head-title {
+      padding: 8px 0;
+    }
+  }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    .title {
+      font-size: 24px;
+    }
+  }
+}
+
+.inlineForm {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  label {
+    width: 30%;
+    user-select: none;
+  }
+  .item {
+    width: 50%;
+  }
+  &:not(first-child) {
+    margin-top: 10px;
+  }
+}
+
+.action {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}

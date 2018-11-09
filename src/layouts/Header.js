@@ -111,6 +111,12 @@ function HeaderMenu({ location, avatar }) {
             严重废锁图分析
           </Link>
         </Menu.Item>
+        <Menu.Item key="/package">
+          <Link to="/package">
+            <Icon type="setting" />
+            裁封自动线排产
+          </Link>
+        </Menu.Item>
       </Menu>
       <LoginAvatar avatar={avatar} />
     </Header>

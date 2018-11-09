@@ -1,6 +1,8 @@
 import pathToRegexp from "path-to-regexp";
 import * as db from "../services/report";
-
+import {
+    setStore
+} from '@/utils/lib';
 const namespace = "locklist";
 export default {
     namespace,
@@ -13,14 +15,7 @@ export default {
         lock_type: 0
     },
     reducers: {
-        setStore(state, {
-            payload
-        }) {
-            return {
-                ...state,
-                ...payload
-            };
-        }
+        setStore
     },
     effects: {
         * handleReportData(payload, {

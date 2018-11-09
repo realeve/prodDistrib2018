@@ -4,6 +4,8 @@ import {
     uploadHost
 } from "./axios";
 import http from "axios";
+const R = require('ramda');
+
 export const searchUrl = "http://10.8.2.133/search#";
 export const imgUrl = "http://10.8.2.133/search/image#";
 export const adminUserList = ['钟鸣', '李宾'];
@@ -202,4 +204,27 @@ export let dataFile2URI = async(file, callback) => {
     };
     reader.readAsDataURL(file);
     return reader;
+};
+
+
+export const getType = o =>
+    Object.prototype.toString
+    .call(o)
+    .match(/\w+/g)[1]
+    .toLowerCase();
+
+export const setStore = (state, {
+    payload
+}) => {
+    let nextState = R.clone(state);
+    Object.keys(payload).forEach(key => {
+        let val = payload[key];
+        // console.log(key, val);
+        if (getType(val) == 'object') {
+            nextState[key] = Object.assign({}, nextState[key], val);
+        } else {
+            nextState[key] = val;
+        }
+    });
+    return nextState;
 };

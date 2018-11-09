@@ -1,111 +1,107 @@
 import pathToRegexp from "path-to-regexp";
 import * as db from "../services/Proclist";
 import userTool from '../utils/users';
-
+import {
+    setStore
+} from '@/utils/lib';
 const namespace = "common";
 export default {
-  namespace,
-  state: {
-    procList: [],
-    productList: [],
-    userSetting: {
-      uid: '',
-      name: '',
-      avatar: ''
+    namespace,
+    state: {
+        procList: [],
+        productList: [],
+        userSetting: {
+            uid: '',
+            name: '',
+            avatar: ''
+        },
+        inited: false
     },
-    inited: false
-  },
-  reducers: {
-    setStore(state, {
-      payload
-    }) {
-      return { ...state,
-        ...payload
-      };
-    }
-  },
-  effects: {
-    * getProclist(payload, {
-      put,
-      call,
-      select
-    }) {
-      const store = yield select(state => state[namespace]);
-      const {
-        inited
-      } = store;
-      if (inited) {
-        return;
-      }
-
-      let {
-        data
-      } = yield call(db.getPrintNewprocType);
-      yield put({
-        type: "setStore",
-        payload: {
-          procList: data
-        }
-      });
+    reducers: {
+        setStore
     },
-    * getProduct(payload, {
-      put,
-      call,
-      select
-    }) {
-      const store = yield select(state => state[namespace]);
-      const {
-        inited
-      } = store;
-      if (inited) {
-        return;
-      }
+    effects: {
+        * getProclist(payload, {
+            put,
+            call,
+            select
+        }) {
+            const store = yield select(state => state[namespace]);
+            const {
+                inited
+            } = store;
+            if (inited) {
+                return;
+            }
 
-      let {
-        data
-      } = yield call(db.getProduct);
-      yield put({
-        type: "setStore",
-        payload: {
-          productList: data.map(item => {
-            item.name = item.name.trim();
-            return item;
-          })
+            let {
+                data
+            } = yield call(db.getPrintNewprocType);
+            yield put({
+                type: "setStore",
+                payload: {
+                    procList: data
+                }
+            });
+        },
+        * getProduct(payload, {
+            put,
+            call,
+            select
+        }) {
+            const store = yield select(state => state[namespace]);
+            const {
+                inited
+            } = store;
+            if (inited) {
+                return;
+            }
+
+            let {
+                data
+            } = yield call(db.getProduct);
+            yield put({
+                type: "setStore",
+                payload: {
+                    productList: data.map(item => {
+                        item.name = item.name.trim();
+                        return item;
+                    })
+                }
+            });
         }
-      });
-    }
-  },
-  subscriptions: {
-    setup({
-      dispatch,
-      history
-    }) {
-      return history.listen(async ({
-        pathname,
-        query
-      }) => {
-        const match = pathToRegexp("/login").exec(pathname);
-        if (match && match[0] === "/login") {
-          return;
+    },
+    subscriptions: {
+        setup({
+            dispatch,
+            history
+        }) {
+            return history.listen(async({
+                pathname,
+                query
+            }) => {
+                const match = pathToRegexp("/login").exec(pathname);
+                if (match && match[0] === "/login") {
+                    return;
+                }
+
+                userTool.saveLastRouter(pathname);
+
+                await dispatch({
+                    type: "getProclist"
+                });
+
+                await dispatch({
+                    type: "getProduct"
+                });
+
+                dispatch({
+                    type: "setStore",
+                    payload: {
+                        inited: true
+                    }
+                })
+            });
         }
-
-        userTool.saveLastRouter(pathname);
-
-        await dispatch({
-          type: "getProclist"
-        });
-
-        await dispatch({
-          type: "getProduct"
-        });
-
-        dispatch({
-          type: "setStore",
-          payload: {
-            inited: true
-          }
-        })
-      });
     }
-  }
 };

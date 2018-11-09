@@ -1,6 +1,11 @@
 import * as db from "../db";
 import pathToRegexp from "path-to-regexp";
 import dateRanges from "../../../utils/ranges";
+
+import {
+    setStore
+} from '@/utils/lib';
+
 const R = require('ramda')
 
 const namespace = "seriousimg";
@@ -13,14 +18,7 @@ export default {
         seriousImgCount: []
     },
     reducers: {
-        setStore(state, {
-            payload
-        }) {
-            return {
-                ...state,
-                ...payload
-            };
-        }
+        setStore
     },
     effects: {
         * fetchAPIData({

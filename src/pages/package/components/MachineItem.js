@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'dva';
 import {
   Card,
@@ -21,6 +22,26 @@ const Option = Select.Option;
   ...state.package
 }))
 class MachineItem extends Component {
+  static propTypes = {
+    machine: PropTypes.object,
+    productList: PropTypes.array,
+    procTypeList: PropTypes.array,
+    workTypeList: PropTypes.array,
+    onDelete: PropTypes.func,
+    onAdd: PropTypes.func
+  };
+
+  static defaultProps = {
+    machine: {
+      machine_name: '载入中...'
+    },
+    productList: [],
+    procTypeList: [],
+    workTypeList: [],
+    onDelete: () => {},
+    onAdd: () => {}
+  };
+
   constructor(props) {
     super(props);
     this.state = this.mapStateToProps(props);
@@ -69,7 +90,14 @@ class MachineItem extends Component {
   }
 
   render() {
-    let { machine, productList, procTypeList, workTypeList } = this.props;
+    let {
+      machine,
+      productList,
+      procTypeList,
+      workTypeList,
+      onDelete,
+      onAdd
+    } = this.props;
     let { last_produce_date, status } = this.state;
 
     const ActionTool = (
@@ -79,17 +107,26 @@ class MachineItem extends Component {
           <small>最近生产：{last_produce_date || '近一月未生产'}</small>
         </div>
         <div>
-          <Button size="small" icon="plus" onClick={() => this.copySetting()} />
+          <Button size="small" icon="plus" onClick={() => onAdd()} />
           <Button
             size="small"
             icon="close"
             type="danger"
             style={{ marginLeft: 10 }}
-            onClick={() => this.removeSetting()}
+            onClick={() => onDelete()}
           />
         </div>
       </div>
     );
+
+    const selectProps = {
+      disabled: !status,
+      className: styles.item
+    };
+    const inputProps = {
+      ...selectProps,
+      type: 'number'
+    };
 
     return (
       <Col
@@ -99,9 +136,8 @@ class MachineItem extends Component {
           <div className={styles.inlineForm}>
             <label>产品品种：</label>
             <Select
-              disabled={!status}
+              {...selectProps}
               value={this.state.prod_id}
-              className={styles.item}
               onChange={(prod_id) => this.setState({ prod_id })}
               placeholder="请选择产品品种">
               {productList.map(({ value, name }) => (
@@ -114,10 +150,9 @@ class MachineItem extends Component {
           <div className={styles.inlineForm}>
             <label>班次：</label>
             <Select
-              disabled={!status}
+              {...selectProps}
               value={this.state.worktype_id}
               onChange={(worktype_id) => this.setState({ worktype_id })}
-              className={styles.item}
               placeholder="班次">
               {workTypeList.map(({ value, name }) => (
                 <Option key={value} value={value}>
@@ -129,10 +164,9 @@ class MachineItem extends Component {
           <div className={styles.inlineForm}>
             <label>工艺：</label>
             <Select
-              disabled={!status}
+              {...selectProps}
               value={this.state.proc_type_id}
               onChange={(proc_type_id) => this.setState({ proc_type_id })}
-              className={styles.item}
               placeholder="工艺">
               {procTypeList.map(({ value, name }) => (
                 <Option key={value} value={value}>
@@ -144,9 +178,7 @@ class MachineItem extends Component {
           <div className={styles.inlineForm}>
             <label>大万数：</label>
             <Input
-              disabled={!status}
-              type="number"
-              className={styles.item}
+              {...inputProps}
               value={this.state.num}
               onChange={({ target: { value: num } }) => this.setState({ num })}
               placeholder="该工艺大万数"
@@ -155,9 +187,7 @@ class MachineItem extends Component {
           <div className={styles.inlineForm}>
             <label>开包量阈值：</label>
             <Input
-              disabled={!status}
-              type="number"
-              className={styles.item}
+              {...inputProps}
               value={this.state.limit}
               onChange={({ target: { value: limit } }) =>
                 this.setState({ limit })

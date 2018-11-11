@@ -44,3 +44,16 @@ export const getVwWimWhitelist = () =>
   axios({
     url: '/260/4c0645f3d4.json'
   });
+
+
+  
+/** 
+ *   @database: { 全幅面 }
+ *   @desc:     { 码后核查判废完工车号列表 } 
+ */
+export const getQfmWipJobs = carts => axios({
+  url: '/250/b3d68925f6.array',
+  params: {
+      carts
+  },
+}).then(({ data }) => R.uniq(R.flatten(data)))

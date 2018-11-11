@@ -6,10 +6,41 @@ import LockList from './LockList';
 import Loading from './Loading';
 
 const TabPane = Tabs.TabPane;
+const R = require('ramda');
 
 class PackageComponent extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.state = {
+      machineList: props.machineList
+    };
+  }
+
+  // 移除设置项
+  async removeItem(idx) {
+    let { machineList } = this.state;
+    machineList = R.remove(idx, 1, machineList);
+    this.setState({
+      machineList
+    });
+    // 服务端移除一项
+    // await db.xxx
+  }
+
+  async addItem(idx) {
+    let { machineList } = this.state;
+    let newItem = R.nth(idx)(machineList);
+    machineList = R.add(idx, newItem, machineList);
+    this.setState({
+      machineList
+    });
+    // 服务端新增一项
+    // await db.xxx
+  }
+
   render() {
-    let { machineList, lockList, loading } = this.props;
+    let { lockList, loading } = this.props;
+    let { machineList } = this.state;
     return (
       <Row>
         <Col span={16} style={{ paddingRight: 10 }}>
@@ -19,9 +50,11 @@ class PackageComponent extends React.PureComponent {
                 <Loading />
               ) : (
                 <Row>
-                  {machineList.map((machine) => (
+                  {machineList.map((machine, idx) => (
                     <MachineItem
                       machine={machine}
+                      onDelete={() => this.removeItem(idx)}
+                      onAdd={() => this.addItem(idx)}
                       key={machine.machine_id + 'm' + machine.worktype_id}
                     />
                   ))}

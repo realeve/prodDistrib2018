@@ -1,23 +1,42 @@
 import React from 'react';
 import { connect } from 'dva';
-import { Row, Col, Tabs, Spin } from 'antd';
+import { Row, Col, Tabs } from 'antd';
 import MachineItem from './MachineItem';
+
 import LockList from './LockList';
 import Loading from './Loading';
+
+import { LocklistProps } from './LockList';
+import { machineType } from './MachineItem';
 
 const TabPane = Tabs.TabPane;
 const R = require('ramda');
 
-class PackageComponent extends React.PureComponent {
-  constructor(props) {
+interface PropType extends LocklistProps {
+  [key: string]: any;
+}
+
+interface StateType {
+  machineList: Array<machineType>;
+}
+
+class PackageComponent extends React.PureComponent<PropType, StateType> {
+  constructor(props: PropType) {
     super(props);
     this.state = {
       machineList: props.machineList
     };
   }
 
+  static getDerivedStateFromProps({ machineList }, prevState) {
+    if (R.equals(machineList, prevState.machineList)) {
+      return null;
+    }
+    return { machineList };
+  }
+
   // 移除设置项
-  async removeItem(idx) {
+  async removeItem(idx: number) {
     let { machineList } = this.state;
     machineList = R.remove(idx, 1, machineList);
     this.setState({
@@ -27,7 +46,7 @@ class PackageComponent extends React.PureComponent {
     // await db.xxx
   }
 
-  async addItem(idx) {
+  async addItem(idx: number) {
     let { machineList } = this.state;
     let newItem = R.nth(idx)(machineList);
     machineList = R.add(idx, newItem, machineList);

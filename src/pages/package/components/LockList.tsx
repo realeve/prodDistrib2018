@@ -2,7 +2,24 @@ import React from 'react';
 import styles from './style.less';
 import Loading from './Loading';
 
-export default function LockList({ lockList, loading }) {
+interface LockListType {
+  gh: string;
+  prodname: string;
+  tech: string;
+  carno: string;
+  lock_reason: string;
+  [key: string]: any;
+}
+
+export interface LocklistProps {
+  lockList: Array<LockListType>;
+  loading: boolean;
+}
+
+export default function LockList({
+  lockList,
+  loading
+}: LocklistProps): JSX.Element {
   if (loading) {
     return <Loading />;
   }
@@ -24,7 +41,7 @@ export default function LockList({ lockList, loading }) {
   return (
     <ul className={styles.locklist}>
       {lockList.map(({ gh, prodname, tech, carno, lock_reason }) => (
-        <li>
+        <li key={carno + lock_reason}>
           <span>{gh}</span>
           <span>{prodname}</span>
           <span>{tech}</span>

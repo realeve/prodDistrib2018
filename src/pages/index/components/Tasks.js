@@ -1,13 +1,13 @@
-import React from "react";
-import { connect } from "dva";
-import { Table, Pagination, Card, Button, Badge } from "antd";
-import * as lib from "../../../utils/lib.js";
-import * as db from "../services/table";
-import wms from "../services/wms";
-import { notification, Icon, Modal } from "antd";
+import React from 'react';
+import { connect } from 'dva';
+import { Table, Pagination, Card, Button, Badge } from 'antd';
+import * as lib from '@/utils/lib';
+import * as db from '../services/table';
+import wms from '../services/wms';
+import { notification, Icon, Modal } from 'antd';
 
-import styles from "./Tasks.less";
-const R = require("ramda");
+import styles from './Tasks.less';
+const R = require('ramda');
 
 const confirm = Modal.confirm;
 
@@ -27,9 +27,9 @@ function Tasks({
   userSetting
 }) {
   // 页码更新
-  const pageChangeHandler = page => {
+  const pageChangeHandler = (page) => {
     dispatch({
-      type: "tasks/changePage",
+      type: 'tasks/changePage',
       payload: page
     });
   };
@@ -38,7 +38,7 @@ function Tasks({
   const onShowSizeChange = async (current, nextPageSize) => {
     let newPage = Math.floor((pageSize * current) / nextPageSize);
     await dispatch({
-      type: "tasks/changePageSize",
+      type: 'tasks/changePageSize',
       payload: nextPageSize
     });
     reloadData(newPage);
@@ -46,30 +46,30 @@ function Tasks({
 
   const reloadData = (newPage = 1) => {
     dispatch({
-      type: "tasks/changePage",
+      type: 'tasks/changePage',
       payload: newPage
     });
   };
 
   const Title = () => {
     const { classDis, taskInfo, weekDay } = sampling;
-    if (typeof classDis === "undefined") {
+    if (typeof classDis === 'undefined') {
       return null;
     }
 
     // 白中班情况
     const classDesc = classDis.map((item, i) => (
       <span key={item.name}>
-        {item.name} {item.value} 次{i ? "" : ","}
+        {item.name} {item.value} 次{i ? '' : ','}
       </span>
     ));
 
     // 周一至周五各工作日抽检数描述
-    const weekDesc = ["周一", "周二", "周三", "周四", "周五"];
+    const weekDesc = ['周一', '周二', '周三', '周四', '周五'];
     const weekInfo = weekDay.map((item, i) => (
       <span key={item.name}>
         {weekDesc[parseInt(item.name, 10) - 1]}
-        {item.value} 次{i === weekDay.length - 1 ? "" : ", "}
+        {item.value} 次{i === weekDay.length - 1 ? '' : ', '}
       </span>
     ));
 
@@ -81,19 +81,17 @@ function Tasks({
         </div>
         <div className={styles.desc}>
           <h5>
-            码后核查共生产<strong>{taskInfo.total}</strong>车产品,在库<strong>
-              {taskInfo.stockCount}
-            </strong>车,按<strong>{taskInfo.percent}</strong>%抽样将抽取<strong>
-              {taskInfo.checks}
-            </strong>车产品
+            码后核查共生产<strong>{taskInfo.total}</strong>车产品,在库
+            <strong>{taskInfo.stockCount}</strong>车,按
+            <strong>{taskInfo.percent}</strong>%抽样将抽取
+            <strong>{taskInfo.checks}</strong>车产品
           </h5>
           <h5>
-            实际抽取<strong>{total}</strong>车(已抽取<strong>
-              {taskInfo.sampled}
-            </strong>,其中异常品<strong>{taskInfo.abnormalCarts}</strong>)，共涉及<strong
-            >
-              {taskInfo.machines}
-            </strong>台胶、凹、码设备。其中{classDesc}
+            实际抽取<strong>{total}</strong>车(已抽取
+            <strong>{taskInfo.sampled}</strong>,其中异常品
+            <strong>{taskInfo.abnormalCarts}</strong>)，共涉及
+            <strong>{taskInfo.machines}</strong>台胶、凹、码设备。其中
+            {classDesc}
           </h5>
           <h5>各工作日抽检次数如下：{weekInfo}</h5>
         </div>
@@ -101,34 +99,34 @@ function Tasks({
     );
   };
 
-  const openNotification = description => {
+  const openNotification = (description) => {
     notification.open({
-      message: "系统提示",
+      message: '系统提示',
       description,
-      icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+      icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
     });
   };
 
-  const addTasks = e => {
+  const addTasks = (e) => {
     let exInfo = {
       week_num: lib.weeks(),
       rec_time: lib.now()
     };
 
-    let insertingData = R.map(item => [
+    let insertingData = R.map((item) => [
       ...R.slice(0, 7, item),
-      item[7] + " " + item[8],
+      item[7] + ' ' + item[8],
       item[9],
       item[11],
       exInfo.week_num,
       exInfo.rec_time
     ])(sampling.save2db.cartLog);
 
-    const keys = "cart_number,gz_no,code_no,proc_name,class_name,machine_name,captain_name,print_date,week_name,prod_name,week_num,rec_time".split(
-      ","
+    const keys = 'cart_number,gz_no,code_no,proc_name,class_name,machine_name,captain_name,print_date,week_name,prod_name,week_num,rec_time'.split(
+      ','
     );
 
-    insertingData = insertingData.map(carts => {
+    insertingData = insertingData.map((carts) => {
       let obj = {};
       carts.forEach((item, i) => {
         obj[keys[i]] = item;
@@ -150,13 +148,13 @@ function Tasks({
     let insertData = async () => {
       let carnos = R.compose(
         R.uniq,
-        R.map(R.prop("cart_number"))
+        R.map(R.prop('cart_number'))
       )(insertingData);
 
       // 20180515调整日志添加接口
       let logInfo = await db.addPrintWmsLog([
         {
-          remark: JSON.stringify({ carnos, proc_stream: "人工拉号每周抽检" }),
+          remark: JSON.stringify({ carnos, proc_stream: '人工拉号每周抽检' }),
           rec_time: lib.now()
         }
       ]);
@@ -164,13 +162,13 @@ function Tasks({
       // 添加日志正常？
       if (logInfo.rows < 1 || logInfo.data[0].affected_rows < 1) {
         console.log(logInfo);
-        openNotification("锁车失败，日志信息添加异常");
+        openNotification('锁车失败，日志信息添加异常');
         return false;
       }
       let log_id = logInfo.data[0].id;
 
       let lockData = await wms.setBlackList({
-        reason_code: "q_handCheck",
+        reason_code: 'q_handCheck',
         carnos,
         log_id
       });
@@ -186,28 +184,28 @@ function Tasks({
       // unhandledList = R.map(R.prop("carno"))(unhandledList);
       // handledList = R.map(R.prop("carno"))(handledList);
       if (!lockData.status) {
-        openNotification("立体库锁车异常，请联系管理员6129/7036");
+        openNotification('立体库锁车异常，请联系管理员6129/7036');
         return;
       }
 
       if (unhandledList.length) {
         openNotification(
-          "锁车完毕,以下车号锁车失败:" + unhandledList.join("、")
+          '锁车完毕,以下车号锁车失败:' + unhandledList.join('、')
         );
       }
 
-      insertingData = R.filter(item => handledList.includes(item.cart_number))(
-        insertingData
-      );
+      insertingData = R.filter((item) =>
+        handledList.includes(item.cart_number)
+      )(insertingData);
 
       if (insertingData.length) {
-        insertingData = insertingData.map(item => {
+        insertingData = insertingData.map((item) => {
           item.user_name = userSetting.name;
           return item;
         });
         let data = await db.addPrintSampleCartlist(insertingData);
         if (data.rows) {
-          openNotification("车号列表领取成功");
+          openNotification('车号列表领取成功');
         }
       }
 
@@ -219,11 +217,11 @@ function Tasks({
 
       let data = await db.addPrintSampleMachine(machines);
       if (data.rows) {
-        openNotification("机台信息添加成功");
+        openNotification('机台信息添加成功');
       }
 
       dispatch({
-        type: "tasks/setSampleStatus",
+        type: 'tasks/setSampleStatus',
         payload: total
       });
     };
@@ -234,7 +232,7 @@ function Tasks({
     }
 
     confirm({
-      title: "系统提示",
+      title: '系统提示',
       content: `本周你已经添加了 ${sampleStatus} 车产品，建议不要重复领取，是否继续？`,
       maskClosable: true,
       onOk: async () => {
@@ -264,7 +262,7 @@ function Tasks({
     // return data;
     if (columns.length) {
       columns[9].render = (text, record) =>
-        text === "星期一" ? <Badge status="success" text={text} /> : text;
+        text === '星期一' ? <Badge status="success" text={text} /> : text;
     }
     return columns;
   };
@@ -274,9 +272,8 @@ function Tasks({
       <Card
         loading={loading}
         title={<Title />}
-        style={{ width: "100%", marginTop: "30px" }}
-        bodyStyle={{ padding: "0px 0px 12px 0px" }}
-      >
+        style={{ width: '100%', marginTop: '30px' }}
+        bodyStyle={{ padding: '0px 0px 12px 0px' }}>
         <Table
           loading={loading}
           columns={distColumn()}
@@ -285,13 +282,13 @@ function Tasks({
           pagination={false}
           size="medium"
           footer={() =>
-            dataSrc.source ? `${dataSrc.source} (共耗时${dataSrc.timing})` : ""
+            dataSrc.source ? `${dataSrc.source} (共耗时${dataSrc.timing})` : ''
           }
         />
         <Pagination
           className="ant-table-pagination"
           showTotal={(total, range) =>
-            total ? `${range[0]}-${range[1]} 共 ${total} 条数据` : ""
+            total ? `${range[0]}-${range[1]} 共 ${total} 条数据` : ''
           }
           showSizeChanger
           onShowSizeChange={onShowSizeChange}
@@ -299,15 +296,14 @@ function Tasks({
           current={page}
           pageSize={pageSize}
           onChange={pageChangeHandler}
-          pageSizeOptions={["5", "10", "15", "20", "30", "40", "50", "100"]}
+          pageSizeOptions={['5', '10', '15', '20', '30', '40', '50', '100']}
         />
         {
           <div
             style={{
               marginTop: 20,
               marginLeft: 20
-            }}
-          >
+            }}>
             {sampleStatus > 10 ? (
               <p>本周已领取{sampleStatus}车产品，禁止重复领取</p>
             ) : (

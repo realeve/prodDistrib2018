@@ -16,8 +16,9 @@ const cx = classNames.bind(styles);
 const R = require('ramda');
 const Option = Select.Option;
 
-interface machineType {
+export interface machineType {
   machine_name: string;
+  id: string | number;
   [key: string]: any;
 }
 
@@ -28,12 +29,12 @@ interface OptionsType {
 
 interface PropType {
   machine: machineType;
-  produceProdList: Array<OptionsType>;
-  productList: Array<OptionsType>;
-  procTypeList: Array<OptionsType>;
-  workTypeList: Array<OptionsType>;
-  onDelete?: () => void;
-  onAdd?: () => void;
+  onDelete: () => void;
+  onAdd: () => void;
+  produceProdList?: Array<OptionsType>;
+  productList?: Array<OptionsType>;
+  procTypeList?: Array<OptionsType>;
+  workTypeList?: Array<OptionsType>;
 }
 
 interface StateType {
@@ -86,6 +87,7 @@ class MachineItem extends Component<PropType, StateType> {
     machine: {
       machine_name: '载入中...'
     },
+    produceProdList: [],
     productList: [],
     procTypeList: [],
     workTypeList: [],
@@ -96,6 +98,13 @@ class MachineItem extends Component<PropType, StateType> {
   constructor(props: PropType) {
     super(props);
     this.state = mapStateToProps(props);
+  }
+
+  static getDerivedStateFromProps(props, prevState) {
+    if (R.equals(props.machine.machine_id, prevState.machine_id)) {
+      return null;
+    }
+    return mapStateToProps(props);
   }
 
   submit() {

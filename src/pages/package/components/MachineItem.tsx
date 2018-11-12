@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'dva';
 import {
   Card,
@@ -8,8 +7,8 @@ import {
   Select,
   notification,
   Icon,
-  Col,
-  Switch
+  Switch,
+  Col
 } from 'antd';
 import styles from './style.less';
 import classNames from 'classnames/bind';
@@ -17,20 +16,72 @@ const cx = classNames.bind(styles);
 const R = require('ramda');
 const Option = Select.Option;
 
+interface machineType {
+  machine_name: string;
+  [key: string]: any;
+}
+
+interface OptionsType {
+  value: string | number;
+  name: string;
+}
+
+interface PropType {
+  machine: machineType;
+  produceProdList: Array<OptionsType>;
+  productList: Array<OptionsType>;
+  procTypeList: Array<OptionsType>;
+  workTypeList: Array<OptionsType>;
+  onDelete?: () => void;
+  onAdd?: () => void;
+}
+
+interface StateType {
+  status: boolean;
+  proc_type_id: string | number;
+  prod_id: string | number;
+  worktype_id: string | number;
+  last_produce_date: string;
+  id: number;
+  prod_name: string;
+  machine_name: string;
+  worktype_name: string;
+  num: number;
+  prod_date_name: string;
+  limit: number;
+  type: string;
+  data: Array<any>;
+}
+
+// 读取设备近期生产品种
+const mapStateToProps = (props: PropType) => {
+  let res = R.clone(props.machine);
+  res.status = Boolean(parseInt(res.status, 10));
+  res.last_produce_date = false;
+  if (R.isNil(res.prod_id)) {
+    let data = R.find(R.propEq('machine_id', res.machine_id))(
+      props.produceProdList
+    );
+    if (!R.isNil(data)) {
+      res.last_produce_date = data.last_produce_date;
+      data = R.find(R.propEq('name', data.prod_name))(props.productList);
+      res.prod_id = data.value;
+    }
+  }
+  if (R.isNil(res.prod_id)) {
+    res.status = false;
+  }
+  if (R.isNil(res.proc_type_id)) {
+    res.proc_type_id = '0';
+  }
+  return res;
+};
+
 @connect((state) => ({
   ...state.common,
   ...state.package
 }))
-class MachineItem extends Component {
-  static propTypes = {
-    machine: PropTypes.object,
-    productList: PropTypes.array,
-    procTypeList: PropTypes.array,
-    workTypeList: PropTypes.array,
-    onDelete: PropTypes.func,
-    onAdd: PropTypes.func
-  };
-
+class MachineItem extends Component<PropType, StateType> {
   static defaultProps = {
     machine: {
       machine_name: '载入中...'
@@ -42,34 +93,10 @@ class MachineItem extends Component {
     onAdd: () => {}
   };
 
-  constructor(props) {
+  constructor(props: PropType) {
     super(props);
-    this.state = this.mapStateToProps(props);
+    this.state = mapStateToProps(props);
   }
-
-  // 读取设备近期生产品种
-  mapStateToProps = (props) => {
-    let res = R.clone(props.machine);
-    res.status = Boolean(parseInt(res.status, 10));
-    res.last_produce_date = false;
-    if (R.isNil(res.prod_id)) {
-      let data = R.find(R.propEq('machine_id', res.machine_id))(
-        props.produceProdList
-      );
-      if (!R.isNil(data)) {
-        res.last_produce_date = data.last_produce_date;
-        data = R.find(R.propEq('name', data.prod_name))(props.productList);
-        res.prod_id = data.value;
-      }
-    }
-    if (R.isNil(res.prod_id)) {
-      res.status = false;
-    }
-    if (R.isNil(res.proc_type_id)) {
-      res.proc_type_id = '0';
-    }
-    return res;
-  };
 
   submit() {
     console.log(this.state);
@@ -78,14 +105,16 @@ class MachineItem extends Component {
   copySetting() {
     notification.open({
       message: '复制本设置项',
-      icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
+      icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />,
+      description: '复制本设置项'
     });
   }
 
   removeSetting() {
     notification.open({
       message: '移除本设置项',
-      icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
+      icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />,
+      description: '移除本设置项'
     });
   }
 
@@ -138,7 +167,7 @@ class MachineItem extends Component {
             <Select
               {...selectProps}
               value={this.state.prod_id}
-              onChange={(prod_id) => this.setState({ prod_id })}
+              onChange={(prod_id: string) => this.setState({ prod_id })}
               placeholder="请选择产品品种">
               {productList.map(({ value, name }) => (
                 <Option key={value} value={value}>
@@ -152,7 +181,7 @@ class MachineItem extends Component {
             <Select
               {...selectProps}
               value={this.state.worktype_id}
-              onChange={(worktype_id) => this.setState({ worktype_id })}
+              onChange={(worktype_id: string) => this.setState({ worktype_id })}
               placeholder="班次">
               {workTypeList.map(({ value, name }) => (
                 <Option key={value} value={value}>
@@ -166,7 +195,9 @@ class MachineItem extends Component {
             <Select
               {...selectProps}
               value={this.state.proc_type_id}
-              onChange={(proc_type_id) => this.setState({ proc_type_id })}
+              onChange={(proc_type_id: string) =>
+                this.setState({ proc_type_id })
+              }
               placeholder="工艺">
               {procTypeList.map(({ value, name }) => (
                 <Option key={value} value={value}>
@@ -180,7 +211,9 @@ class MachineItem extends Component {
             <Input
               {...inputProps}
               value={this.state.num}
-              onChange={({ target: { value: num } }) => this.setState({ num })}
+              onChange={({ target: { value: num } }: any) =>
+                this.setState({ num })
+              }
               placeholder="该工艺大万数"
             />
           </div>
@@ -189,7 +222,7 @@ class MachineItem extends Component {
             <Input
               {...inputProps}
               value={this.state.limit}
-              onChange={({ target: { value: limit } }) =>
+              onChange={({ target: { value: limit } }: any) =>
                 this.setState({ limit })
               }
               placeholder="低于该值时判废"

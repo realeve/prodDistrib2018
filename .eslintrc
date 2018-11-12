@@ -1,3 +1,13 @@
 {
-  "extends": "umi"
+    "extends": "umi",
+    "globals": {
+        "APP_TYPE": true,
+        "BUILD_TYPE": true
+    },
+    "rules": {
+        "experimentalDecorators": false,
+        "react/jsx-filename-extension": [1, {
+            "extensions": [".js", ".jsx"]
+        }]
+    }
 }

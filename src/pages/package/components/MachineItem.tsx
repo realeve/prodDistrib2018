@@ -39,6 +39,7 @@ interface PropType {
   productList?: Array<OptionsType>;
   procTypeList?: Array<OptionsType>;
   workTypeList?: Array<OptionsType>;
+  editable?: boolean;
 }
 
 interface StateType {
@@ -67,7 +68,7 @@ const mapStateToProps = (props: PropType) => {
   let res = R.clone(props.machine);
   res.status = Boolean(parseInt(res.status, 10));
   res.last_produce_date = false;
-  res.remark = '';
+  res.remark = res.remark || '';
   res.lockCarts = [];
 
   let data = R.find(R.propEq('machine_id', res.machine_id))(
@@ -105,7 +106,8 @@ class MachineItem extends Component<PropType, StateType> {
     procTypeList: [],
     workTypeList: [],
     onDelete: () => {},
-    onAdd: () => {}
+    onAdd: () => {},
+    editable: true
   };
 
   constructor(props: PropType) {
@@ -145,7 +147,9 @@ class MachineItem extends Component<PropType, StateType> {
 
   getCurParams() {
     let params = R.pick(
-      'prod_id,machine_id,worktype_id,num,limit,proc_type_id,status'.split(',')
+      'prod_id,machine_id,worktype_id,num,limit,proc_type_id,status,remark'.split(
+        ','
+      )
     )(this.state);
     params.status = params.status ? 1 : 0;
     return params;
@@ -198,7 +202,8 @@ class MachineItem extends Component<PropType, StateType> {
       productList,
       procTypeList,
       workTypeList,
-      onDelete
+      onDelete,
+      editable
     } = this.props;
     let { last_produce_date, status, lockCarts } = this.state;
 
@@ -211,27 +216,29 @@ class MachineItem extends Component<PropType, StateType> {
             {last_produce_date || '近十天未生产'}
           </small>
         </div>
-        <div>
-          <Button
-            disabled={!status}
-            size="small"
-            icon="plus"
-            onClick={() => this.copySetting()}
-          />
-          <Button
-            disabled={!status}
-            size="small"
-            icon="close"
-            type="danger"
-            style={{ marginLeft: 10 }}
-            onClick={() => onDelete()}
-          />
-        </div>
+        {editable && (
+          <div>
+            <Button
+              disabled={!status}
+              size="small"
+              icon="plus"
+              onClick={() => this.copySetting()}
+            />
+            <Button
+              disabled={!status}
+              size="small"
+              icon="close"
+              type="danger"
+              style={{ marginLeft: 10 }}
+              onClick={() => onDelete()}
+            />
+          </div>
+        )}
       </div>
     );
 
     const selectProps = {
-      disabled: !status,
+      disabled: !status || !editable,
       className: styles.item
     };
     const inputProps = {
@@ -245,9 +252,10 @@ class MachineItem extends Component<PropType, StateType> {
         className={cx({
           machine: true,
           disabled: !status,
-          warning: status && !last_produce_date
+          warning: status && !last_produce_date,
+          notEditable: !editable
         })}>
-        <Card title={ActionTool} style={{ minHeight: 510 }}>
+        <Card title={ActionTool} style={{ minHeight: editable ? 510 : 410 }}>
           <div className={styles.inlineForm}>
             <label>产品品种：</label>
             <Select
@@ -282,7 +290,7 @@ class MachineItem extends Component<PropType, StateType> {
               {...selectProps}
               value={this.state.proc_type_id}
               onChange={(proc_type_id: string) =>
-                this.setState({ proc_type_id })
+                this.setState({ proc_type_id, remark: '' })
               }
               placeholder="工艺">
               {procTypeList.map(({ value, name }) => (
@@ -308,6 +316,7 @@ class MachineItem extends Component<PropType, StateType> {
               <label>指定车号:</label>
               <div {...inputProps}>
                 <Input.TextArea
+                  disabled={!editable}
                   rows={3}
                   value={this.state.remark}
                   onBlur={() => this.setCartList()}
@@ -335,21 +344,25 @@ class MachineItem extends Component<PropType, StateType> {
               placeholder="低于该值时判废"
             />
           </div>
-          <div className={styles.inlineForm}>
-            <label>设备状态</label>
-            <Switch
-              checkedChildren="开机"
-              unCheckedChildren="停机"
-              defaultChecked
-              checked={this.state.status}
-              onChange={(status) => this.setState({ status })}
-            />
-          </div>
-          <div className={styles.action}>
-            <Button type="primary" onClick={() => this.submit()}>
-              保存
-            </Button>
-          </div>
+          {editable && (
+              <div className={styles.inlineForm}>
+                <label>设备状态</label>
+                <Switch
+                  checkedChildren="开机"
+                  unCheckedChildren="停机"
+                  defaultChecked
+                  disabled={!editable}
+                  checked={this.state.status}
+                  onChange={(status) => this.setState({ status })}
+                />
+              </div>
+            ) && (
+              <div className={styles.action}>
+                <Button type="primary" onClick={() => this.submit()}>
+                  保存
+                </Button>
+              </div>
+            )}
         </Card>
       </Col>
     );

@@ -23,6 +23,23 @@
   }
 }
 
+.notEditable {
+  label {
+    font-weight: bolder;
+  }
+  :global {
+    .ant-select-selection,
+    .ant-input {
+      background: #fff;
+      color: #444;
+      border: none;
+      .ant-select-arrow {
+        display: none;
+      }
+    }
+  }
+}
+
 .center {
   display: flex;
   width: 100%;

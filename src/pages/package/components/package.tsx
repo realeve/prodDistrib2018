@@ -146,6 +146,7 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
                 {previewList.map((machine, idx) => (
                   <MachineItem
                     machine={machine}
+                    editable={false}
                     onDelete={() => this.removeItem(idx)}
                     onAdd={(param) => this.addItem(param, idx)}
                     key={idx}

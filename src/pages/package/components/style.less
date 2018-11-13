@@ -7,6 +7,22 @@
   }
 }
 
+@warning-color: #ec5050;
+.warning {
+  :global {
+    .ant-card-head {
+      background-color: @warning-color;
+      color: #fff;
+    }
+    .ant-card-bordered {
+      border-color: @warning-color;
+    }
+  }
+  h4 {
+    color: #fff;
+  }
+}
+
 .center {
   display: flex;
   width: 100%;
@@ -16,6 +32,8 @@
 
 .machine {
   padding: 5px;
+  transition: 1s all;
+  opacity: 1;
   :global {
     .ant-card-head-title {
       padding: 8px 0;
@@ -43,6 +61,10 @@
     }
     &:not(first-child) {
       margin-top: 10px;
+    }
+    .block {
+      color: #656565;
+      margin-top: 5px;
     }
   }
   .action {

@@ -25,30 +25,23 @@ export default function LockList({
   }
 
   if (!lockList.length) {
-    return <h3>当前在库产品均未锁车</h3>;
+    return <h3>无满足条件的产品</h3>;
   }
 
-  lockList = [
-    {
-      prodname: '品种',
-      tech: '工艺',
-      gh: '冠号',
-      carno: '大万号',
-      lock_reason: '锁车原因'
-    },
-    ...lockList
-  ];
   return (
     <ul className={styles.locklist}>
-      {lockList.map(({ gh, prodname, tech, carno, lock_reason }) => (
-        <li key={carno + lock_reason}>
-          <span>{gh}</span>
-          <span>{prodname}</span>
-          <span>{tech}</span>
-          <span>{carno}</span>
-          <span>{lock_reason}</span>
-        </li>
-      ))}
+      {lockList.map(
+        ({ gh, prodname, tech, carno, lock_reason, open_num }, key) => (
+          <li key={key}>
+            {gh && <span>{gh}</span>}
+            <span>{prodname}</span>
+            <span>{carno}</span>
+            <span>{open_num}</span>
+            {tech && <span>{tech}</span>}
+            {lock_reason && <span>{lock_reason}</span>}
+          </li>
+        )
+      )}
     </ul>
   );
 }

@@ -64,7 +64,7 @@ export const getQfmWipJobs = (carts) =>
  */
 module.exports.getVwWimWhitelistUncomplete = () =>
   axios({
-    url: '/262/37762ded85/30.json'
+    url: '/262/37762ded85.json'
   });
 
 /**

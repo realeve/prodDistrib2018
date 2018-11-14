@@ -35,7 +35,7 @@ interface PropType {
   machine: machineType;
   onDelete: () => void;
   onAdd: (param: any) => void;
-  onChange: (param: any) => void;
+  onChange?: (param: any) => void;
   produceProdList?: Array<OptionsType>;
   productList?: Array<OptionsType>;
   procTypeList?: Array<OptionsType>;

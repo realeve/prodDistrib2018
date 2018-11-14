@@ -70,7 +70,7 @@ module.exports.getVwWimWhitelistUncomplete = () =>
 /**
 *   @database: { 质量信息系统 }
 *   @desc:     { 新建排产任务信息 } 
-    const { prod_id, machine_id, worktype_id, num, limit, proc_type_id, status,remark } = params;
+    const { prod_id, machine_id, worktype_id, num,  proc_type_id, status,remark } = params;
 */
 export const addPrintCutTask = (params) =>
   axios({
@@ -93,7 +93,7 @@ export const delPrintCutTask = (task_id) =>
 /**
 *   @database: { 质量信息系统 }
 *   @desc:     { 更新排产任务 } 
-    const { prod_id, machine_id, worktype_id, num, limit, proc_type_id, status, task_id } = params;
+    const { prod_id, machine_id, worktype_id, num,  proc_type_id, status, task_id } = params;
 */
 export const setPrintCutTask = (params) =>
   axios({

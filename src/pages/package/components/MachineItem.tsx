@@ -58,7 +58,6 @@ interface StateType {
   worktype_name: string;
   num: number;
   prod_date_name: string;
-  limit: number;
   type: string;
   data: Array<any>;
   task_id: number | string;
@@ -167,9 +166,7 @@ class MachineItem extends Component<PropType, StateType> {
 
   getCurParams() {
     let params = R.pick(
-      'prod_id,machine_id,worktype_id,num,limit,proc_type_id,status,remark'.split(
-        ','
-      )
+      'prod_id,machine_id,worktype_id,num,proc_type_id,status,remark'.split(',')
     )(this.state);
     params.status = params.status ? 1 : 0;
     return params;
@@ -290,7 +287,7 @@ class MachineItem extends Component<PropType, StateType> {
           warning: inValid.date || inValid.prod_id,
           notEditable: !editable
         })}>
-        <Card title={ActionTool} style={{ minHeight: editable ? 510 : 410 }}>
+        <Card title={ActionTool} style={{ minHeight: editable ? 480 : 380 }}>
           <div className={styles.inlineForm}>
             <label>产品品种：</label>
             <Select
@@ -368,7 +365,7 @@ class MachineItem extends Component<PropType, StateType> {
               </div>
             </div>
           )}
-          <div className={styles.inlineForm}>
+          {/* <div className={styles.inlineForm}>
             <label>开包量阈值：</label>
             <Input
               {...inputProps}
@@ -378,7 +375,7 @@ class MachineItem extends Component<PropType, StateType> {
               }
               placeholder="低于该值时判废"
             />
-          </div>
+          </div> */}
           {editable && (
             <>
               <div className={styles.inlineForm}>

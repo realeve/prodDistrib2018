@@ -22,6 +22,15 @@ interface StateType {
   previewList?: Array<machineType>;
 }
 
+/**
+ * todo:20181115
+ * 1.品种列表对应的开包量上限设置
+ * 2.编辑信息时，会影响到复制的任务
+ * 3.手工编辑排活任务
+ * 4.增加产品领用状态信息以及查询接口。
+ *
+ */
+
 const getPreviewList = R.filter((item) => item.status != '0');
 
 class PackageComponent extends React.PureComponent<PropType, StateType> {
@@ -68,16 +77,16 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
     this.updateState(machineList);
   }
 
-  updateState(machineList) {
-    this.setState({
-      machineList,
-      previewList: getPreviewList(machineList)
-    });
-    this.props.dispatch({
+  async updateState(machineList) {
+    await this.props.dispatch({
       type: 'package/setStore',
       payload: {
         machineList
       }
+    });
+    this.setState({
+      machineList,
+      previewList: getPreviewList(machineList)
     });
     this.notify('任务更新成功');
   }

@@ -15,7 +15,7 @@ export const getPrintCutMachine = () =>
  */
 export const getPrintCutProcList = () =>
   axios({
-    url: '/257/8cc4ce7bb2/200.json'
+    url: '/257/8cc4ce7bb2/2000.json'
   });
 
 /**
@@ -111,4 +111,14 @@ export const getVwBlacklist = (carts) =>
     params: {
       carts
     }
+  });
+
+/** NodeJS服务端调用：
+ *
+ *   @database: { 库管系统 }
+ *   @desc:     { 开包量异常产品列表 }
+ */
+module.exports.getVwWimWhitelistAbnormal = () =>
+  axios({
+    url: '/269/15c7b56487.json'
   });

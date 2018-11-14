@@ -11,7 +11,8 @@ export default {
     workTypeList: [],
     produceProdList: [],
     lockList: [],
-    unCompleteList: []
+    unCompleteList: [],
+    abnormalList: []
   },
   reducers: {
     setStore
@@ -28,13 +29,16 @@ export default {
       let { data: produceProdList } = yield call(db.getViewCartfinder);
       // 锁车列表
       let { data: lockList } = yield call(db.getVwWimWhitelist);
-      // 未完工列表
-      let { data: unCompleteList } = yield call(db.getVwWimWhitelistUncomplete);
-      // 开包量超过设定值
       lockList = lockList.map((item) => {
         item.lock_reason = item.lock_reason.replace('锁车', '');
         return item;
       });
+
+      // 未完工列表
+      let { data: unCompleteList } = yield call(db.getVwWimWhitelistUncomplete);
+
+      // 开包量超过设定值
+      let { data: abnormalList } = yield call(db.getVwWimWhitelistAbnormal);
       yield put({
         type: 'setStore',
         payload: {
@@ -42,6 +46,16 @@ export default {
           procTypeList,
           workTypeList,
           produceProdList,
+          abnormalList: [
+            {
+              prodname: '品种',
+              gh: '冠号',
+              carno: '大万号',
+              open_num: '开包量',
+              tech: '工艺'
+            },
+            ...abnormalList
+          ],
           lockList: [
             {
               prodname: '品种',

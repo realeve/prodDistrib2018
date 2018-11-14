@@ -114,28 +114,13 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
     this.updateState(machineList);
   }
 
-  async taskPreview(key) {
-    return;
-    // 任务预览
-    if (key !== '2') {
-      return;
-    }
-    let { data: machineList } = await db.getPrintCutMachine();
-    const previewList = getPreviewList(machineList);
-
-    this.setState({
-      machineList,
-      previewList
-    });
-  }
-
   render() {
-    let { lockList, loading, unCompleteList } = this.props;
+    let { lockList, loading, unCompleteList, abnormalList } = this.props;
     let { machineList, previewList } = this.state;
     return (
       <Row>
         <Col span={16} style={{ paddingRight: 10 }}>
-          <Tabs defaultActiveKey="1" onChange={(key) => this.taskPreview(key)}>
+          <Tabs defaultActiveKey="1">
             <TabPane tab="机台设置" key="1">
               {loading ? (
                 <Loading />
@@ -177,7 +162,7 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
               <LockList loading={loading} lockList={unCompleteList} />
             </TabPane>
             <TabPane tab="开包量超阈值产品" key="3">
-              3
+              <LockList loading={loading} lockList={abnormalList} />
             </TabPane>
           </Tabs>
         </Col>

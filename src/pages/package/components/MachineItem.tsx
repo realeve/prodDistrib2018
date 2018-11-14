@@ -40,6 +40,7 @@ interface PropType {
   productList?: Array<OptionsType>;
   procTypeList?: Array<OptionsType>;
   workTypeList?: Array<OptionsType>;
+  abnormalList?: Array<OptionsType>;
   editable?: boolean;
   [key: string]: any;
 }
@@ -66,6 +67,13 @@ interface StateType {
   machine?: any;
   last_prod_name?: string;
   [key: string]: any;
+}
+
+enum PROC_TYPE {
+  MAHOU, // 码后
+  ALL_CHECK, //全检
+  CHANGE_CART, // 补票
+  CART_LIST // 指定车号列表
 }
 
 // 读取设备近期生产品种
@@ -338,7 +346,7 @@ class MachineItem extends Component<PropType, StateType> {
               placeholder="该工艺大万数"
             />
           </div>
-          {this.state.proc_type_id == 3 && (
+          {this.state.proc_type_id == PROC_TYPE.CART_LIST && (
             <div className={styles.inlineForm}>
               <label>指定车号:</label>
               <div {...inputProps}>

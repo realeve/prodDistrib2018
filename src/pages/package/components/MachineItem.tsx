@@ -35,11 +35,13 @@ interface PropType {
   machine: machineType;
   onDelete: () => void;
   onAdd: (param: any) => void;
+  onChange: (param: any) => void;
   produceProdList?: Array<OptionsType>;
   productList?: Array<OptionsType>;
   procTypeList?: Array<OptionsType>;
   workTypeList?: Array<OptionsType>;
   editable?: boolean;
+  [key: string]: any;
 }
 
 interface StateType {
@@ -61,15 +63,21 @@ interface StateType {
   task_id: number | string;
   remark?: string;
   lockCarts?: Array<string>;
+  machine?: any;
+  last_prod_name?: string;
+  [key: string]: any;
 }
 
 // 读取设备近期生产品种
 const mapStateToProps = (props: PropType) => {
   let res = R.clone(props.machine);
-  res.status = Boolean(parseInt(res.status, 10));
-  res.last_produce_date = false;
-  res.remark = res.remark || '';
-  res.lockCarts = [];
+  res = Object.assign(res, {
+    machine: R.clone(props.machine),
+    status: Boolean(parseInt(res.status, 10)),
+    last_produce_date: false,
+    remark: res.remark || '',
+    lockCarts: []
+  });
 
   let data = R.find(R.propEq('machine_id', res.machine_id))(
     props.produceProdList
@@ -78,7 +86,8 @@ const mapStateToProps = (props: PropType) => {
   if (!R.isNil(data)) {
     res.last_produce_date = data.last_produce_date;
     data = R.find(R.propEq('name', data.prod_name))(props.productList);
-    res.prod_id = data.value;
+    res.last_prod_id = data.value;
+    res.last_prod_name = data.name;
   }
 
   // 为防止误导用户，不强制设置status
@@ -107,6 +116,7 @@ class MachineItem extends Component<PropType, StateType> {
     workTypeList: [],
     onDelete: () => {},
     onAdd: () => {},
+    onChange: () => {},
     editable: true
   };
 
@@ -116,7 +126,7 @@ class MachineItem extends Component<PropType, StateType> {
   }
 
   static getDerivedStateFromProps(props, prevState) {
-    if (R.equals(props.machine.machine_id, prevState.machine_id)) {
+    if (R.equals(props.machine, prevState.machine)) {
       return null;
     }
     return mapStateToProps(props);
@@ -134,6 +144,8 @@ class MachineItem extends Component<PropType, StateType> {
     let params = this.getCurParams();
     let task_id = this.state.task_id;
     params = { ...params, task_id };
+    this.props.onChange(params);
+
     let {
       data: [{ affected_rows }]
     } = await db.setPrintCutTask(params);
@@ -205,7 +217,19 @@ class MachineItem extends Component<PropType, StateType> {
       onDelete,
       editable
     } = this.props;
-    let { last_produce_date, status, lockCarts } = this.state;
+    let {
+      last_produce_date,
+      status,
+      lockCarts,
+      last_prod_name,
+      last_prod_id,
+      prod_id
+    } = this.state;
+
+    let inValid = {
+      date: status && !last_produce_date,
+      prod_id: last_prod_id && last_prod_id != prod_id
+    };
 
     const ActionTool = (
       <div className={styles.header}>
@@ -213,8 +237,11 @@ class MachineItem extends Component<PropType, StateType> {
           <h4 className={styles.header}>{machine.machine_name}</h4>
           <small>
             最近生产：
-            {last_produce_date || '近十天未生产'}
+            {last_produce_date || '近十天未生产'}{' '}
+            {last_prod_name && `(${last_prod_name})`}
           </small>
+          <h5>{inValid.date && '提示：近十天未生产'}</h5>
+          <h5>{inValid.prod_id && '提示：当前设置生产品种与最近生产不一致'}</h5>
         </div>
         {editable && (
           <div>
@@ -252,7 +279,7 @@ class MachineItem extends Component<PropType, StateType> {
         className={cx({
           machine: true,
           disabled: !status,
-          warning: status && !last_produce_date,
+          warning: inValid.date || inValid.prod_id,
           notEditable: !editable
         })}>
         <Card title={ActionTool} style={{ minHeight: editable ? 510 : 410 }}>
@@ -345,6 +372,7 @@ class MachineItem extends Component<PropType, StateType> {
             />
           </div>
           {editable && (
+            <>
               <div className={styles.inlineForm}>
                 <label>设备状态</label>
                 <Switch
@@ -356,13 +384,13 @@ class MachineItem extends Component<PropType, StateType> {
                   onChange={(status) => this.setState({ status })}
                 />
               </div>
-            ) && (
               <div className={styles.action}>
                 <Button type="primary" onClick={() => this.submit()}>
                   保存
                 </Button>
               </div>
-            )}
+            </>
+          )}
         </Card>
       </Col>
     );

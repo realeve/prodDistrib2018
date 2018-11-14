@@ -33,16 +33,13 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
     };
   }
 
-  static getDerivedStateFromProps({ machineList }, prevState) {
+  static getDerivedStateFromProps({ machineList, previewList }, prevState) {
     // 未改变
-    if (R.equals(machineList, prevState.machineList)) {
+    if (
+      R.equals(machineList, prevState.machineList) &&
+      R.equals(previewList, prevState.previewList)
+    ) {
       return null;
-    } else if (prevState.machineList.length) {
-      // 增删数据
-      return {
-        machineList: prevState.machineList,
-        previewList: getPreviewList(prevState.machineList)
-      };
     }
     // 初始化
     return { machineList, previewList: getPreviewList(machineList) };
@@ -64,15 +61,25 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
       data: [{ affected_rows }]
     } = await db.delPrintCutTask(task_id);
     if (affected_rows == 0) {
-      this.notify('任务添加失败');
+      this.notify('任务删除失败');
       return;
     }
     machineList = R.remove(idx, 1, machineList);
+    this.updateState(machineList);
+  }
+
+  updateState(machineList) {
     this.setState({
       machineList,
       previewList: getPreviewList(machineList)
     });
-    this.notify('任务添加成功');
+    this.props.dispatch({
+      type: 'package/setStore',
+      payload: {
+        machineList
+      }
+    });
+    this.notify('任务更新成功');
   }
 
   notify(message) {
@@ -81,6 +88,13 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
       icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />,
       description: message
     });
+  }
+
+  updateItem(param: any, idx: number) {
+    let { machineList } = this.state;
+    param = Object.assign(R.nth(idx)(machineList), param);
+    machineList = R.update(idx, param, machineList);
+    this.updateState(machineList);
   }
 
   async addItem(param: any, idx: number) {
@@ -97,14 +111,11 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
       task_id: id
     });
     machineList = R.insert(idx, newItem, machineList);
-    this.setState({
-      machineList,
-      previewList: getPreviewList(machineList)
-    });
-    this.notify('任务添加成功');
+    this.updateState(machineList);
   }
 
   async taskPreview(key) {
+    return;
     // 任务预览
     if (key !== '2') {
       return;
@@ -135,6 +146,7 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
                       machine={machine}
                       onDelete={() => this.removeItem(idx)}
                       onAdd={(param) => this.addItem(param, idx)}
+                      onChange={(param) => this.updateItem(param, idx)}
                       key={idx}
                     />
                   ))}

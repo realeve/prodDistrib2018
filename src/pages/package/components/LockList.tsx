@@ -24,7 +24,7 @@ export default function LockList({
     return <Loading />;
   }
 
-  if (!lockList.length) {
+  if (lockList.length === 1) {
     return <h3>无满足条件的产品</h3>;
   }
 

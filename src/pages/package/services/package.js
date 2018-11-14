@@ -42,7 +42,7 @@ export const getViewCartfinder = () =>
  */
 export const getVwWimWhitelist = () =>
   axios({
-    url: '/260/4c0645f3d4/30.json'
+    url: '/260/4c0645f3d4/1.json'
   });
 
 /**

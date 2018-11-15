@@ -287,7 +287,7 @@ class MachineItem extends Component<PropType, StateType> {
           warning: inValid.date || inValid.prod_id,
           notEditable: !editable
         })}>
-        <Card title={ActionTool} style={{ minHeight: editable ? 480 : 380 }}>
+        <Card title={ActionTool} style={{ minHeight: editable ? 460 : 380 }}>
           <div className={styles.inlineForm}>
             <label>产品品种：</label>
             <Select

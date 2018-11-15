@@ -113,12 +113,33 @@ export const getVwBlacklist = (carts) =>
     }
   });
 
-/** NodeJS服务端调用：
- *
- *   @database: { 库管系统 }
- *   @desc:     { 开包量异常产品列表 }
- */
-module.exports.getVwWimWhitelistAbnormal = () =>
+/**
+*   @database: { 库管系统 }
+*   @desc:     { 开包量异常产品列表 } 
+    const { prod2, prod3, prod4, prod6, prod7 } = params;
+*/
+export const getVwWimWhitelistAbnormal = (params) =>
   axios({
-    url: '/269/15c7b56487.json'
+    url: '/269/15c7b56487.json',
+    params
+  });
+
+/**
+ *   @database: { 质量信息系统 }
+ *   @desc:     { 各品种开包量限额 }
+ */
+export const getProductdata = () =>
+  axios({
+    url: '/272/eae49a15d0.json'
+  });
+
+/**
+*   @database: { 质量信息系统 }
+*   @desc:     { 更新品种开包量阈值设置 } 
+    const { limit, prod_name } = params;
+*/
+export const setProductdata = (params) =>
+  axios({
+    url: '/273/920c2e5dfb.json',
+    params
   });

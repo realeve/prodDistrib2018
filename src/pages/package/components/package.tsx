@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'dva';
 import { Row, Col, notification, Tabs, Icon } from 'antd';
 import MachineItem from './MachineItem';
+import ProductItem from './ProductItem';
 
 import LockList from './LockList';
 import Loading from './Loading';
@@ -24,11 +25,11 @@ interface StateType {
 
 /**
  * todo:20181115
- * 1.品种列表对应的开包量上限设置
+ * 1.品种列表对应的开包量上限设置   (20181115 16：40 完成)
  * 2.编辑信息时，会影响到复制的任务
  * 3.手工编辑排活任务
  * 4.增加产品领用状态信息以及查询接口。
- *
+ * 5.不同阈值下品种的未排活情况   (20181115 16：40 完成)
  */
 
 const getPreviewList = R.filter((item) => item.status != '0');
@@ -123,8 +124,27 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
     this.updateState(machineList);
   }
 
+  changeProd(limit, idx) {
+    let { prodList, dispatch } = this.props;
+    let item = R.nth(idx)(prodList);
+    item.limit = limit;
+    prodList = R.update(idx, item, prodList);
+    dispatch({
+      type: 'package/setStore',
+      payload: {
+        prodList
+      }
+    });
+  }
+
   render() {
-    let { lockList, loading, unCompleteList, abnormalList } = this.props;
+    let {
+      lockList,
+      loading,
+      unCompleteList,
+      abnormalList,
+      prodList
+    } = this.props;
     let { machineList, previewList } = this.state;
     return (
       <Row>
@@ -156,6 +176,17 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
                     onDelete={() => this.removeItem(idx)}
                     onAdd={(param) => this.addItem(param, idx)}
                     key={idx}
+                  />
+                ))}
+              </Row>
+            </TabPane>
+            <TabPane tab="品种开包量阈值设置" key="3">
+              <Row>
+                {prodList.map((item, idx) => (
+                  <ProductItem
+                    {...item}
+                    key={item.prod_name}
+                    onChange={(limit) => this.changeProd(limit, idx)}
                   />
                 ))}
               </Row>

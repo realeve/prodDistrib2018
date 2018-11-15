@@ -12,7 +12,8 @@ export default {
     produceProdList: [],
     lockList: [],
     unCompleteList: [],
-    abnormalList: []
+    abnormalList: [],
+    prodList: []
   },
   reducers: {
     setStore
@@ -37,8 +38,42 @@ export default {
       // 未完工列表
       let { data: unCompleteList } = yield call(db.getVwWimWhitelistUncomplete);
 
-      // 开包量超过设定值
-      let { data: abnormalList } = yield call(db.getVwWimWhitelistAbnormal);
+      // 品种阈值
+      let { data: prodList } = yield call(db.getProductdata);
+
+      let params = {
+        prod2: 150,
+        prod3: 150,
+        prod4: 150,
+        prod6: 150,
+        prod7: 150
+      };
+      prodList.map(({ prod_name, limit }) => {
+        switch (prod_name) {
+          case '9602A':
+            params.prod2 = limit;
+            break;
+          case '9603A':
+            params.prod3 = limit;
+            break;
+          case '9604A':
+            params.prod4 = limit;
+            break;
+          case '9606A':
+            params.prod6 = limit;
+            break;
+          case '9607T':
+            params.prod7 = limit;
+            break;
+          default:
+            break;
+        }
+      });
+      // 开包量超过设定值产品
+      let { data: abnormalList } = yield call(
+        db.getVwWimWhitelistAbnormal(params)
+      );
+
       yield put({
         type: 'setStore',
         payload: {
@@ -46,6 +81,7 @@ export default {
           procTypeList,
           workTypeList,
           produceProdList,
+          prodList,
           abnormalList: [
             {
               prodname: '品种',

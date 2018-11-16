@@ -2,6 +2,35 @@ import pathToRegexp from 'path-to-regexp';
 import * as db from '../services/package';
 
 import { setStore } from '@/utils/lib';
+const R = require('ramda');
+const handleProdResult = (data) => {
+  let res = R.groupBy(R.prop('machine_name'))(data);
+  return R.compose(
+    R.map((key) => {
+      let item = res[key];
+      let baseInfo = R.compose(
+        R.pick(
+          'machine_id,machine_name,prod_name,expect_num,real_num,type,rec_date'.split(
+            ','
+          )
+        ),
+        R.nth(0)
+      )(item);
+      baseInfo.data = [];
+      item.forEach((cartInfo) => {
+        baseInfo.data.push(
+          R.pick(
+            'carno,ex_opennum,gh,status,rec_id,tech,work_type_name'.split(',')
+          )(cartInfo)
+        );
+      });
+      baseInfo.data = R.sort(R.assoc(R.prop('gh')))(baseInfo.data);
+      return baseInfo;
+    }),
+    R.keys
+  )(res);
+};
+
 const namespace = 'package';
 export default {
   namespace,
@@ -13,7 +42,8 @@ export default {
     lockList: [],
     unCompleteList: [],
     abnormalList: [],
-    prodList: []
+    prodList: [],
+    prodResult: []
   },
   reducers: {
     setStore
@@ -41,39 +71,18 @@ export default {
       // 品种阈值
       let { data: prodList } = yield call(db.getProductdata);
 
-      let params = {
-        prod2: 150,
-        prod3: 150,
-        prod4: 150,
-        prod6: 150,
-        prod7: 150
-      };
-      prodList.map(({ prod_name, limit }) => {
-        switch (prod_name) {
-          case '9602A':
-            params.prod2 = limit;
-            break;
-          case '9603A':
-            params.prod3 = limit;
-            break;
-          case '9604A':
-            params.prod4 = limit;
-            break;
-          case '9606A':
-            params.prod6 = limit;
-            break;
-          case '9607T':
-            params.prod7 = limit;
-            break;
-          default:
-            break;
-        }
-      });
+      let params = yield call(db.getThreadByProdname, prodList);
+
       // 开包量超过设定值产品
       let { data: abnormalList } = yield call(
-        db.getVwWimWhitelistAbnormal(params)
+        db.getVwWimWhitelistAbnormal,
+        params
       );
 
+      // 排产结果
+      let { data: res } = yield call(db.getViewPrintCutProdLog);
+      let prodResult = handleProdResult(res);
+      // console.log(prodResult);
       yield put({
         type: 'setStore',
         payload: {
@@ -82,6 +91,7 @@ export default {
           workTypeList,
           produceProdList,
           prodList,
+          prodResult,
           abnormalList: [
             {
               prodname: '品种',

@@ -143,3 +143,43 @@ export const setProductdata = (params) =>
     url: '/273/920c2e5dfb.json',
     params
   });
+
+export const getThreadByProdname = (prodList) => {
+  let params = {
+    prod2: 150,
+    prod3: 150,
+    prod4: 150,
+    prod6: 150,
+    prod7: 150
+  };
+  prodList.forEach(({ prod_name, limit }) => {
+    switch (prod_name) {
+      case '9602A':
+        params.prod2 = limit;
+        break;
+      case '9603A':
+        params.prod3 = limit;
+        break;
+      case '9604A':
+        params.prod4 = limit;
+        break;
+      case '9606A':
+        params.prod6 = limit;
+        break;
+      case '9607T':
+        params.prod7 = limit;
+        break;
+      default:
+        break;
+    }
+  });
+  return params;
+};
+
+/**
+ *   @database: { 质量信息系统 }
+ *   @desc:     { 检封排活结果 } 
+ */
+export const getViewPrintCutProdLog = () => axios({
+  url: '/274/9a3ae8bb4b.json'
+});

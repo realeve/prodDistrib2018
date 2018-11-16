@@ -3,6 +3,7 @@ import { connect } from 'dva';
 import { Row, Col, notification, Tabs, Icon } from 'antd';
 import MachineItem from './MachineItem';
 import ProductItem from './ProductItem';
+import ProductList from './ProdList';
 
 import LockList from './LockList';
 import Loading from './Loading';
@@ -28,7 +29,7 @@ interface StateType {
  * 1.品种列表对应的开包量上限设置   (20181115 16：40 完成)
  * 2.编辑信息时，会影响到复制的任务
  * 3.手工编辑排活任务
- * 4.增加产品领用状态信息以及查询接口。
+ * 4.增加产品领用状态信息以及查询接口。(20181116 16：40 完成)
  * 5.不同阈值下品种的未排活情况   (20181115 16：40 完成)
  */
 
@@ -143,13 +144,21 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
       loading,
       unCompleteList,
       abnormalList,
-      prodList
+      prodList,
+      prodResult
     } = this.props;
     let { machineList, previewList } = this.state;
     return (
       <Row>
         <Col span={16} style={{ paddingRight: 10 }}>
-          <Tabs defaultActiveKey="1">
+          <Tabs defaultActiveKey="0">
+            <TabPane tab="今日排产结果" key="0">
+              <Row>
+                {prodResult.map((item) => (
+                  <ProductList {...item} key={item.machine_id} />
+                ))}
+              </Row>
+            </TabPane>
             <TabPane tab="机台设置" key="1">
               {loading ? (
                 <Loading />

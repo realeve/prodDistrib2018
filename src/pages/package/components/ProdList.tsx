@@ -1,11 +1,11 @@
 import React from 'react';
-import { Card, Input, Button, notification, Icon, Col } from 'antd';
+import { Card, Button, notification, Icon, Col, Modal, Input } from 'antd';
 import styles from './style.less';
-import classNames from 'classnames/bind';
-import * as db from '../services/package';
 
-const cx = classNames.bind(styles);
 const R = require('ramda');
+
+const confirm = Modal.confirm;
+
 interface cartItem {
   carno: string;
   ex_opennum: string | number;
@@ -14,6 +14,12 @@ interface cartItem {
   status: string | number;
   tech: string;
 }
+
+interface Iindex {
+  rec_id: string | number;
+  idx: string | number;
+}
+
 interface PropType {
   machine_id: string | number;
   machine_name: string;
@@ -23,14 +29,22 @@ interface PropType {
   expect_num: string | number;
   rec_date: string;
   data: Array<cartItem>;
+  removeItem?: (i: Iindex) => {};
   [key: string]: any;
 }
 
-export default class ProdList extends React.Component<PropType> {
+interface IState {
+  visible: boolean;
+  remark: string;
+}
+
+export default class ProdList extends React.Component<PropType, IState> {
   constructor(props) {
     super(props);
+    console.log(props);
     this.state = {
-      ...props
+      visible: false,
+      remark: ''
     };
   }
 
@@ -40,6 +54,47 @@ export default class ProdList extends React.Component<PropType> {
       icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />,
       description: message
     });
+  }
+
+  removeItem(item) {
+    confirm({
+      title: '移除任务',
+      content: `是否在任务列表中移除本车产品？`,
+      maskClosable: true,
+      onOk: async () => {
+        this.props.removeItem(item);
+      }
+    });
+  }
+
+  handleOk() {
+    this.setState({
+      visible: false,
+      remark: ''
+    });
+  }
+
+  async inputChange({ target: { value } }) {
+    this.setState({ remark: value });
+    value = value.trim();
+    if (value.includes(',')) {
+      value = value.split(',');
+    } else if (value.includes(' ')) {
+      value = value.split(' ');
+    } else {
+      value = value.split('\r\n');
+    }
+    value = value.map((item) => item.trim()).filter((i) => i.length);
+    if (value.length === 0) {
+      return;
+    }
+
+    let appendInfo = R.pick('task_id,expect_num,real_num'.split(','))(
+      this.props
+    );
+    appendInfo.type = '手工追加车号';
+
+    this.props.addCarts(value, appendInfo);
   }
 
   render() {
@@ -53,23 +108,52 @@ export default class ProdList extends React.Component<PropType> {
       data
     } = this.props;
 
+    type = type
+      .split('+')
+      .map((item) => item + '万')
+      .join(' + ');
+
     let cartList = R.clone(data);
     cartList = [
       {
-        rec_id: '0',
-        car_no: '车号',
+        rec_id: 0,
+        carno: '车号',
         gh: '冠号',
         ex_opennum: '开包量',
         tech: '工艺',
-        status: '状态'
+        status: '已生产',
+        worktype_name: '班次'
       },
       ...cartList
     ];
 
-    // const CartsComponent = cartList=>
+    const CartsComponent = () => (
+      <ul className={styles.preview}>
+        {cartList.map(
+          ({ rec_id, carno, gh, ex_opennum, tech, worktype_name }, idx) => (
+            <li key={rec_id}>
+              <span>{idx || '#'}</span>
+              <span>{carno}</span>
+              <span>{gh}</span>
+              <span>{ex_opennum}</span>
+              <span>{tech}</span>
+              <span>{worktype_name}</span>
+              <Button
+                size="small"
+                icon="delete"
+                title="删除"
+                className={styles.delBtn}
+                type="danger"
+                onClick={() => this.removeItem({ rec_id, idx: idx - 1 })}
+              />
+            </li>
+          )
+        )}
+      </ul>
+    );
 
     return (
-      <Col className={styles.machine} span={8}>
+      <Col className={styles.taskPreview} span={8}>
         <Card>
           <div className={styles.inlineForm}>
             <label>机台</label>
@@ -92,41 +176,37 @@ export default class ProdList extends React.Component<PropType> {
             <span>{real_num}</span>
           </div>
           <div className={styles.inlineForm}>
-            <label>系统排产时间</label>
+            <label>排产时间</label>
             <span>{rec_date}</span>
           </div>
           <div className={styles.cartList}>
             <h3>排产结果</h3>
-            {data.map(({ carno, rec_id, ex_opennum, gh, status, tech }) => (
-              <div key={rec_id}>
-                <div className={styles.inlineForm}>
-                  <label>车号</label>
-                  <span>{carno}</span>
-                </div>
-                <div className={styles.inlineForm}>
-                  <label>冠号</label>
-                  <span>{gh}</span>
-                </div>
-                <div className={styles.inlineForm}>
-                  <label>开包量</label>
-                  <span>{ex_opennum}</span>
-                </div>
-                <div className={styles.inlineForm}>
-                  <label>工艺</label>
-                  <span>{tech}</span>
-                </div>
-                <div className={styles.inlineForm}>
-                  <label>领用状态</label>
-                  <span>{status == '0' ? '未生产' : '已生产'}</span>
-                </div>
-              </div>
-            ))}
+            <CartsComponent />
           </div>
 
           <div className={styles.action}>
-            <Button type="primary">保存</Button>
+            <Button
+              type="primary"
+              onClick={() => this.setState({ visible: true })}>
+              添加车号
+            </Button>
           </div>
         </Card>
+
+        <Modal
+          title="添加车号"
+          visible={this.state.visible}
+          onOk={() => this.handleOk()}
+          onCancel={() => {
+            this.setState({ visible: false });
+          }}>
+          <Input.TextArea
+            rows={3}
+            onChange={(e) => this.inputChange(e)}
+            value={this.state.remark}
+            placeholder="车号列表"
+          />
+        </Modal>
       </Col>
     );
   }

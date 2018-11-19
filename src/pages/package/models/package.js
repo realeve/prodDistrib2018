@@ -2,34 +2,6 @@ import pathToRegexp from 'path-to-regexp';
 import * as db from '../services/package';
 
 import { setStore } from '@/utils/lib';
-const R = require('ramda');
-const handleProdResult = (data) => {
-  let res = R.groupBy(R.prop('machine_name'))(data);
-  return R.compose(
-    R.map((key) => {
-      let item = res[key];
-      let baseInfo = R.compose(
-        R.pick(
-          'machine_id,machine_name,prod_name,expect_num,real_num,type,rec_date'.split(
-            ','
-          )
-        ),
-        R.nth(0)
-      )(item);
-      baseInfo.data = [];
-      item.forEach((cartInfo) => {
-        baseInfo.data.push(
-          R.pick(
-            'carno,ex_opennum,gh,status,rec_id,tech,work_type_name'.split(',')
-          )(cartInfo)
-        );
-      });
-      baseInfo.data = R.sort(R.assoc(R.prop('gh')))(baseInfo.data);
-      return baseInfo;
-    }),
-    R.keys
-  )(res);
-};
 
 const namespace = 'package';
 export default {
@@ -49,6 +21,16 @@ export default {
     setStore
   },
   effects: {
+    *refreshPreview(_, { call, put }) {
+      // 排产结果
+      let prodResult = yield call(db.getViewPrintCutProdLog);
+      yield put({
+        type: 'setStore',
+        payload: {
+          prodResult
+        }
+      });
+    },
     *getData(_, { call, put }) {
       // 机台列表
       let { data: machineList } = yield call(db.getPrintCutMachine);
@@ -80,9 +62,8 @@ export default {
       );
 
       // 排产结果
-      let { data: res } = yield call(db.getViewPrintCutProdLog);
-      let prodResult = handleProdResult(res);
-      // console.log(prodResult);
+      let prodResult = yield call(db.getViewPrintCutProdLog);
+
       yield put({
         type: 'setStore',
         payload: {

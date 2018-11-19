@@ -1,5 +1,58 @@
 import { axios } from '../../../utils/axios';
 
+const R = require('ramda');
+
+const handleBaseInfo = (data) => {
+  let white = R.filter(R.propEq('worktype_name', '白班'))(data);
+  let black = R.reject(R.propEq('worktype_name', '白班'))(data);
+  white = white.sort(
+    (a, b) => a.gh.replace(/[a-zA-Z]/g, '') - b.gh.replace(/[a-zA-Z]/g, '')
+  );
+  black = black.sort(
+    (a, b) => a.gh.replace(/[a-zA-Z]/g, '') - b.gh.replace(/[a-zA-Z]/g, '')
+  );
+  return [...white, ...black].map((item) => {
+    item.tech =
+      item.tech === '码后核查'
+        ? '码后'
+        : item.tech == '全检品'
+        ? '全检'
+        : item.tech;
+    return item;
+  });
+};
+
+const handleProdResult = (data) => {
+  let res = R.groupBy(R.prop('machine_name'))(data);
+  return R.compose(
+    R.map((key) => {
+      let item = res[key];
+      // let baseInfo = R.compose(
+      //   R.pick(
+      //     'machine_id,machine_name,prod_name,expect_num,real_num,type,rec_date'.split(
+      //       ','
+      //     )
+      //   ),
+      //   R.nth(0)
+      // )(item);
+      let baseInfo = R.nth(0, item);
+      baseInfo.data = [];
+      item.forEach((cartInfo) => {
+        baseInfo.data.push(
+          R.pick(
+            'carno,ex_opennum,gh,status,rec_id,tech,work_type_name,worktype_name'.split(
+              ','
+            )
+          )(cartInfo)
+        );
+      });
+      baseInfo.data = handleBaseInfo(baseInfo.data);
+      return baseInfo;
+    }),
+    R.keys
+  )(res);
+};
+
 /**
  *   @database: { 质量信息系统 }
  *   @desc:     { 核查排活任务列表 }
@@ -178,8 +231,60 @@ export const getThreadByProdname = (prodList) => {
 
 /**
  *   @database: { 质量信息系统 }
- *   @desc:     { 检封排活结果 } 
+ *   @desc:     { 检封排活结果 }
  */
-export const getViewPrintCutProdLog = () => axios({
-  url: '/274/9a3ae8bb4b.json'
-});
+export const getViewPrintCutProdLog = () =>
+  axios({
+    url: '/274/9a3ae8bb4b.json'
+  }).then(({ data }) => handleProdResult(data));
+
+/**
+ *   @database: { 质量信息系统 }
+ *   @desc:     { 取消单万排活任务 }
+ */
+export const setPrintCutProdLog = (rec_id) =>
+  axios({
+    url: '/275/fa49156e41.json',
+    params: {
+      rec_id
+    }
+  });
+
+/**
+ *   @database: { 库管系统 }
+ *   @desc:     { 指定车号在库信息查询 }
+ */
+export const getVwWimWhitelistStatus = (carts) =>
+  axios({
+    url: '/268/5c9f14f76f.json',
+    params: {
+      carts
+    }
+  });
+
+/**
+*   @database: { 质量信息系统 }
+*   @desc:     { 批量批量记录检封排产任务 } 
+	以下参数在建立过程中与系统保留字段冲突，已自动替换:
+	@desc:批量插入数据时，约定使用二维数组values参数，格式为[{task_id,type,expect_num,real_num,gh,prodname,tech,carno,ex_opennum,status,rec_date }]，数组的每一项表示一条数据*/
+export const addPrintCutProdLog = (values) =>
+  axios({
+    method: 'post',
+    data: {
+      values,
+      id: 270,
+      nonce: '6f3ed8e1ec'
+    }
+  });
+
+/**
+ *   @database: { 质量信息系统 }
+ *   @desc:     { 更新车号列表领用状态 }
+ */
+export const setPrintCutProdLogByCarts = (carts) =>
+  axios({
+    url: '/276/84a244aae0.json',
+    params: {
+      carts
+    }
+  });

@@ -48,7 +48,8 @@
   align-items: center;
 }
 
-.machine {
+.machine,
+.taskPreview {
   padding: 5px;
   transition: 1s all;
   opacity: 1;
@@ -93,6 +94,14 @@
   }
 }
 
+.taskPreview {
+  .inlineForm {
+    &:not(first-child) {
+      margin-top: 5px;
+    }
+  }
+}
+
 .locklist {
   padding: 10px;
   li {
@@ -113,5 +122,48 @@
     padding: 15px;
     border-bottom: 1px dashed #888;
     text-align: center;
+  }
+}
+
+// 任务预览
+.preview {
+  padding: 0;
+  li {
+    width: 100%;
+    display: flex;
+    line-height: 25px;
+    cursor: pointer;
+    span {
+      flex: 1;
+      &:nth-child(1) {
+        flex: 0.6;
+      }
+      &:nth-child(2),
+      &:nth-child(3) {
+        flex: 1.6;
+      }
+    }
+    &:first-child {
+      padding-bottom: 5px;
+      margin-bottom: 5px;
+      font-weight: bold;
+      border-bottom: 1px solid #f2f2f2;
+      &:hover {
+        .delBtn {
+          display: none;
+        }
+      }
+    }
+    .delBtn {
+      display: none;
+      position: absolute;
+      right: 15px;
+    }
+    &:hover {
+      background: #f2f4fa;
+      .delBtn {
+        display: block;
+      }
+    }
   }
 }

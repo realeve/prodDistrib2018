@@ -11,6 +11,7 @@ import Loading from './Loading';
 import { LocklistProps } from './LockList';
 import { machineType } from './MachineItem';
 import * as db from '../services/package';
+import * as libs from '@/utils/lib';
 
 const TabPane = Tabs.TabPane;
 const R = require('ramda');
@@ -27,8 +28,8 @@ interface StateType {
 /**
  * todo:20181115
  * 1.品种列表对应的开包量上限设置   (20181115 16：40 完成)
- * 2.编辑信息时，会影响到复制的任务
- * 3.手工编辑排活任务
+ * 2.编辑信息时，会影响到复制的任务 (待修复 )
+ * 3.手工编辑排活任务 (20181119 21:16完成)
  * 4.增加产品领用状态信息以及查询接口。(20181116 16：40 完成)
  * 5.不同阈值下品种的未排活情况   (20181115 16：40 完成)
  */
@@ -125,7 +126,7 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
     this.updateState(machineList);
   }
 
-  changeProd(limit, idx) {
+  changeProd(limit: number | string, idx: number) {
     let { prodList, dispatch } = this.props;
     let item = R.nth(idx)(prodList);
     item.limit = limit;
@@ -135,6 +136,64 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
       payload: {
         prodList
       }
+    });
+  }
+
+  async removeProdResult(idx: number, item) {
+    let { prodResult, dispatch } = this.props;
+
+    let {
+      data: [{ affected_rows }]
+    } = await db.setPrintCutProdLog(item.rec_id);
+
+    if (affected_rows == 0) {
+      this.notify('删除失败');
+      return;
+    }
+
+    this.notify('删除成功');
+
+    let prodItem = R.nth(idx)(prodResult);
+    prodItem.data = R.remove(item.idx, 1)(prodItem.data);
+    prodResult = R.update(idx, prodItem)(prodResult);
+    dispatch({
+      type: 'package/setStore',
+      payload: {
+        prodResult
+      }
+    });
+  }
+
+  async addCarts(carts: Array<string>, appendInfo) {
+    let { data } = await db.getVwWimWhitelistStatus(carts);
+    data = R.map(R.pick('gh,prodname,tech,carno,ex_opennum'.split(',')))(data);
+
+    let params = data.map((item) =>
+      Object.assign(item, {
+        status: 0,
+        rec_date: libs.now(),
+        ...appendInfo
+      })
+    );
+    // console.log(params);
+    // return;
+
+    // 从其它机台取消领用。
+    await db.setPrintCutProdLogByCarts(carts);
+
+    // 车号列表增加至当前机台
+    let {
+      data: [{ affected_rows }]
+    } = await db.addPrintCutProdLog(params);
+    if (affected_rows == 0) {
+      this.notify('添加失败');
+      return;
+    }
+    this.notify(params.length + '车产品添加成功');
+
+    // 刷新车号列表;
+    this.props.dispatch({
+      type: 'package/refreshPreview'
     });
   }
 
@@ -150,12 +209,19 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
     let { machineList, previewList } = this.state;
     return (
       <Row>
-        <Col span={16} style={{ paddingRight: 10 }}>
+        <Col span={18} style={{ paddingRight: 10 }}>
           <Tabs defaultActiveKey="0">
             <TabPane tab="今日排产结果" key="0">
               <Row>
-                {prodResult.map((item) => (
-                  <ProductList {...item} key={item.machine_id} />
+                {prodResult.map((item, idx) => (
+                  <ProductList
+                    {...item}
+                    key={item.machine_id}
+                    removeItem={(rec_id) => this.removeProdResult(idx, rec_id)}
+                    addCarts={(carts, baseInfo) =>
+                      this.addCarts(carts, baseInfo)
+                    }
+                  />
                 ))}
               </Row>
             </TabPane>
@@ -202,7 +268,7 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
             </TabPane>
           </Tabs>
         </Col>
-        <Col span={8} style={{ paddingLeft: 10 }}>
+        <Col span={6} style={{ paddingLeft: 10 }}>
           <Tabs defaultActiveKey="1">
             <TabPane tab="锁车产品" key="1">
               <LockList loading={loading} lockList={lockList} />

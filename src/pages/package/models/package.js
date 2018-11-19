@@ -31,6 +31,15 @@ export default {
         }
       });
     },
+    *refreshMachineList(_, { call, put }) {
+      let { data: machineList } = yield call(db.getPrintCutMachine);
+      yield put({
+        type: 'setStore',
+        payload: {
+          machineList
+        }
+      });
+    },
     *getData(_, { call, put }) {
       // 机台列表
       let { data: machineList } = yield call(db.getPrintCutMachine);

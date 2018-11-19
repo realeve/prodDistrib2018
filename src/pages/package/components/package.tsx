@@ -110,8 +110,6 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
   }
 
   async addItem(param: any, idx: number) {
-    let { machineList } = this.state;
-    let newItem = R.nth(idx)(machineList);
     let {
       data: [{ id, affected_rows }]
     } = await db.addPrintCutTask(param);
@@ -119,11 +117,21 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
       this.notify('任务添加失败');
       return;
     }
-    newItem = Object.assign(newItem, param, {
-      task_id: id
+    // 全新刷新任务列表
+    this.props.dispatch({
+      type: 'package/refreshMachineList'
     });
-    machineList = R.insert(idx, newItem, machineList);
-    this.updateState(machineList);
+
+    // 防止修改影响到被复制的任务
+    // let item = R.clone(param);
+
+    // let { machineList } = this.state;
+    // let newItem = R.nth(idx)(machineList);
+    // newItem = Object.assign(newItem, item, {
+    //   task_id: id
+    // });
+    // machineList = R.insert(idx, newItem, machineList);
+    // this.updateState(machineList);
   }
 
   changeProd(limit: number | string, idx: number) {

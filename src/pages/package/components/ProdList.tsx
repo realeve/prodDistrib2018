@@ -41,7 +41,6 @@ interface IState {
 export default class ProdList extends React.Component<PropType, IState> {
   constructor(props) {
     super(props);
-    console.log(props);
     this.state = {
       visible: false,
       remark: ''

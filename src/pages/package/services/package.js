@@ -3,15 +3,16 @@ import { axios } from '../../../utils/axios';
 const R = require('ramda');
 
 const handleBaseInfo = (data) => {
-  let white = R.filter(R.propEq('worktype_name', '白班'))(data);
-  let black = R.reject(R.propEq('worktype_name', '白班'))(data);
-  white = white.sort(
-    (a, b) => a.gh.replace(/[a-zA-Z]/g, '') - b.gh.replace(/[a-zA-Z]/g, '')
-  );
-  black = black.sort(
-    (a, b) => a.gh.replace(/[a-zA-Z]/g, '') - b.gh.replace(/[a-zA-Z]/g, '')
-  );
-  return [...white, ...black].map((item) => {
+  // let white = R.filter(R.propEq('worktype_name', '白班'))(data);
+  // let black = R.reject(R.propEq('worktype_name', '白班'))(data);
+  // white = white.sort(
+  //   (a, b) => a.gh.replace(/[a-zA-Z]/g, '') - b.gh.replace(/[a-zA-Z]/g, '')
+  // );
+  // black = black.sort(
+  //   (a, b) => a.gh.replace(/[a-zA-Z]/g, '') - b.gh.replace(/[a-zA-Z]/g, '')
+  // );
+  // return [...white, ...black]
+  return data.map((item) => {
     item.tech =
       item.tech === '码后核查'
         ? '码后'
@@ -40,7 +41,7 @@ const handleProdResult = (data) => {
       item.forEach((cartInfo) => {
         baseInfo.data.push(
           R.pick(
-            'carno,ex_opennum,gh,status,rec_id,tech,work_type_name,worktype_name'.split(
+            'carno,ex_opennum,gh,status_name,rec_id,tech,work_type_name,worktype_name'.split(
               ','
             )
           )(cartInfo)

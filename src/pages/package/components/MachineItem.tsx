@@ -281,6 +281,10 @@ class MachineItem extends Component<PropType, StateType> {
     return (
       <Col
         span={8}
+        xl={8}
+        lg={12}
+        md={12}
+        sm={12}
         className={cx({
           machine: true,
           disabled: !status,

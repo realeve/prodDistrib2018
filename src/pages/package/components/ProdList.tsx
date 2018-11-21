@@ -120,7 +120,7 @@ export default class ProdList extends React.Component<PropType, IState> {
         gh: '冠号',
         ex_opennum: '开包量',
         tech: '工艺',
-        status: '已生产',
+        status_name: '状态',
         worktype_name: '班次'
       },
       ...cartList
@@ -129,13 +129,17 @@ export default class ProdList extends React.Component<PropType, IState> {
     const CartsComponent = () => (
       <ul className={styles.preview}>
         {cartList.map(
-          ({ rec_id, carno, gh, ex_opennum, tech, worktype_name }, idx) => (
+          (
+            { rec_id, carno, gh, ex_opennum, tech, worktype_name, status_name },
+            idx
+          ) => (
             <li key={rec_id}>
               <span>{idx || '#'}</span>
               <span>{carno}</span>
               <span>{gh}</span>
               <span>{ex_opennum}</span>
               <span>{tech}</span>
+              <span>{status_name}</span>
               <span>{worktype_name}</span>
               <Button
                 size="small"
@@ -152,7 +156,13 @@ export default class ProdList extends React.Component<PropType, IState> {
     );
 
     return (
-      <Col className={styles.taskPreview} span={8}>
+      <Col
+        className={styles.taskPreview}
+        span={8}
+        xl={8}
+        lg={12}
+        md={12}
+        sm={12}>
         <Card>
           <div className={styles.inlineForm}>
             <label>机台</label>

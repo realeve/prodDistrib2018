@@ -105,14 +105,17 @@
 .locklist {
   padding: 10px;
   li {
-    display: flex;
-    justify-content: space-between;
+    display: flex; // justify-content: space-between;
     line-height: 30px;
     &:first-child {
       padding-bottom: 5px;
       margin-bottom: 5px;
       font-weight: bold;
       border-bottom: 1px solid #f2f2f2;
+    }
+    cursor: pointer;
+    span {
+      flex: 1;
     }
   }
 }

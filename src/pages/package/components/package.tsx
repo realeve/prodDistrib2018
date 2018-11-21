@@ -217,7 +217,14 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
     let { machineList, previewList } = this.state;
     return (
       <Row>
-        <Col span={18} style={{ paddingRight: 10 }}>
+        <Col
+          span={18}
+          style={{ paddingRight: 10 }}
+          xxl={18}
+          xl={24}
+          lg={24}
+          md={24}
+          sm={24}>
           <Tabs defaultActiveKey="0">
             <TabPane tab="今日排产结果" key="0">
               <Row>
@@ -276,7 +283,14 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
             </TabPane>
           </Tabs>
         </Col>
-        <Col span={6} style={{ paddingLeft: 10 }}>
+        <Col
+          span={6}
+          style={{ paddingLeft: 10 }}
+          xxl={6}
+          xl={24}
+          lg={24}
+          md={24}
+          sm={24}>
           <Tabs defaultActiveKey="1">
             <TabPane tab="锁车产品" key="1">
               <LockList loading={loading} lockList={lockList} />

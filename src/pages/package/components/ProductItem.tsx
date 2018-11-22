@@ -1,10 +1,8 @@
 import React from 'react';
 import { Card, Input, Button, notification, Icon, Col } from 'antd';
 import styles from './style.less';
-import classNames from 'classnames/bind';
-import * as db from '../services/package';
 
-const cx = classNames.bind(styles);
+import * as db from '../services/package';
 const R = require('ramda');
 
 interface PropType {

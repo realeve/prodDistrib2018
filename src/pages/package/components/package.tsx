@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'dva';
-import { Row, Col, notification, Tabs, Icon } from 'antd';
+import { Row, Col, notification, Tabs, Icon, Card, Button, Modal } from 'antd';
 import MachineItem from './MachineItem';
 import ProductItem from './ProductItem';
 import ProductList from './ProdList';
@@ -13,8 +13,12 @@ import { machineType } from './MachineItem';
 import * as db from '../services/package';
 import * as libs from '@/utils/lib';
 
+import userLib from '@/utils/users';
+import styles from './style.less';
+
 const TabPane = Tabs.TabPane;
 const R = require('ramda');
+const confirm = Modal.confirm;
 
 interface PropType extends LocklistProps {
   [key: string]: any;
@@ -23,6 +27,7 @@ interface PropType extends LocklistProps {
 interface StateType {
   machineList: Array<machineType>;
   previewList?: Array<machineType>;
+  visible: boolean;
 }
 
 /**
@@ -41,7 +46,8 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
     super(props);
     this.state = {
       machineList: props.machineList,
-      previewList: []
+      previewList: [],
+      visible: false
     };
   }
 
@@ -205,6 +211,31 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
     });
   }
 
+  // 一般人员不显示操作按钮
+  isAdmin = () => {
+    let { data, success } = userLib.getUserSetting();
+    return success && libs.packageAdmin.includes(data.setting.name);
+  };
+
+  manualProdis() {
+    confirm({
+      title: '提示',
+      content: `手工排活将会覆盖当前工作日未完成的产品信息，14:30前为白班，之后为中班。排活完毕后将会重新加载排产数据，是否继续？`,
+      maskClosable: true,
+      cancelText: '取消',
+      okText: '确定',
+      onOk: async () => {
+        console.log('手工排活');
+        // 手工强制排产
+        await db.manualProdist();
+        // 刷新车号列表;
+        this.props.dispatch({
+          type: 'package/refreshPreview'
+        });
+      }
+    });
+  }
+
   render() {
     let {
       lockList,
@@ -215,6 +246,9 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
       prodResult
     } = this.props;
     let { machineList, previewList } = this.state;
+
+    let admin = this.isAdmin();
+
     return (
       <Row>
         <Col
@@ -224,7 +258,8 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
           xl={24}
           lg={24}
           md={24}
-          sm={24}>
+          sm={24}
+          xs={24}>
           <Tabs defaultActiveKey="0">
             <TabPane tab="今日排产结果" key="0">
               <Row>
@@ -236,8 +271,41 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
                     addCarts={(carts, baseInfo) =>
                       this.addCarts(carts, baseInfo)
                     }
+                    isAdmin={admin}
                   />
                 ))}
+                <Col
+                  className={styles.machine}
+                  span={8}
+                  xl={8}
+                  lg={12}
+                  md={12}
+                  sm={12}
+                  xs={12}>
+                  <Card style={{ background: '#f4f7fa' }}>
+                    <div className={styles.inlineForm}>
+                      <label>白班自动排产时间:</label>
+                      <span>06:30至07:30</span>
+                    </div>
+                    <div className={styles.inlineForm}>
+                      <label>中班自动排产时间:</label>
+                      <span>14:30至15:59</span>
+                    </div>
+                    <div className={styles.inlineForm}>
+                      <label>白班手工排产时间:</label>
+                      <span>14:30以前</span>
+                    </div>
+                    <div className={styles.inlineForm}>
+                      <label>中班手工排产时间:</label>
+                      <span>14:30以后</span>
+                    </div>
+                    <div className={styles.action}>
+                      <Button type="danger" onClick={() => this.manualProdis()}>
+                        手工排活
+                      </Button>
+                    </div>
+                  </Card>
+                </Col>
               </Row>
             </TabPane>
             <TabPane tab="机台设置" key="1">
@@ -252,35 +320,40 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
                       onAdd={(param) => this.addItem(param, idx)}
                       onChange={(param) => this.updateItem(param, idx)}
                       key={idx}
+                      editable={admin}
                     />
                   ))}
                 </Row>
               )}
             </TabPane>
-            <TabPane tab="排产计划预览" key="2">
-              <Row>
-                {previewList.map((machine, idx) => (
-                  <MachineItem
-                    machine={machine}
-                    editable={false}
-                    onDelete={() => this.removeItem(idx)}
-                    onAdd={(param) => this.addItem(param, idx)}
-                    key={idx}
-                  />
-                ))}
-              </Row>
-            </TabPane>
-            <TabPane tab="品种开包量阈值设置" key="3">
-              <Row>
-                {prodList.map((item, idx) => (
-                  <ProductItem
-                    {...item}
-                    key={item.prod_name}
-                    onChange={(limit) => this.changeProd(limit, idx)}
-                  />
-                ))}
-              </Row>
-            </TabPane>
+            {admin && (
+              <TabPane tab="排产计划预览" key="2">
+                <Row>
+                  {previewList.map((machine, idx) => (
+                    <MachineItem
+                      machine={machine}
+                      editable={false}
+                      onDelete={() => this.removeItem(idx)}
+                      onAdd={(param) => this.addItem(param, idx)}
+                      key={idx}
+                    />
+                  ))}
+                </Row>
+              </TabPane>
+            )}
+            {admin && (
+              <TabPane tab="品种开包量阈值设置" key="3">
+                <Row>
+                  {prodList.map((item, idx) => (
+                    <ProductItem
+                      {...item}
+                      key={item.prod_name}
+                      onChange={(limit) => this.changeProd(limit, idx)}
+                    />
+                  ))}
+                </Row>
+              </TabPane>
+            )}
           </Tabs>
         </Col>
         <Col

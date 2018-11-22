@@ -29,6 +29,7 @@ interface PropType {
   expect_num: string | number;
   rec_date: string;
   data: Array<cartItem>;
+  isAdmin: boolean;
   removeItem?: (i: Iindex) => {};
   [key: string]: any;
 }
@@ -60,6 +61,8 @@ export default class ProdList extends React.Component<PropType, IState> {
       title: '移除任务',
       content: `是否在任务列表中移除本车产品？`,
       maskClosable: true,
+      cancelText: '取消',
+      okText: '确定',
       onOk: async () => {
         this.props.removeItem(item);
       }
@@ -104,7 +107,8 @@ export default class ProdList extends React.Component<PropType, IState> {
       real_num,
       expect_num,
       rec_date,
-      data
+      data,
+      isAdmin
     } = this.props;
 
     type = type
@@ -162,7 +166,8 @@ export default class ProdList extends React.Component<PropType, IState> {
         xl={8}
         lg={12}
         md={12}
-        sm={12}>
+        sm={12}
+        xs={12}>
         <Card>
           <div className={styles.inlineForm}>
             <label>机台</label>
@@ -193,13 +198,15 @@ export default class ProdList extends React.Component<PropType, IState> {
             <CartsComponent />
           </div>
 
-          <div className={styles.action}>
-            <Button
-              type="primary"
-              onClick={() => this.setState({ visible: true })}>
-              添加车号
-            </Button>
-          </div>
+          {isAdmin && (
+            <div className={styles.action}>
+              <Button
+                type="primary"
+                onClick={() => this.setState({ visible: true })}>
+                添加车号
+              </Button>
+            </div>
+          )}
         </Card>
 
         <Modal

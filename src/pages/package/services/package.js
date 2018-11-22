@@ -1,5 +1,5 @@
 import { axios } from '../../../utils/axios';
-
+import http from 'axios';
 const R = require('ramda');
 
 const handleBaseInfo = (data) => {
@@ -289,3 +289,9 @@ export const setPrintCutProdLogByCarts = (carts) =>
       carts
     }
   });
+
+export const manualProdist = () => {
+  http({
+    url: 'http://10.8.1.27:4000/api/package'
+  });
+};

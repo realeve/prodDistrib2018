@@ -8,6 +8,8 @@ export const imgUrl: string = 'http://10.8.2.133/search/image#';
 export const adminUserList: Array<string> = ['钟鸣', '李宾'];
 export const imgAdmin: Array<string> = ['邓玉红'];
 
+export const packageAdmin: Array<string> = ['母霞', '张蓉萍', '李宾'];
+
 export const apiHost: string = host;
 
 interface Rules {

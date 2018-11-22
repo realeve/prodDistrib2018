@@ -301,7 +301,7 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
                     </div>
                     <div className={styles.action}>
                       <Button type="danger" onClick={() => this.manualProdis()}>
-                        手工排活
+                        手工排产
                       </Button>
                     </div>
                   </Card>

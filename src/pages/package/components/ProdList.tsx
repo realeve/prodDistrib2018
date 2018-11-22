@@ -131,7 +131,7 @@ export default class ProdList extends React.Component<PropType, IState> {
     ];
 
     const CartsComponent = () => (
-      <ul className={styles.preview}>
+      <ul className={styles.preview} style={{ minHeight: 390 }}>
         {cartList.map(
           (
             { rec_id, carno, gh, ex_opennum, tech, worktype_name, status_name },

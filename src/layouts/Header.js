@@ -1,8 +1,8 @@
-import { Menu, Icon, Layout } from "antd";
-import Link from "umi/link";
+import { Menu, Icon, Layout } from 'antd';
+import Link from 'umi/link';
 
-import styles from "./header.less";
-import LoginAvatar from "./LoginAvatar";
+import styles from './header.less';
+import LoginAvatar from './LoginAvatar';
 
 const { Header } = Layout;
 const SubMenu = Menu.SubMenu;
@@ -15,16 +15,14 @@ function HeaderMenu({ location, avatar }) {
         selectedKeys={[location.pathname]}
         mode="horizontal"
         theme="dark"
-        className={styles.menu}
-      >
+        className={styles.menu}>
         <SubMenu
           title={
             <span>
               <Icon type="calculator" />
               自动排活 <Icon type="down" />
             </span>
-          }
-        >
+          }>
           <Menu.Item key="/">
             <Link to="/">
               <Icon type="home" />
@@ -51,8 +49,7 @@ function HeaderMenu({ location, avatar }) {
               <Icon type="unlock" />
               异常品处理 <Icon type="down" />
             </span>
-          }
-        >
+          }>
           <Menu.Item key="/addcart">
             <Link to="/addcart">
               <Icon type="exclamation-circle-o" />
@@ -82,10 +79,9 @@ function HeaderMenu({ location, avatar }) {
           title={
             <span>
               <Icon type="eye-o" />
-              机检弱项通知 <Icon type="down" />
+              机检弱项 <Icon type="down" />
             </span>
-          }
-        >
+          }>
           <Menu.Item key="/multiweak">
             <Link to="/multiweak">
               <Icon type="close-circle-o" />
@@ -108,15 +104,29 @@ function HeaderMenu({ location, avatar }) {
         <Menu.Item key="/seriousimg">
           <Link to="/seriousimg">
             <Icon type="home" />
-            严重废锁图分析
+            严重废锁图
           </Link>
         </Menu.Item>
-        <Menu.Item key="/package">
-          <Link to="/package">
-            <Icon type="setting" />
-            裁封自动线排产
-          </Link>
-        </Menu.Item>
+        <SubMenu
+          title={
+            <span>
+              <Icon type="eye-o" />
+              裁封线排产 <Icon type="down" />
+            </span>
+          }>
+          <Menu.Item key="/package">
+            <Link to="/package">
+              <Icon type="setting" />
+              自动排产设置
+            </Link>
+          </Menu.Item>
+          <Menu.Item key="/package_report">
+            <Link to="/package_report">
+              <Icon type="setting" />
+              排产报告
+            </Link>
+          </Menu.Item>
+        </SubMenu>
       </Menu>
       <LoginAvatar avatar={avatar} />
     </Header>

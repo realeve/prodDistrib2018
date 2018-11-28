@@ -1,0 +1,28 @@
+.container {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+}
+
+.dateRange {
+  display: flex;
+  justify-content: flex-end;
+  .labelDesc {
+    padding: 15px;
+  }
+  :global(.ant-calendar-picker) {
+    width: 220px;
+  }
+  .search {
+    display: flex;
+    justify-content: flex-end;
+    margin: 10px 0;
+  }
+}
+
+.exCard {
+  :global(.ant-card-head) {
+    padding: 0 12px;
+  }
+}

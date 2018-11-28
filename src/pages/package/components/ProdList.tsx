@@ -140,19 +140,21 @@ export default class ProdList extends React.Component<PropType, IState> {
             <li key={rec_id}>
               <span>{idx || '#'}</span>
               <span>{carno}</span>
-              <span>{gh}</span>
+              <span className={styles.gz}>{gh}</span>
               <span>{ex_opennum}</span>
               <span>{tech}</span>
               <span>{status_name}</span>
               <span>{worktype_name}</span>
-              <Button
-                size="small"
-                icon="delete"
-                title="删除"
-                className={styles.delBtn}
-                type="danger"
-                onClick={() => this.removeItem({ rec_id, idx: idx - 1 })}
-              />
+              {isAdmin && (
+                <Button
+                  size="small"
+                  icon="delete"
+                  title="删除"
+                  className={styles.delBtn}
+                  type="danger"
+                  onClick={() => this.removeItem({ rec_id, idx: idx - 1 })}
+                />
+              )}
             </li>
           )
         )}
@@ -182,13 +184,15 @@ export default class ProdList extends React.Component<PropType, IState> {
             <span>{prod_name}</span>
           </div>
           <div className={styles.inlineForm}>
-            <label>预计开包量</label>
-            <span>{expect_num}</span>
+            <label>实际开包量/预计开包量</label>
+            <span>
+              {real_num}/{expect_num}
+            </span>
           </div>
-          <div className={styles.inlineForm}>
+          {/* <div className={styles.inlineForm}>
             <label>实际开包量</label>
             <span>{real_num}</span>
-          </div>
+          </div> */}
           <div className={styles.inlineForm}>
             <label>排产时间</label>
             <span>{rec_date}</span>

@@ -127,6 +127,12 @@ function HeaderMenu({ location, avatar }) {
             </Link>
           </Menu.Item>
         </SubMenu>
+          <Menu.Item key="/auto_proc">
+            <Link to="/auto_proc">
+              <Icon type="eye-o" />
+              码前自动工艺
+            </Link>
+          </Menu.Item>
       </Menu>
       <LoginAvatar avatar={avatar} />
     </Header>

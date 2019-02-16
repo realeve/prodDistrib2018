@@ -85,9 +85,18 @@ export const getPrintCutWorktype = () =>
  *   @database: { 机台作业 }
  *   @desc:     { 裁封自动线最近一月机台品种列表 }
  */
+// export const getViewCartfinder = () =>
+//   axios({
+//     url: '/259/d390c28544.json'
+//   });
+
+/**
+ *   @database: { MES_MAIN }
+ *   @desc:     { 裁封自动线最近10天机台品种列表 }
+ */
 export const getViewCartfinder = () =>
   axios({
-    url: '/259/d390c28544.json'
+    url: '/352/e0653f0146.json'
   });
 
 /**

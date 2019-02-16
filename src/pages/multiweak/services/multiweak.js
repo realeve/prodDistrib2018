@@ -1,6 +1,4 @@
-import {
-  axios
-} from "../../../utils/axios";
+import { axios } from '../../../utils/axios';
 
 /**
 *   @database: { 机台作业 }
@@ -8,11 +6,21 @@ import {
   
     const { cart } = params;
 */
-export const getVIEWCARTFINDER = async params =>
-  await axios({
-    url: "/82/32635d468b.json",
+// export const getVIEWCARTFINDER = async params =>
+//   await axios({
+//     url: "/82/32635d468b.json",
+//     params
+//   }).then(res => res);
+
+/**
+ *   @database: { MES_MAIN }
+ *   @desc:     { 车号信息查询 }
+ */
+export const getVIEWCARTFINDER = (params) =>
+  axios({
+    url: '/351/982001ccc7.json',
     params
-  }).then(res => res);
+  });
 
 /**
 *   @database: { 质量信息系统 }
@@ -20,19 +28,19 @@ export const getVIEWCARTFINDER = async params =>
   
     const { cart_number, prod_id, proc_name, machine_name, captain_name, fake_type, kilo_num, pos_num, remark, rec_time } = params;
 */
-export const addPrintMachinecheckMultiweak = async params =>
+export const addPrintMachinecheckMultiweak = async (params) =>
   await axios({
-    url: "/83/3475990fbf.json",
+    url: '/83/3475990fbf.json',
     params
-  }).then(res => res);
-
+  }).then((res) => res);
 
 /**
 *   @database: { 质量信息系统 }
 *   @desc:     { 机台连续废通知产品列表 } 
     const { tstart, tend } = params;
 */
-export const getViewPrintMachinecheckMultiweak = async params => await axios({
-  url: '/148/c882234fd8/array.json',
-  params,
-}).then(res => res);
+export const getViewPrintMachinecheckMultiweak = async (params) =>
+  await axios({
+    url: '/148/c882234fd8/array.json',
+    params
+  }).then((res) => res);

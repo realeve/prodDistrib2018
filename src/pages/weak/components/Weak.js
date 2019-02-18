@@ -1,5 +1,5 @@
-import React from "react";
-import { connect } from "dva";
+import React from 'react';
+import { connect } from 'dva';
 import {
   Card,
   Form,
@@ -11,25 +11,25 @@ import {
   Row,
   Col,
   Radio
-} from "antd";
-import ErrImage from "./ErrImage";
+} from 'antd';
+import ErrImage from './ErrImage';
 
-import moment from "moment";
-import "moment/locale/zh-cn";
-import * as db from "../services/Weak";
+import moment from 'moment';
+import 'moment/locale/zh-cn';
+import * as db from '../services/Weak';
 // import * as dbTblHandler from "../../../services/table";
 
-import styles from "./Report.less";
-import * as lib from "../../../utils/lib";
-import { uploadHost } from "../../../utils/axios";
+import styles from './Report.less';
+import * as lib from '../../../utils/lib';
+import { uploadHost } from '../../../utils/axios';
 
-import fakeTypes from "../../../utils/fakeTypes";
+import fakeTypes from '../../../utils/fakeTypes';
 
-import VTable from "../../../components/Table";
+import VTable from '../../../components/Table';
 
-moment.locale("zh-cn");
+moment.locale('zh-cn');
 
-const R = require("ramda");
+const R = require('ramda');
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -55,17 +55,17 @@ class DynamicRule extends React.Component {
       fakeTypeList: [],
       fakeTypes,
       isNotice: false,
-      noticeInfo: "",
+      noticeInfo: '',
       dataCart: {
         rows: 0
       },
-      print_time: "",
+      print_time: '',
       loading: props.loading
     };
 
     // react 16.3中的用法，目前webpack报错
     // this.base64Input = React.createRef();
-    this.base64URI = "";
+    this.base64URI = '';
   }
 
   componentWillReceiveProps(nextProps) {
@@ -74,7 +74,7 @@ class DynamicRule extends React.Component {
     });
   }
 
-  setTextInputRef = e => {
+  setTextInputRef = (e) => {
     // antd 二次封装后需console查看结构得到refs
     if (R.isNil(e)) {
       return;
@@ -82,15 +82,15 @@ class DynamicRule extends React.Component {
     this.base64Input = e.input.input;
   };
 
-  handleThumbUrl = url => uploadHost + url;
+  handleThumbUrl = (url) => uploadHost + url;
 
-  uploadBase64 = async e => {
-    let dataURI = typeof e === "string" ? e : e.target.value;
-    if (dataURI.slice(0, 11) !== "data:image/") {
+  uploadBase64 = async (e) => {
+    let dataURI = typeof e === 'string' ? e : e.target.value;
+    if (dataURI.slice(0, 11) !== 'data:image/') {
       notification.error({
-        message: "提示",
-        description: "目前仅支持base64图像上传",
-        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+        message: '提示',
+        description: '目前仅支持base64图像上传',
+        icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
       });
       return;
     }
@@ -99,13 +99,13 @@ class DynamicRule extends React.Component {
     let response = await lib.uploadBase64(dataURI);
 
     // 将数据绑定至上传组件
-    if (response && R.has("url")(response)) {
+    if (response && R.has('url')(response)) {
       response.url = response.url.slice(1);
 
-      let fileName = response.url.split("/");
+      let fileName = response.url.split('/');
 
       this.props.dispatch({
-        type: "weak/setFileList",
+        type: 'weak/setFileList',
         payload: [
           {
             uid: fileName[fileName.length - 1],
@@ -115,7 +115,7 @@ class DynamicRule extends React.Component {
       });
 
       this.props.dispatch({
-        type: "weak/setImgUrl",
+        type: 'weak/setImgUrl',
         payload: response.url
       });
     }
@@ -123,15 +123,15 @@ class DynamicRule extends React.Component {
 
   insertData = async () => {
     let data = this.getInsertedData();
-    if (typeof data.remark === "undefined") {
-      data.remark = "";
+    if (typeof data.remark === 'undefined') {
+      data.remark = '';
     }
 
-    if (data.img_url.trim() === "") {
+    if (data.img_url.trim() === '') {
       notification.error({
-        message: "提示",
-        description: "请先上传缺陷图像",
-        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+        message: '提示',
+        description: '请先上传缺陷图像',
+        icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
       });
       // return;
     }
@@ -140,17 +140,17 @@ class DynamicRule extends React.Component {
 
     if (!insertRes.rows) {
       notification.error({
-        message: "系统错误",
-        description: "数据插入失败，请联系管理员",
-        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+        message: '系统错误',
+        description: '数据插入失败，请联系管理员',
+        icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
       });
       return;
     }
 
     notification.open({
-      message: "系统提示",
-      description: "数据插入成功",
-      icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+      message: '系统提示',
+      description: '数据插入成功',
+      icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
     });
 
     this.resetData();
@@ -161,16 +161,16 @@ class DynamicRule extends React.Component {
     const { setFieldsValue } = this.props.form;
     setFieldsValue({
       paper_num: 0,
-      remark: ""
+      remark: ''
       // fake_type: ""
     });
     this.setState({ level_type: 0 });
     this.props.dispatch({
-      type: "weak/setImgUrl",
-      payload: ""
+      type: 'weak/setImgUrl',
+      payload: ''
     });
     this.props.dispatch({
-      type: "weak/setFileList",
+      type: 'weak/setFileList',
       payload: []
     });
   };
@@ -185,11 +185,11 @@ class DynamicRule extends React.Component {
   clearData = () => {
     const { setFieldsValue } = this.props.form;
     setFieldsValue({
-      cart_number: "",
-      proc_name: "",
+      cart_number: '',
+      proc_name: '',
       captain_name: [],
-      machine_name: "",
-      fake_type: ""
+      machine_name: '',
+      fake_type: ''
     });
     this.setState({
       procList: [],
@@ -198,20 +198,20 @@ class DynamicRule extends React.Component {
       prodInfo: [],
       fakeTypeList: [],
       isNotice: false,
-      noticeInfo: "",
+      noticeInfo: '',
       dataCart: {
         rows: 0
       },
-      print_time: ""
+      print_time: ''
     });
   };
 
   getInsertedData = () => {
     let data = this.props.form.getFieldsValue();
     let captain_name =
-      typeof data.captain_name === "string"
+      typeof data.captain_name === 'string'
         ? data.captain_name
-        : data.captain_name.join(",");
+        : data.captain_name.join(',');
     data = Object.assign(data, {
       level_type: this.state.level_type,
       img_url: this.props.imgUrl,
@@ -224,7 +224,7 @@ class DynamicRule extends React.Component {
   };
 
   submit = () => {
-    this.props.form.validateFields(err => {
+    this.props.form.validateFields((err) => {
       if (err) {
         return;
       }
@@ -232,7 +232,7 @@ class DynamicRule extends React.Component {
     });
   };
 
-  handleLevelType = e => {
+  handleLevelType = (e) => {
     const level_type = e.target.value;
     this.setState({ level_type });
   };
@@ -255,8 +255,8 @@ class DynamicRule extends React.Component {
     // let prodInfo = this.props.productList.find(item => item.value === prod_id);
 
     let prod = R.compose(
-      R.prop("name"),
-      R.find(R.propEq("value", prod_id))
+      R.prop('name'),
+      R.find(R.propEq('value', prod_id))
     )(this.props.productList);
 
     let params = lib.handleGZInfo({ code: value, prod });
@@ -272,19 +272,20 @@ class DynamicRule extends React.Component {
 
     if (R.isNil(data) || !data.length) {
       notification.error({
-        message: "提示",
-        description: "当前车号未搜索到生产信息",
-        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+        message: '提示',
+        description: '当前车号未搜索到生产信息',
+        icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
       });
       return;
     }
 
-    data = data.filter(item => item.PROCNAME.includes("印"));
-    let procList = R.uniq(R.map(R.prop("PROCNAME"), data));
+    data = data.filter(
+      (item) => item.procName.includes('印') || item.procName.includes('涂')
+    );
+    let procList = R.uniq(R.map(R.prop('procName'), data));
     this.setState({ procList, prodInfo: data });
-
     const { setFieldsValue } = this.props.form;
-    let cart_number = data.length ? data[0].CARTNUMBER : "";
+    let cart_number = data.length ? data[0].cartNumber : '';
     setFieldsValue({
       cart_number
     });
@@ -292,22 +293,22 @@ class DynamicRule extends React.Component {
     this.handleCartNumber(cart_number);
   };
 
-  handleCartNumber = async cart_number => {
+  handleCartNumber = async (cart_number) => {
     let dataCart = await db.getViewPrintMachinecheckWeak(cart_number);
     // dataCart = dbTblHandler.handleSrcData(dataCart);
     this.setState({ dataCart });
     if (dataCart.rows > 0) {
       notification.open({
-        message: "系统提示",
+        message: '系统提示',
         description: `当前车号搜索到${dataCart.rows}条生产信息`,
-        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+        icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
       });
       return;
     }
     notification.open({
-      message: "系统提示",
+      message: '系统提示',
       description: `当前车号信息首次输入`,
-      icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+      icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
     });
   };
 
@@ -315,7 +316,7 @@ class DynamicRule extends React.Component {
     let { data } = await db.getPrintMachinecheckMultiweak({ cart_number });
     let isNotice = false;
     if (!R.isNil(data) && data.length) {
-      let noticeInfo = data.find(item => item.machine_name === machine_name);
+      let noticeInfo = data.find((item) => item.machine_name === machine_name);
       if (!R.isNil(noticeInfo)) {
         isNotice = true;
         let {
@@ -329,34 +330,34 @@ class DynamicRule extends React.Component {
         } = noticeInfo;
         this.setState({
           noticeInfo: `${rec_time}日，${machine_name} ${captain_name}通知第 ${kilo_num} 千位，${pos_info} 开产品有作废(${fake_type})，备注信息:${
-            remark.trim().length === 0 ? "无" : remark
+            remark.trim().length === 0 ? '无' : remark
           }`,
           isNotice: true
         });
         notification.error({
-          message: "提示",
-          description: "当前车号机台有通知作废信息，建议降废处理",
-          icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+          message: '提示',
+          description: '当前车号机台有通知作废信息，建议降废处理',
+          icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
         });
         return;
       }
     }
-    this.setState({ isNotice, noticeInfo: "" });
+    this.setState({ isNotice, noticeInfo: '' });
     if (!isNotice) {
       notification.error({
-        message: "提示",
-        description: "当前车号机台未通知作废信息",
-        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+        message: '提示',
+        description: '当前车号机台未通知作废信息',
+        icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
       });
     }
   };
 
-  handleProduct = e => {
+  handleProduct = (e) => {
     let { code_num } = this.props.form.getFieldsValue();
     this.searchCart(code_num, e);
   };
 
-  searchCode = e => {
+  searchCode = (e) => {
     let { value } = e.target;
     value = value.toUpperCase().trim();
     e.target.value = value;
@@ -367,22 +368,22 @@ class DynamicRule extends React.Component {
     this.searchCart(value, prod_id);
   };
 
-  changeProc = v => {
+  changeProc = (v) => {
     let { prodInfo, fakeTypes } = this.state;
     let proc = v.target.value;
     let cartInfos = R.compose(
-      R.project(["MACHINENAME", "STARTDATE"]),
-      R.filter(R.propEq("PROCNAME", proc))
+      R.project(['machineName', 'startDate']),
+      R.filter(R.propEq('procName', proc))
     )(prodInfo);
     let machineList = R.compose(
       R.uniq,
-      R.map(R.prop("MACHINENAME"))
+      R.map(R.prop('machineName'))
     )(cartInfos);
 
     let print_time = R.compose(
       R.head,
       R.uniq,
-      R.map(R.prop("STARTDATE"))
+      R.map(R.prop('startDate'))
     )(cartInfos);
 
     this.setState({ machineList, print_time });
@@ -401,12 +402,12 @@ class DynamicRule extends React.Component {
     this.isThisCartNotice(cart_number, machineList[0]);
   };
 
-  changeMachine = v => {
+  changeMachine = (v) => {
     let { prodInfo } = this.state;
     let captainList = R.compose(
       R.uniq,
-      R.map(R.prop("CAPTAINNAME")),
-      R.filter(R.propEq("MACHINENAME", v))
+      R.map(R.prop('captainName')),
+      R.filter(R.propEq('machineName', v))
     )(prodInfo);
     this.setState({ captainList });
 
@@ -424,10 +425,9 @@ class DynamicRule extends React.Component {
     return (
       cart_number && (
         <a
-          href={"http://10.8.2.133/search/image/#" + cart_number}
+          href={'http://10.8.2.133/search/image/#' + cart_number}
           className="ant-btn ant-btn-primary ant-btn-sm"
-          target="_blank"
-        >
+          target="_blank">
           缺陷图像
         </a>
       )
@@ -464,19 +464,17 @@ class DynamicRule extends React.Component {
         <Card
           title={<h3 className={styles.header}>机检弱项记废信息</h3>}
           loading={this.state.loading}
-          style={{ width: "100%" }}
-        >
+          style={{ width: '100%' }}>
           <Form>
             <Row>
               <Col span={8}>
                 <FormItem {...formItemLayout} label="品种">
-                  {getFieldDecorator("prod_id", {
-                    rules: [{ required: true, message: "请选择品种" }]
+                  {getFieldDecorator('prod_id', {
+                    rules: [{ required: true, message: '请选择品种' }]
                   })(
                     <Select
                       placeholder="请选择品种"
-                      onChange={this.handleProduct}
-                    >
+                      onChange={this.handleProduct}>
                       {this.props.productList.map(({ name, value }) => (
                         <Option value={value} key={value}>
                           {name}
@@ -486,11 +484,11 @@ class DynamicRule extends React.Component {
                   )}
                 </FormItem>
                 <FormItem {...formItemLayout} label="印码号">
-                  {getFieldDecorator("code_num", {
+                  {getFieldDecorator('code_num', {
                     rules: [
                       {
                         required: true,
-                        message: "请输入印码号前6位",
+                        message: '请输入印码号前6位',
                         pattern: /^[A-Za-z]{2}\d{4}$|^[A-Za-z]\d[A-Za-z]\d{3}$|^[A-Za-z]\d{2}[A-Za-z]\d{2}$|^[A-Za-z]\d{3}[A-Za-z]\d$|^[A-Za-z]\d{4}[A-Za-z]$/
                       }
                     ]
@@ -505,20 +503,18 @@ class DynamicRule extends React.Component {
                 <FormItem
                   {...formItemLayout}
                   label="车号"
-                  extra={this.cartLink()}
-                >
-                  {getFieldDecorator("cart_number")(<Input disabled />)}
+                  extra={this.cartLink()}>
+                  {getFieldDecorator('cart_number')(<Input disabled />)}
                 </FormItem>
                 <FormItem
                   {...formItemLayout}
                   label="工序"
-                  className={styles.radioButton}
-                >
-                  {getFieldDecorator("proc_name", {
-                    rules: [{ required: true, message: "请选择工序" }]
+                  className={styles.radioButton}>
+                  {getFieldDecorator('proc_name', {
+                    rules: [{ required: true, message: '请选择工序' }]
                   })(
                     <Radio.Group onChange={this.changeProc}>
-                      {procList.map(name => (
+                      {procList.map((name) => (
                         <Radio.Button value={name} key={name}>
                           {name}
                         </Radio.Button>
@@ -527,14 +523,13 @@ class DynamicRule extends React.Component {
                   )}
                 </FormItem>
                 <FormItem {...formItemLayout} label="设备">
-                  {getFieldDecorator("machine_name", {
-                    rules: [{ required: true, message: "请选择机台" }]
+                  {getFieldDecorator('machine_name', {
+                    rules: [{ required: true, message: '请选择机台' }]
                   })(
                     <Select
                       placeholder="请选择机台"
-                      onChange={this.changeMachine}
-                    >
-                      {machineList.map(name => (
+                      onChange={this.changeMachine}>
+                      {machineList.map((name) => (
                         <Option value={name} key={name}>
                           {name}
                         </Option>
@@ -543,11 +538,11 @@ class DynamicRule extends React.Component {
                   )}
                 </FormItem>
                 <FormItem {...formItemLayout} label="机长">
-                  {getFieldDecorator("captain_name", {
-                    rules: [{ required: true, message: "请选择机长" }]
+                  {getFieldDecorator('captain_name', {
+                    rules: [{ required: true, message: '请选择机长' }]
                   })(
                     <Select mode="multiple" placeholder="请选择机长">
-                      {captainList.map(name => (
+                      {captainList.map((name) => (
                         <Option value={name} key={name}>
                           {name}
                         </Option>
@@ -556,11 +551,11 @@ class DynamicRule extends React.Component {
                   )}
                 </FormItem>
                 <FormItem {...formItemLayout} label="分类" extra={procTipInfo}>
-                  {getFieldDecorator("fake_type", {
-                    rules: [{ required: true, message: "请选择分类" }]
+                  {getFieldDecorator('fake_type', {
+                    rules: [{ required: true, message: '请选择分类' }]
                   })(
                     <Select placeholder="请选择分类">
-                      {fakeTypeList.map(name => (
+                      {fakeTypeList.map((name) => (
                         <Option value={name} key={name}>
                           {name}
                         </Option>
@@ -572,11 +567,11 @@ class DynamicRule extends React.Component {
 
               <Col span={8}>
                 <FormItem {...formItemLayout} label="产品张数">
-                  {getFieldDecorator("paper_num", {
+                  {getFieldDecorator('paper_num', {
                     rules: [
                       {
                         required: true,
-                        message: "请输入产品张数",
+                        message: '请输入产品张数',
                         pattern: /^\d+$/
                       }
                     ]
@@ -586,12 +581,10 @@ class DynamicRule extends React.Component {
                   {...formItemLayout}
                   label="记废等级"
                   className={styles.radioButton}
-                  extra={extraInfo}
-                >
+                  extra={extraInfo}>
                   <Radio.Group
                     value={level_type}
-                    onChange={this.handleLevelType}
-                  >
+                    onChange={this.handleLevelType}>
                     <Radio.Button value={0}>0</Radio.Button>
                     <Radio.Button value={1}>1</Radio.Button>
                     <Radio.Button value={9}>10</Radio.Button>
@@ -615,7 +608,7 @@ class DynamicRule extends React.Component {
                         placeholder="粘贴图像信息自动上传"
                         onSearch={this.uploadBase64}
                         enterButton={<Icon type="upload" />}
-                        onFocus={e => this.base64Input.select()}
+                        onFocus={(e) => this.base64Input.select()}
                         onChange={this.uploadBase64}
                         value={this.base64URI}
                       />
@@ -624,7 +617,7 @@ class DynamicRule extends React.Component {
                 </FormItem>
 
                 <FormItem {...formItemLayout} label="备注">
-                  {getFieldDecorator("remark")(
+                  {getFieldDecorator('remark')(
                     <Input.TextArea rows={3} placeholder="请输入备注信息" />
                   )}
                 </FormItem>

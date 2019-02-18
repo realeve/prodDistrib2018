@@ -1,4 +1,5 @@
 export default {
+  hash: true, //添加hash后缀
   plugins: [
     [
       'umi-plugin-react',

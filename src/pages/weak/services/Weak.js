@@ -16,11 +16,20 @@ import { axios } from '../../../utils/axios';
 *   @desc:     { 冠字查车号 } 
     const { prod, alpha, start, end, alpha2, start2, end2 } = params;
 */
-export const getVIEWCARTFINDER = (params) =>
-  axios({
+
+export const getVIEWCARTFINDER = async (params) => {
+  let res1 = await await axios({
+    url: '/79/797066c5d6.json',
+    params
+  });
+  let res2 = await axios({
     url: '/353/6a7cbf14d5.json',
     params
   });
+  res1.rows += res2.rows;
+  res1.data = [...res1.data, ...res2.data];
+  return res1;
+};
 
 /**
 *   @database: { 质量信息系统 }

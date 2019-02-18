@@ -57,9 +57,7 @@ export const getViewCartfinder = (params) =>
 
 export const getTbstock = async (carnos) =>
   await getTbbaseCarTechnologHistory({
-    carnos1: carnos,
-    carnos2: carnos,
-    carnos3: carnos
+    carnos
   });
 
 /**
@@ -71,7 +69,7 @@ const getTbbaseCarTechnologHistory = async (params) =>
   await axios({
     // url: '/132/6ac1e30d85/array.json',
     method: 'post',
-    data: { ...params, id: 132, nonce: '6ac1e30d85', mode: 'array' }
+    data: { ...params, id: 334, nonce: 'f47b05f146', mode: 'array' }
   }).then((res) => res);
 
 /**

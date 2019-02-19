@@ -26,6 +26,19 @@ export const getVIEWCARTFINDER = async (params) => {
     url: '/353/6a7cbf14d5.json',
     params
   });
+
+  // 机台作业未搜到冠字
+  if (res1.rows == 0 && res2.rows > 0) {
+    // 根据车号重新搜索
+    let cart = res2.data[0].cartNumber;
+    res1 = await axios({
+      url: '/354/2b31102d60.json',
+      params: {
+        cart
+      }
+    });
+  }
+
   res1.rows += res2.rows;
   res1.data = [...res1.data, ...res2.data];
   return res1;

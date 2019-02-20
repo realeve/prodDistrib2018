@@ -1,5 +1,5 @@
-import React from "react";
-import { connect } from "dva";
+import React from 'react';
+import { connect } from 'dva';
 import {
   Card,
   Form,
@@ -10,22 +10,23 @@ import {
   Icon,
   Row,
   Col
-} from "antd";
+} from 'antd';
 
-import styles from "./Report.less";
-import * as lib from "../../../utils/lib";
+import styles from './Report.less';
+import * as lib from '../../../utils/lib';
 
-import * as db from "../services/Addcart";
+import * as db from '../services/Addcart';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
-const R = require("ramda");
+const R = require('ramda');
 
-const formItemLayout = {
+export const formItemLayout = {
   labelCol: { span: 6 },
   wrapperCol: { span: 18 }
 };
-const formTailLayout = {
+
+export const formTailLayout = {
   labelCol: { span: 6 },
   wrapperCol: { span: 18, offset: 6 }
 };
@@ -44,47 +45,47 @@ class DynamicRule extends React.Component {
     });
   }
 
-  insertData = async data => {
+  insertData = async (data) => {
     let res = await db.addPrintAbnormalProd(data);
     if (!res.rows) {
       notification.error({
-        message: "系统错误",
-        description: "数据插入失败，请联系管理员",
-        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+        message: '系统错误',
+        description: '数据插入失败，请联系管理员',
+        icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
       });
       return;
     }
     notification.open({
-      message: "系统提示",
-      description: "数据插入成功",
-      icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+      message: '系统提示',
+      description: '数据插入成功',
+      icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
     });
 
     this.props.form.resetFields();
 
     // 重载报表数据
-    this.props.dispatch({
-      type: "addcart/handleReportData"
+    await this.props.dispatch({
+      type: 'addcart/handleReportData'
     });
   };
 
   submit = () => {
-    this.props.form.validateFields(err => {
+    this.props.form.validateFields((err) => {
       if (err) {
         return;
       }
       let data = this.props.form.getFieldsValue();
       data.rec_date = lib.now();
       data.captain_name =
-        typeof data.captain_name === "string"
+        typeof data.captain_name === 'string'
           ? data.captain_name
-          : data.captain_name.join(",");
+          : data.captain_name.join(',');
       data.user_name = this.props.userSetting.name;
       this.insertData(data);
     });
   };
 
-  convertCart = async e => {
+  convertCart = async (e) => {
     e.preventDefault();
     let val = e.target.value.toUpperCase().trim();
     e.target.value = val;
@@ -101,9 +102,9 @@ class DynamicRule extends React.Component {
       const { data } = await db.getViewCartfinder({ cart: val });
       if (data.length === 0) {
         notification.error({
-          message: "系统错误",
-          description: "当前车号未搜到生产信息",
-          icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+          message: '系统错误',
+          description: '当前车号未搜到生产信息',
+          icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
         });
         return;
       }
@@ -113,11 +114,11 @@ class DynamicRule extends React.Component {
     }
   };
 
-  handleProcessInfo = data => {
+  handleProcessInfo = (data) => {
     let { setFieldsValue } = this.props.form;
     const procList = R.compose(
       R.uniq,
-      R.map(R.prop("proc_name"))
+      R.map(R.prop('proc_name'))
     )(data);
     this.setState({
       procList
@@ -131,15 +132,15 @@ class DynamicRule extends React.Component {
     this.handleProc(proc_name);
   };
 
-  updateMachineList = data => {
+  updateMachineList = (data) => {
     let { setFieldsValue } = this.props.form;
     const machineList = R.compose(
       R.uniq,
-      R.map(R.prop("machine_name"))
+      R.map(R.prop('machine_name'))
     )(data);
     const captainList = R.compose(
       R.uniq,
-      R.map(R.prop("captain_name"))
+      R.map(R.prop('captain_name'))
     )(data);
     this.setState({
       machineList,
@@ -162,8 +163,8 @@ class DynamicRule extends React.Component {
     });
   };
 
-  handleProc = proc_name => {
-    const data = R.filter(R.propEq("proc_name", proc_name))(
+  handleProc = (proc_name) => {
+    const data = R.filter(R.propEq('proc_name', proc_name))(
       this.state.processInfo
     );
     this.updateMachineList(data);
@@ -177,11 +178,11 @@ class DynamicRule extends React.Component {
         <Row>
           <Col span={12}>
             <FormItem {...formItemLayout} label="车号">
-              {getFieldDecorator("cart_number", {
+              {getFieldDecorator('cart_number', {
                 rules: [
                   {
                     required: true,
-                    message: "车号信息必须填写",
+                    message: '车号信息必须填写',
                     pattern: /^\d{4}[A-Z]\d{3}$/
                   }
                 ]
@@ -195,8 +196,8 @@ class DynamicRule extends React.Component {
             </FormItem>
 
             <FormItem {...formItemLayout} label="问题分类">
-              {getFieldDecorator("abnormal_type", {
-                rules: [{ required: true, message: "请选择问题分类" }]
+              {getFieldDecorator('abnormal_type', {
+                rules: [{ required: true, message: '请选择问题分类' }]
               })(
                 <Select placeholder="请选择问题分类">
                   {this.props.abnormalTypeList.map(({ proc_name }) => (
@@ -208,11 +209,11 @@ class DynamicRule extends React.Component {
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="原因说明">
-              {getFieldDecorator("reason", {
+              {getFieldDecorator('reason', {
                 rules: [
                   {
                     required: true,
-                    message: "请输入异常原因说明"
+                    message: '请输入异常原因说明'
                   }
                 ]
               })(<Input.TextArea rows={3} placeholder="请输入异常原因说明" />)}
@@ -229,10 +230,9 @@ class DynamicRule extends React.Component {
                   </span>
                   .
                 </label>
-              }
-            >
-              {getFieldDecorator("proc_stream", {
-                rules: [{ required: false, message: "请选择产品工艺流程" }]
+              }>
+              {getFieldDecorator('proc_stream', {
+                rules: [{ required: false, message: '请选择产品工艺流程' }]
               })(
                 <Select placeholder="请选择产品工艺流程">
                   {this.props.procList.map(({ value, name }) => (
@@ -250,16 +250,15 @@ class DynamicRule extends React.Component {
               </Button>
               <Button
                 style={{ marginLeft: 20 }}
-                onClick={e => this.props.form.resetFields()}
-              >
+                onClick={(e) => this.props.form.resetFields()}>
                 重置
               </Button>
             </FormItem>
           </Col>
           <Col span={12}>
             <FormItem {...formItemLayout} label="品种">
-              {getFieldDecorator("prod_id", {
-                rules: [{ required: true, message: "请选择品种" }]
+              {getFieldDecorator('prod_id', {
+                rules: [{ required: true, message: '请选择品种' }]
               })(
                 <Select placeholder="请选择品种">
                   {this.props.productList.map(({ name, value }) => (
@@ -271,11 +270,11 @@ class DynamicRule extends React.Component {
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="工序">
-              {getFieldDecorator("proc_name", {
-                rules: [{ required: true, message: "请选择工序" }]
+              {getFieldDecorator('proc_name', {
+                rules: [{ required: true, message: '请选择工序' }]
               })(
                 <Select placeholder="请选择工序" onChange={this.handleProc}>
-                  {this.state.procList.map(item => (
+                  {this.state.procList.map((item) => (
                     <Option value={item} key={item}>
                       {item}
                     </Option>
@@ -284,11 +283,11 @@ class DynamicRule extends React.Component {
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="机台">
-              {getFieldDecorator("machine_name", {
-                rules: [{ required: true, message: "请选择机台" }]
+              {getFieldDecorator('machine_name', {
+                rules: [{ required: true, message: '请选择机台' }]
               })(
                 <Select placeholder="请选择机台">
-                  {this.state.machineList.map(item => (
+                  {this.state.machineList.map((item) => (
                     <Option value={item} key={item}>
                       {item}
                     </Option>
@@ -297,11 +296,11 @@ class DynamicRule extends React.Component {
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="机长">
-              {getFieldDecorator("captain_name", {
-                rules: [{ required: true, message: "请选择机长" }]
+              {getFieldDecorator('captain_name', {
+                rules: [{ required: true, message: '请选择机长' }]
               })(
                 <Select mode="multiple" placeholder="请选择机长">
-                  {this.state.captainList.map(item => (
+                  {this.state.captainList.map((item) => (
                     <Option value={item} key={item}>
                       {item}
                     </Option>
@@ -310,11 +309,11 @@ class DynamicRule extends React.Component {
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="生产日期">
-              {getFieldDecorator("prod_date", {
+              {getFieldDecorator('prod_date', {
                 rules: [
                   {
                     required: true,
-                    message: "请输入生产日期"
+                    message: '请输入生产日期'
                   }
                 ]
               })(<Input disabled />)}
@@ -347,8 +346,7 @@ function Addcart(props) {
           </div>
         }
         loading={props.loading}
-        style={{ width: "100%" }}
-      >
+        style={{ width: '100%' }}>
         <WrappedDynamicRule {...props} />
       </Card>
     </div>

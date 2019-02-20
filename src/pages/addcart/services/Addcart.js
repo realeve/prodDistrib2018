@@ -1,14 +1,14 @@
-import { axios } from '../../../utils/axios';
+import { axios, DEV } from '../../../utils/axios';
 
 /**
 *   @database: { 质量信息系统 }
 *   @desc:     { 异常产品原因列表 } 
   
 */
-export const getPrintAbnormalProd = async () =>
-  await axios({
+export const getPrintAbnormalProd = () =>
+  axios({
     url: '/72/2b853fe9ed.json'
-  }).then((res) => res);
+  });
 
 /**
 *   @database: { 质量信息系统 }
@@ -16,11 +16,11 @@ export const getPrintAbnormalProd = async () =>
   
     const { tstart, tend } = params;
 */
-export const getViewPrintAbnormalProd = async (params) =>
-  await axios({
+export const getViewPrintAbnormalProd = (params) =>
+  axios({
     url: '/73/2dcf6571e6/array.json',
     params
-  }).then((res) => res);
+  });
 
 /**
 *   @database: { 质量信息系统 }
@@ -28,11 +28,11 @@ export const getViewPrintAbnormalProd = async (params) =>
   
     const { prod_id, cart_number, rec_date, machine_name, reason, proc_stream, proc_name, captain_name, prod_date, problem_type } = params;
 */
-export const addPrintAbnormalProd = async (params) =>
-  await axios({
+export const addPrintAbnormalProd = (params) =>
+  axios({
     url: '/77/d9072e2900.json',
     params
-  }).then((res) => res);
+  });
 
 /**
 *   @database: { 接口管理 }
@@ -44,7 +44,7 @@ export const addPrintAbnormalProd = async (params) =>
 //   await axios({
 //     url: '/86/db8acd1ea1.json',
 //     params
-//   }).then((res) => res);
+//   })
 
 /**
  *   @database: { MES_MAIN }
@@ -57,8 +57,8 @@ export const getViewCartfinder = (params) =>
     params
   });
 
-export const getTbstock = async (carnos) =>
-  await getTbbaseCarTechnologHistory({
+export const getTbstock = (carnos) =>
+  getTbbaseCarTechnologHistory({
     carnos
   });
 
@@ -67,19 +67,45 @@ export const getTbstock = async (carnos) =>
 *   @desc:     { 查询批次状态 } 
     const { carnos1, carnos2, carnos3 } = params;
 */
-const getTbbaseCarTechnologHistory = async (params) =>
-  await axios({
+const getTbbaseCarTechnologHistory = (params) =>
+  axios({
     url: '/334/f47b05f146/array.json',
     params
-  }).then((res) => res);
+  });
 
 /**
 *   @database: { 质量信息系统 }
 *   @desc:     { 人工拉号车号万数汇总 } 
     const { tstart, tend, tstart2, tend2 } = params;
 */
-export const getPrintSampleCartlist = async (params) =>
-  await axios({
+export const getPrintSampleCartlist = (params) =>
+  axios({
     url: '/124/cd6e54e7e3.json',
     params
-  }).then((res) => res);
+  });
+
+export const getUserList = () => require('../../../../mock/userList.js');
+
+// 判废人员名单信息存储
+const KEY_OPERATOR = 'image_check_operator';
+export const saveOperatorList = (users) => {
+  window.localStorage.setItem(KEY_OPERATOR, JSON.stringify(users));
+};
+
+export const loadOperatorList = () => {
+  let users = window.localStorage.getItem(KEY_OPERATOR);
+  if (users == null) {
+    return [];
+  }
+  return JSON.parse(users);
+};
+
+// 图核排产
+export const getHechaTasks = (data) =>
+  DEV
+    ? require('../../../../mock/addcart_task.js')
+    : axios({
+        url: 'http://10.8.1.27:4000/api/hecha/task',
+        method: 'post',
+        data
+      });

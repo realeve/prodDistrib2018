@@ -47,9 +47,15 @@ function HeaderMenu({ location, avatar }) {
           title={
             <span>
               <Icon type="unlock" />
-              异常品处理 <Icon type="down" />
+              图核及异常品 <Icon type="down" />
             </span>
           }>
+          <Menu.Item key="/addcart/task">
+            <Link to="/addcart/task">
+              <Icon type="exclamation-circle-o" />
+              图像核查自动排产
+            </Link>
+          </Menu.Item>
           <Menu.Item key="/addcart">
             <Link to="/addcart">
               <Icon type="exclamation-circle-o" />
@@ -127,12 +133,12 @@ function HeaderMenu({ location, avatar }) {
             </Link>
           </Menu.Item>
         </SubMenu>
-          <Menu.Item key="/auto_proc">
-            <Link to="/auto_proc">
-              <Icon type="eye-o" />
-              码前自动工艺
-            </Link>
-          </Menu.Item>
+        <Menu.Item key="/auto_proc">
+          <Link to="/auto_proc">
+            <Icon type="eye-o" />
+            码前自动工艺
+          </Link>
+        </Menu.Item>
       </Menu>
       <LoginAvatar avatar={avatar} />
     </Header>

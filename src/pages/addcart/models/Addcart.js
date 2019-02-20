@@ -1,10 +1,11 @@
-import pathToRegexp from "path-to-regexp";
-import * as db from "../services/Addcart";
-import dateRanges from "../../../utils/ranges";
+import pathToRegexp from 'path-to-regexp';
+import * as db from '../services/Addcart';
+import dateRanges from '@/utils/ranges';
 import wms from '../../index/services/wms';
+import { setStore } from '@/utils/lib';
 const R = require('ramda');
 
-const namespace = "addcart";
+const namespace = 'addcart';
 export default {
   namespace,
   state: {
@@ -15,78 +16,69 @@ export default {
     lockInfo: {
       checkByWeek: 0,
       abnormal: 0
-    }
+    },
+    operatorList: [],
+    hechaTask: [],
+    hechaLoading: false
   },
   reducers: {
-    save(state, {
-      payload: {
-        dataSource,
+    setStore,
+    save(
+      state,
+      {
+        payload: { dataSource }
       }
-    }) {
-      return { ...state,
-        dataSource,
-      };
+    ) {
+      return { ...state, dataSource };
     },
-    setDateRange(state, {
-      payload: dateRange
-    }) {
+    setDateRange(state, { payload: dateRange }) {
       return {
         ...state,
         dateRange
       };
     },
-    setProc(state, {
-      payload: abnormalTypeList
-    }) {
+    setProc(state, { payload: abnormalTypeList }) {
       return {
         ...state,
         abnormalTypeList
       };
     },
-    saveWMS(state, {
-      payload: {
-        abnormalWMS
+    saveWMS(
+      state,
+      {
+        payload: { abnormalWMS }
       }
-    }) {
+    ) {
       return {
         ...state,
         abnormalWMS
-      }
+      };
     },
-    saveLockInfo(state, {
-      payload: {
-        lockInfo
+    saveLockInfo(
+      state,
+      {
+        payload: { lockInfo }
       }
-    }) {
+    ) {
       return {
         ...state,
         lockInfo
-      }
+      };
     }
   },
   effects: {
-    * updateDateRange({
-      payload: dateRange
-    }, {
-      put
-    }) {
+    *updateDateRange({ payload: dateRange }, { put }) {
       yield put({
-        type: "setDateRange",
+        type: 'setDateRange',
         payload: dateRange
       });
     },
-    * getLockCart(payload, {
-      call,
-      put,
-      select
-    }) {
-      const [ts, te] = dateRanges["本周"];
-      const [tstart, tend] = [ts.format("YYYYMMDD"), te.format("YYYYMMDD")];
+    *getLockCart(payload, { call, put, select }) {
+      const [ts, te] = dateRanges['本周'];
+      const [tstart, tend] = [ts.format('YYYYMMDD'), te.format('YYYYMMDD')];
 
       // 获取每周人工拉号锁车产品信息
-      let {
-        data
-      } = yield call(db.getPrintSampleCartlist, {
+      let { data } = yield call(db.getPrintSampleCartlist, {
         tstart,
         tend,
         tstart2: tstart,
@@ -97,36 +89,28 @@ export default {
       let lockInfo = {
         checkByWeek: 0,
         abnormal: 0
-      }
+      };
 
-      data.forEach(({
-        num,
-        type
-      }) => {
+      data.forEach(({ num, type }) => {
         if (type === '1') {
           lockInfo.checkByWeek = num;
         } else {
           lockInfo.abnormal = num;
         }
-      })
+      });
 
       yield put({
         type: 'saveLockInfo',
         payload: {
           lockInfo
         }
-      })
-
+      });
     },
-    * handleReportData(payload, {
-      call,
-      put,
-      select
-    }) {
+    *handleReportData(payload, { call, put, select }) {
       yield put({
-        type: "save",
+        type: 'save',
         payload: {
-          dataSource: [],
+          dataSource: []
         }
       });
 
@@ -135,12 +119,10 @@ export default {
         payload: {
           abnormalWMS: []
         }
-      })
+      });
 
-      const store = yield select(state => state[namespace]);
-      const {
-        dateRange
-      } = store;
+      const store = yield select((state) => state[namespace]);
+      const { dateRange } = store;
 
       let dataSource = yield call(db.getViewPrintAbnormalProd, {
         tstart: dateRange[0],
@@ -154,16 +136,24 @@ export default {
         return;
       }
       let abnormalWMS = yield call(db.getTbstock, carts);
-      abnormalWMS.data = abnormalWMS.data.map(item => {
+      abnormalWMS.data = abnormalWMS.data.map((item) => {
         item[6] = wms.getLockReason(item[6]);
         return item;
-      })
+      });
 
       // 将库管系统数据合并
-      dataSource.header = [...dataSource.header.slice(0, 8), '锁车状态(库管系统)', '工艺(库管系统)', '完成状态(调度服务)', ...dataSource.header.slice(9, 12)]
-      dataSource.data = dataSource.data.map(item => {
+      dataSource.header = [
+        ...dataSource.header.slice(0, 8),
+        '锁车状态(库管系统)',
+        '工艺(库管系统)',
+        '完成状态(调度服务)',
+        ...dataSource.header.slice(9, 12)
+      ];
+      dataSource.data = dataSource.data.map((item) => {
         let iTemp = item.slice(0, 8);
-        let lockStatus = abnormalWMS.data.filter(wmsItem => wmsItem[2] === item[1]);
+        let lockStatus = abnormalWMS.data.filter(
+          (wmsItem) => wmsItem[2] === item[1]
+        );
         if (lockStatus.length === 0) {
           iTemp = [...iTemp, '', ''];
         } else {
@@ -173,9 +163,9 @@ export default {
       });
 
       yield put({
-        type: "save",
+        type: 'save',
         payload: {
-          dataSource,
+          dataSource
         }
       });
 
@@ -184,55 +174,79 @@ export default {
         payload: {
           abnormalWMS
         }
-      })
+      });
       yield put({
-        type: "setLoading",
+        type: 'setLoading',
         payload: {
-          loading: false,
+          loading: false
         }
       });
     },
-    * getProc(payload, {
-      put,
-      select,
-      call
-    }) {
+    *getProc(payload, { put, select, call }) {
       let proc = yield call(db.getPrintAbnormalProd);
       yield put({
-        type: "setProc",
+        type: 'setProc',
         payload: proc.data
+      });
+    },
+    *getOperatorList(payload, { put, select, call }) {
+      let { data: operatorList } = yield call(db.getUserList);
+      yield put({
+        type: 'setStore',
+        payload: {
+          operatorList
+        }
+      });
+    },
+    *getHechaTask({ params }, { put, select, call }) {
+      yield put({
+        type: 'setStore',
+        payload: {
+          hechaLoading: true
+        }
+      });
+      let { data: hechaTask } = yield call(db.getHechaTasks, params);
+
+      yield put({
+        type: 'setStore',
+        payload: {
+          hechaTask,
+          hechaLoading: false
+        }
       });
     }
   },
   subscriptions: {
-    setup({
-      dispatch,
-      history
-    }) {
-      return history.listen(async ({
-        pathname,
-        query
-      }) => {
-        const match = pathToRegexp("/" + namespace).exec(pathname);
-        if (match && match[0] === "/" + namespace) {
-          const [tstart, tend] = dateRanges["最近一月"];
-          const [ts, te] = [tstart.format("YYYYMMDD"), tend.format("YYYYMMDD")];
+    setup({ dispatch, history }) {
+      return history.listen(async ({ pathname, query }) => {
+        const match = pathToRegexp('/' + namespace).exec(pathname);
+
+        if (match && match[0] === '/' + namespace) {
+          const [tstart, tend] = dateRanges['最近一月'];
+          const [ts, te] = [tstart.format('YYYYMMDD'), tend.format('YYYYMMDD')];
 
           await dispatch({
-            type: "updateDateRange",
+            type: 'updateDateRange',
             payload: [ts, te]
           });
           dispatch({
-            type: "handleReportData"
+            type: 'handleReportData'
           });
 
           dispatch({
-            type: "getProc"
+            type: 'getProc'
           });
 
           dispatch({
             type: 'getLockCart'
-          })
+          });
+        }
+
+        // 自动排产载入人员信息
+        if (pathname === `/${namespace}/task`) {
+          dispatch({
+            type: 'getOperatorList'
+          });
         }
       });
     }

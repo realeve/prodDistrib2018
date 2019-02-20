@@ -85,7 +85,7 @@ const mapStateToProps = (props: PropType) => {
     remark: res.remark || '',
     lockCarts: []
   });
-
+  // console.log(props.machine);
   let data = R.find(R.propEq('machine_id', res.machine_id))(
     props.produceProdList
   );
@@ -342,9 +342,13 @@ class MachineItem extends Component<PropType, StateType> {
             <Input
               {...inputProps}
               value={this.state.num}
-              onChange={({ target: { value: num } }: any) =>
-                this.setState({ num })
-              }
+              onChange={({ target: { value: num } }: any) => {
+                this.setState({ num });
+                if (num == 0) {
+                  // 设为0时自动关闭
+                  this.setState({ status: false });
+                }
+              }}
               placeholder="该工艺大万数"
             />
           </div>

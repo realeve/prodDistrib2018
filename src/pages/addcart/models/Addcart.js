@@ -18,7 +18,7 @@ export default {
       abnormal: 0
     },
     operatorList: [],
-    hechaTask: [],
+    hechaTask: { task_list: [], unhandle_carts: [], unupload_carts: [] },
     hechaLoading: false
   },
   reducers: {
@@ -198,15 +198,19 @@ export default {
         }
       });
     },
-    *getHechaTask({ params }, { put, select, call }) {
+    *getHechaTask(
+      {
+        payload: { params }
+      },
+      { put, select, call }
+    ) {
       yield put({
         type: 'setStore',
         payload: {
           hechaLoading: true
         }
       });
-      let { data: hechaTask } = yield call(db.getHechaTasks, params);
-
+      let hechaTask = yield call(db.getHechaTasks, params);
       yield put({
         type: 'setStore',
         payload: {

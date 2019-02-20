@@ -30,3 +30,49 @@
   font-weight: bold;
   color: #e44;
 }
+
+.detailInfo {
+  padding-inline-start: 0px;
+
+  li {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+
+    span {
+      &:nth-child(1) {
+        font-weight: bold;
+      }
+    }
+  }
+}
+
+.cartListTitle {
+  color: #e23;
+  font-weight: bold;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 2px;
+  margin-bottom: 5px;
+}
+
+.cartList {
+  padding-inline-start: 0px;
+
+  li {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+
+    span {
+      flex: 1;
+
+      &:nth-child(1) {
+        flex: 0.6;
+      }
+
+      &:nth-child(5) {
+        flex: 0.6;
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import { axios, DEV } from '../../../utils/axios';
-
+import http from 'axios';
 /**
 *   @database: { 质量信息系统 }
 *   @desc:     { 异常产品原因列表 } 
@@ -103,8 +103,8 @@ export const loadOperatorList = () => {
 // 图核排产
 export const getHechaTasks = (data) =>
   DEV
-    ? require('../../../../mock/addcart_task.js')
-    : axios({
+    ? require('../../../../mock/addcart_task.js').data
+    : http({
         url: 'http://10.8.1.27:4000/api/hecha/task',
         method: 'post',
         data

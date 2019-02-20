@@ -99,7 +99,7 @@ class DynamicRule extends React.Component {
           if (err) {
             return resolve(false);
           }
-          let params = handleParams(form);
+          let params = this.handleParams(form);
           return resolve(params);
         });
       });
@@ -107,7 +107,7 @@ class DynamicRule extends React.Component {
     if (!params) {
       return;
     }
-    dispatchTasks(params);
+    this.dispatchTasks(params);
   };
 
   // 动态存储用户信息

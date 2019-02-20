@@ -191,8 +191,8 @@ class DynamicRule extends React.Component {
                     人判废
                   </p>
                   {user_ignore && (
-                    <p>
-                      以下人员不参与判废：
+                    <>
+                      <p>以下人员不参与判废(点击姓名加入判废人员列表)：</p>
                       {user_ignore.map((user) => (
                         <Button
                           type="danger"
@@ -202,7 +202,7 @@ class DynamicRule extends React.Component {
                           {user}
                         </Button>
                       ))}
-                    </p>
+                    </>
                   )}
                 </div>
               }>

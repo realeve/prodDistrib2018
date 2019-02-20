@@ -126,6 +126,20 @@ class DynamicRule extends React.Component {
     });
   };
 
+  removeUserIgnore = (user) => {
+    const { user_list, user_ignore } = this.state;
+
+    let newIgnore = R.reject(R.equals(user))(user_ignore);
+
+    user_list.push(user);
+    db.saveOperatorList(user_list);
+
+    this.setState({
+      user_list,
+      user_ignore: newIgnore
+    });
+  };
+
   render() {
     const { getFieldDecorator } = this.props.form;
     const { user_list, user_ignore } = this.state;
@@ -178,10 +192,16 @@ class DynamicRule extends React.Component {
                   </p>
                   {user_ignore && (
                     <p>
-                      以下人员不参与判废：{' '}
-                      <span className={styles['user-tips']}>
-                        {user_ignore.join('、')}
-                      </span>
+                      以下人员不参与判废：
+                      {user_ignore.map((user) => (
+                        <Button
+                          type="danger"
+                          key={user}
+                          style={{ marginRight: 5 }}
+                          onClick={() => this.removeUserIgnore(user)}>
+                          {user}
+                        </Button>
+                      ))}
                     </p>
                   )}
                 </div>

@@ -31,7 +31,8 @@ export default function taskItem(props) {
           marginTop: 10,
           marginRight: 5,
           marginLeft: 5,
-          minHeight: 500
+          minHeight: 500,
+          fontSize: 15
         }}>
         <ul className={styles.detailInfo}>
           <li>
@@ -65,7 +66,9 @@ export default function taskItem(props) {
             <span>{work_long_time}</span>
           </li>
         </ul>
-        <div className={styles.cartListTitle}>车号列表</div>
+        <div className={styles.cartListTitle}>
+          <span>车号列表</span>
+        </div>
         <ul className={styles.cartList}>
           <li>
             <span>序号</span>

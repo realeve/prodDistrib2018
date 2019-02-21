@@ -10,7 +10,8 @@ import {
   Icon,
   Row,
   Col,
-  DatePicker
+  DatePicker,
+  Skeleton
 } from 'antd';
 
 import styles from './Report.less';
@@ -28,7 +29,7 @@ const R = require('ramda');
 
 class DynamicRule extends React.Component {
   // 判废人员列表，未判废人员列表
-  state = { user_list: [], user_ignore: [] };
+  state = { user_list: [], user_ignore: [], operator_detail: [] };
 
   componentDidMount() {
     // 用户列表载入完毕后才加载控件
@@ -116,33 +117,50 @@ class DynamicRule extends React.Component {
     this.refreshUsers(user_list);
   };
 
+  getUserInfoByName = (user) =>
+    this.props.operatorList.find((item) => item.user_name == user);
   // 计算参与判废人员，不参与判废人员
   refreshUsers = (user_list = []) => {
     let operators = this.props.operatorList.map(({ user_name }) => user_name);
     let user_ignore = R.difference(operators, user_list);
+
+    let operator_detail = user_list.map(this.getUserInfoByName);
+
     this.setState({
       user_list,
-      user_ignore
+      user_ignore,
+      operator_detail
     });
   };
 
   removeUserIgnore = (user) => {
-    const { user_list, user_ignore } = this.state;
+    const { user_list, user_ignore, operator_detail } = this.state;
 
     let newIgnore = R.reject(R.equals(user))(user_ignore);
+
+    let newUser = this.getUserInfoByName(user);
+    newUser.work_long_time = 1;
+    operator_detail.push(newUser);
 
     user_list.push(user);
     db.saveOperatorList(user_list);
 
     this.setState({
       user_list,
+      operator_detail,
       user_ignore: newIgnore
     });
   };
 
+  editOperator = (idx) => {
+    const { operator_detail } = this.state;
+    let user = operator_detail[idx];
+  };
+
   render() {
     const { getFieldDecorator } = this.props.form;
-    const { user_list, user_ignore } = this.state;
+    const { user_list, user_ignore, operator_detail } = this.state;
+
     return (
       <Form>
         <Row>
@@ -222,6 +240,22 @@ class DynamicRule extends React.Component {
               )}
             </FormItem>
           </Col>
+
+          <Col span={12}>
+            <FormItem
+              {...formItemLayout}
+              label="工作时长"
+              extra="点击单独编辑请假人员信息">
+              {operator_detail.map(({ user_name, work_long_time }, idx) => (
+                <Button
+                  key={user_name}
+                  style={{ marginRight: 5 }}
+                  onClick={() => this.editOperator(idx)}>
+                  {user_name}({work_long_time})
+                </Button>
+              ))}
+            </FormItem>
+          </Col>
           <Col span={12}>
             <FormItem
               {...formItemLayout}
@@ -270,8 +304,10 @@ function task(props) {
     props.operatorList.length == 0 || props.productList.length == 0;
   return (
     <div className={styles.container}>
-      <Card title="图核排产设置" loading={loading} style={{ width: '100%' }}>
-        {!loading && <WrappedDynamicRule {...props} />}
+      <Card title="图核排产设置" style={{ width: '100%' }}>
+        <Skeleton loading={loading} active>
+          <WrappedDynamicRule {...props} />
+        </Skeleton>
       </Card>
     </div>
   );

@@ -84,7 +84,10 @@ export const getPrintSampleCartlist = (params) =>
     params
   });
 
-export const getUserList = () => require('../../../../mock/userList.js');
+export const getUserList = () =>
+  new Promise((resolve) => {
+    setTimeout(() => resolve(require('../../../../mock/userList.js')), 3000);
+  });
 
 // 判废人员名单信息存储
 const KEY_OPERATOR = 'image_check_operator';

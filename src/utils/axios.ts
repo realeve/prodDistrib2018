@@ -2,7 +2,6 @@ import http from 'axios';
 import qs from 'qs';
 import { getType } from './lib';
 export { mock } from './mock';
-
 export let DEV: boolean = true;
 
 export let host: string = DEV

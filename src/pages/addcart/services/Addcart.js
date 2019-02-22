@@ -1,4 +1,4 @@
-import { axios, DEV } from '../../../utils/axios';
+import { axios, DEV, mock } from '../../../utils/axios';
 import http from 'axios';
 /**
 *   @database: { 质量信息系统 }
@@ -84,10 +84,7 @@ export const getPrintSampleCartlist = (params) =>
     params
   });
 
-export const getUserList = () =>
-  new Promise((resolve) => {
-    setTimeout(() => resolve(require('../../../../mock/userList.js')), 3000);
-  });
+export const getUserList = () => mock(require('../../../../mock/userList.js'));
 
 // 判废人员名单信息存储
 const KEY_OPERATOR = 'image_check_operator';
@@ -106,7 +103,7 @@ export const loadOperatorList = () => {
 // 图核排产
 export const getHechaTasks = (data) =>
   DEV
-    ? require('../../../../mock/addcart_task.js').data
+    ? mock(require('../../../../mock/addcart_task.js').data)
     : http({
         url: 'http://10.8.1.27:4000/api/hecha/task',
         method: 'post',

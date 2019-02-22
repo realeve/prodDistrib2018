@@ -1,9 +1,9 @@
 import React from 'react';
 import { connect } from 'dva';
-import { Row, Col, Card, Empty } from 'antd';
+import { Row, Col, Card, Empty, Skeleton } from 'antd';
 import styles from './Report.less';
 
-const taskList = ({ task_list }) => {
+const taskList = ({ task_list, loading }) => {
   const result = (
     <Row gutter={10}>
       {task_list.map(
@@ -107,13 +107,14 @@ const taskList = ({ task_list }) => {
       bodyStyle={{
         padding: 0
       }}>
-      {task_list.length == 0 ? <Empty /> : result}
+      {loading ? <Skeleton /> : task_list.length == 0 ? <Empty /> : result}
     </Card>
   );
 };
 
 const mapStateToProps = (state) => ({
-  task_list: state.addcart.hechaTask.task_list
+  task_list: state.addcart.hechaTask.task_list,
+  loading: state.addcart.hechaLoading
 });
 
 export default connect(mapStateToProps)(taskList);

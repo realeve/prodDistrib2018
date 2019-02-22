@@ -54,23 +54,41 @@
     text-transform: uppercase;
     margin: 0 0 -1px 0;
     display: inline-block;
-    letter-spacing: .3em;
+    letter-spacing: .1em;
     font-size: 16px;
+    padding: 0 5px;
   }
 
   border-bottom: 1px solid #cdcdcd;
   color:#444;
-  margin-bottom: 5px;
 }
 
 .cartList {
   padding-inline-start: 0px;
+  border: 1px solid #cdcdcd;
+  border-top: none;
 
   li {
     width: 100%;
     display: flex;
     justify-content: space-between;
     height: 2em;
+    align-items: center;
+    padding-left: 10px;
+
+    &:nth-child(even) {
+      background: #e9f3ff;
+    }
+
+    &:nth-child(1) {
+      font-weight: bold;
+    }
+
+    &:not(:nth-child(1)) {
+      &:hover {
+        background: #f0f0f0;
+      }
+    }
 
     span {
       flex: 1;

@@ -66,29 +66,31 @@ export default function taskItem(props) {
             <span>{work_long_time}</span>
           </li>
         </ul>
-        <div className={styles.cartListTitle}>
-          <span>车号列表</span>
-        </div>
-        <ul className={styles.cartList}>
-          <li>
-            <span>序号</span>
-            <span>车号</span>
-            <span>判废数</span>
-            <span>品种</span>
-            <span>类型</span>
-            <span>生产日期</span>
-          </li>
-          {data.map((item, i) => (
-            <li key={item.cart_number}>
-              <span>{i + 1}</span>
-              <span>{item.cart_number}</span>
-              <span>{item.pf_num}</span>
-              <span>{item.product_name}</span>
-              <span>{item.type == 0 ? '码后' : '丝印'}</span>
-              <span>{item.start_date.split(' ')[0]}</span>
+        <div className={styles.styles}>
+          <div className={styles.cartListTitle}>
+            <span>车号列表</span>
+          </div>
+          <ul className={styles.cartList}>
+            <li>
+              <span>序号</span>
+              <span>车号</span>
+              <span>判废数</span>
+              <span>品种</span>
+              <span>类型</span>
+              <span>生产日期</span>
             </li>
-          ))}
-        </ul>
+            {data.map((item, i) => (
+              <li key={item.cart_number}>
+                <span>{i + 1}</span>
+                <span>{item.cart_number}</span>
+                <span>{item.pf_num}</span>
+                <span>{item.product_name}</span>
+                <span>{item.type == 0 ? '码后' : '丝印'}</span>
+                <span>{item.start_date.split(' ')[0]}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </Card>
     </Col>
   );

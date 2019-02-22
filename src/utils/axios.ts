@@ -11,6 +11,13 @@ export let uploadHost: string = DEV
   ? '//localhost/upload/'
   : '//10.8.2.133/upload/';
 
+export const _commonData = {
+  rows: 1,
+  data: [{ affected_rows: 1, id: Math.ceil(Math.random() * 100) }],
+  time: 20,
+  ip: '127.0.0.1',
+  title: '数据更新/插入/删除返回值'
+};
 let g_axios = {
   host,
   token: ''

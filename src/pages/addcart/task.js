@@ -1,5 +1,7 @@
 import TaskSetting from './components/TaskSetting';
 import TaskList from './components/TaskList';
+import UnhandleInfo from './components/UnhandleInfo';
+
 import * as lib from '../../utils/lib';
 import userLib from '../../utils/users';
 
@@ -10,6 +12,7 @@ export default () => {
   return (
     <div>
       <TaskSetting />
+      <UnhandleInfo />
       <TaskList />
     </div>
   );

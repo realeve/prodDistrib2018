@@ -1,5 +1,4 @@
 import React from 'react';
-import { connect } from 'dva';
 import { Card, Col } from 'antd';
 import styles from './Report.less';
 export default function taskItem(props) {

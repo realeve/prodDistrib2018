@@ -4,6 +4,7 @@ import {
   Card,
   Form,
   Input,
+  InputNumber,
   Button,
   Select,
   notification,
@@ -11,7 +12,8 @@ import {
   Row,
   Col,
   DatePicker,
-  Skeleton
+  Skeleton,
+  Modal
 } from 'antd';
 
 import styles from './Report.less';
@@ -29,7 +31,19 @@ const R = require('ramda');
 
 class DynamicRule extends React.Component {
   // 判废人员列表，未判废人员列表
-  state = { user_list: [], user_ignore: [], operator_detail: [] };
+  state = {
+    user_list: [],
+    user_ignore: [],
+    operator_detail: [],
+    visible: false,
+    curUserIdx: 0,
+    curUserInfo: {
+      user_name: '',
+      user_no: '',
+      work_long_time: 1
+    },
+    curWorkLongTime: 1
+  };
 
   componentDidMount() {
     // 用户列表载入完毕后才加载控件
@@ -54,19 +68,15 @@ class DynamicRule extends React.Component {
   handleParams = (form) => {
     let {
       daterange: [tstart, tend],
-      user_list,
       limit,
       prod,
       precision
     } = form.getFieldsValue();
-
     return {
       need_convert: 0,
       tstart: moment(tstart).format('YYYYMMDD'),
       tend: moment(tend).format('YYYYMMDD'),
-      user_list: R.filter(({ user_name }) => user_list.includes(user_name))(
-        this.props.operatorList
-      ),
+      user_list: this.state.operator_detail,
       limit,
       prod,
       precision
@@ -119,12 +129,24 @@ class DynamicRule extends React.Component {
 
   getUserInfoByName = (user) =>
     this.props.operatorList.find((item) => item.user_name == user);
+
   // 计算参与判废人员，不参与判废人员
   refreshUsers = (user_list = []) => {
     let operators = this.props.operatorList.map(({ user_name }) => user_name);
     let user_ignore = R.difference(operators, user_list);
 
-    let operator_detail = user_list.map(this.getUserInfoByName);
+    let { operator_detail } = this.state;
+    let operatorDetailList = operator_detail.map(({ user_name }) => user_name);
+
+    let removeUser = R.difference(operatorDetailList, user_list);
+    let newUser = R.difference(user_list, operatorDetailList);
+
+    operator_detail = R.reject(({ user_name }) =>
+      removeUser.includes(user_name)
+    )(operator_detail);
+
+    let newUserDetail = newUser.map(this.getUserInfoByName);
+    operator_detail = [...operator_detail, ...newUserDetail];
 
     this.setState({
       user_list,
@@ -153,16 +175,84 @@ class DynamicRule extends React.Component {
   };
 
   editOperator = (idx) => {
-    const { operator_detail } = this.state;
-    let user = operator_detail[idx];
+    const { operator_detail, curUserIdx } = this.state;
+    let user = operator_detail[curUserIdx];
+    this.setState({
+      visible: true,
+      curUserIdx: idx,
+      curUserInfo: R.clone(user)
+    });
+  };
+
+  // 编辑工作时长
+  handleOk = () => {
+    this.setState({
+      visible: false
+    });
+  };
+
+  handleCancel = () => {
+    this.setState({
+      visible: false
+    });
+  };
+
+  getOperatorDetail = (curWorkLongTime) => {
+    const { operator_detail, curUserIdx } = this.state;
+    let user = R.clone(operator_detail[curUserIdx]);
+    user.work_long_time = curWorkLongTime;
+    operator_detail[curUserIdx] = user;
+    return operator_detail;
+  };
+
+  onWorkLongTimeChange = (curWorkLongTime) => {
+    let operator_detail = this.getOperatorDetail(curWorkLongTime);
+
+    this.setState({
+      curWorkLongTime,
+      operator_detail
+    });
   };
 
   render() {
     const { getFieldDecorator } = this.props.form;
-    const { user_list, user_ignore, operator_detail } = this.state;
+    const {
+      user_list,
+      user_ignore,
+      operator_detail,
+      curUserIdx,
+      curUserInfo
+    } = this.state;
+    let curUser = operator_detail.length
+      ? operator_detail[curUserIdx]
+      : curUserInfo;
 
     return (
       <Form>
+        <Modal
+          title={`${curUser.user_name}(${curUser.user_no})工作时长调整`}
+          visible={this.state.visible}
+          onOk={this.handleOk}
+          onCancel={this.handleCancel}
+          footer={[
+            <Button key="submit" type="primary" onClick={this.handleOk}>
+              确定
+            </Button>
+          ]}>
+          <div>
+            工作时长:
+            <InputNumber
+              defaultValue={1}
+              value={curUser.work_long_time}
+              min={0}
+              max={1}
+              step={0.0625}
+              formatter={(value) => value * 8}
+              onChange={this.onWorkLongTimeChange}
+            />
+            小时
+          </div>
+        </Modal>
         <Row>
           <Col span={12}>
             <FormItem {...formItemLayout} label="生产日期">
@@ -244,14 +334,15 @@ class DynamicRule extends React.Component {
           <Col span={12}>
             <FormItem
               {...formItemLayout}
-              label="工作时长"
+              label="工作时长(小时)"
               extra="点击单独编辑请假人员信息">
               {operator_detail.map(({ user_name, work_long_time }, idx) => (
                 <Button
+                  type={work_long_time < 1 ? 'danger' : 'default'}
                   key={user_name}
                   style={{ marginRight: 5 }}
                   onClick={() => this.editOperator(idx)}>
-                  {user_name}({work_long_time})
+                  {user_name}({work_long_time * 8})
                 </Button>
               ))}
             </FormItem>

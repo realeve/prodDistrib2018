@@ -7,7 +7,7 @@ import { axios, DEV } from '../utils/axios';
 */
 export const getPrintNewprocType = () =>
   DEV
-    ? require('../../mock/a7835c9ebc.js')
+    ? require('@/mock/a7835c9ebc.js')
     : axios({
         url: '/87/a7835c9ebc.json'
       });
@@ -19,7 +19,7 @@ export const getPrintNewprocType = () =>
 */
 export const getProduct = () =>
   DEV
-    ? require('../../mock/0fff65bc40.js')
+    ? require('@/mock/0fff65bc40.js')
     : axios({
         url: '/71/0fff65bc40.json'
       });

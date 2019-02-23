@@ -19,7 +19,8 @@ export default {
     },
     operatorList: [],
     hechaTask: { task_list: [], unhandle_carts: [], unupload_carts: [] },
-    hechaLoading: false
+    hechaLoading: false,
+    rec_time: ''
   },
   reducers: {
     setStore,
@@ -182,15 +183,16 @@ export default {
         }
       });
     },
-    *getProc(payload, { put, select, call }) {
+    *getProc(_, { put, call }) {
       let proc = yield call(db.getPrintAbnormalProd);
       yield put({
         type: 'setProc',
         payload: proc.data
       });
     },
-    *getOperatorList(payload, { put, select, call }) {
+    *getOperatorList(_, { put, call }) {
       let { data: operatorList } = yield call(db.getUserList);
+
       yield put({
         type: 'setStore',
         payload: {
@@ -202,7 +204,7 @@ export default {
       {
         payload: { params }
       },
-      { put, select, call }
+      { put, call }
     ) {
       yield put({
         type: 'setStore',
@@ -216,6 +218,27 @@ export default {
         payload: {
           hechaTask,
           hechaLoading: false
+        }
+      });
+    },
+    *loadHechaTask(_, { put, call }) {
+      yield put({
+        type: 'setStore',
+        payload: {
+          hechaLoading: true
+        }
+      });
+      let {
+        data: [{ task_info, rec_time }]
+      } = yield call(db.getPrintHechatask);
+
+      let hechaTask = JSON.parse(task_info);
+      yield put({
+        type: 'setStore',
+        payload: {
+          hechaTask,
+          hechaLoading: false,
+          rec_time
         }
       });
     }
@@ -250,6 +273,10 @@ export default {
         if (pathname === `/${namespace}/task`) {
           dispatch({
             type: 'getOperatorList'
+          });
+
+          dispatch({
+            type: 'loadHechaTask'
           });
         }
       });

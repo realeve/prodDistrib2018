@@ -4,7 +4,7 @@ import styles from './Report.less';
 import { connect } from 'dva';
 const R = require('ramda');
 
-function UnhandleInfo({ unhandle_carts, unupload_carts, loading }) {
+function UnhandleInfo({ unhandle_carts, unupload_carts, loading, rec_time }) {
   const unhandle = loading ? (
     <Skeleton />
   ) : unhandle_carts.length == 0 ? (
@@ -39,52 +39,58 @@ function UnhandleInfo({ unhandle_carts, unupload_carts, loading }) {
   );
 
   return (
-    <Row gutter={10}>
-      <Col span={12} style={{ marginTop: 10 }}>
-        <Card hoverable>
-          <div className={styles.styles}>
-            <div className={styles.cartListTitle}>
-              <span>不参与排活车号列表</span>
+    <div>
+      <p className={styles.recTime}>
+        最近排产任务：<span>{rec_time}</span>
+      </p>
+      <Row gutter={10}>
+        <Col span={12} style={{ marginTop: 10 }}>
+          <Card hoverable>
+            <div className={styles.styles}>
+              <div className={styles.cartListTitle}>
+                <span>不参与排活车号列表</span>
+              </div>
+              <ul className={styles.cartList}>
+                <li>
+                  <span>序号</span>
+                  <span>车号</span>
+                  <span>判废数</span>
+                  <span>品种</span>
+                  <span>机台</span>
+                  <span>工艺</span>
+                </li>
+                {unhandle}
+              </ul>
             </div>
-            <ul className={styles.cartList}>
-              <li>
-                <span>序号</span>
-                <span>车号</span>
-                <span>判废数</span>
-                <span>品种</span>
-                <span>机台</span>
-                <span>工艺</span>
-              </li>
-              {unhandle}
-            </ul>
-          </div>
-        </Card>
-      </Col>
-      <Col span={12} style={{ marginTop: 10 }}>
-        <Card hoverable>
-          <div className={styles.styles}>
-            <div className={styles.cartListTitle}>
-              <span>未上传车号列表</span>
+          </Card>
+        </Col>
+        <Col span={12} style={{ marginTop: 10 }}>
+          <Card hoverable>
+            <div className={styles.styles}>
+              <div className={styles.cartListTitle}>
+                <span>未上传车号列表</span>
+              </div>
+              <ul className={styles.cartList}>
+                <li>
+                  <span>序号</span>
+                  <span>车号</span>
+                  <span>品种</span>
+                  <span>机台</span>
+                  <span>工艺</span>
+                </li>
+                {unupload}
+              </ul>
             </div>
-            <ul className={styles.cartList}>
-              <li>
-                <span>序号</span>
-                <span>车号</span>
-                <span>品种</span>
-                <span>机台</span>
-                <span>工艺</span>
-              </li>
-              {unupload}
-            </ul>
-          </div>
-        </Card>
-      </Col>
-    </Row>
+          </Card>
+        </Col>
+      </Row>
+    </div>
   );
 }
 
 const mapStateToProps = (state) => ({
   ...R.pick(['unhandle_carts', 'unupload_carts'], state.addcart.hechaTask),
+  rec_time: state.addcart.rec_time,
   loading: state.addcart.hechaLoading
 });
 

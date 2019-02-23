@@ -18,6 +18,7 @@ import {
 
 import styles from './Report.less';
 import dateRanges from '@/utils/ranges';
+import * as lib from '@/utils/lib';
 import moment from 'moment';
 import * as db from '../services/Addcart';
 import { formItemLayout, formTailLayout } from './Addcart';
@@ -214,6 +215,40 @@ class DynamicRule extends React.Component {
     });
   };
 
+  publishTask = () => {
+    let task_info = JSON.stringify(this.props.hechaTask);
+
+    Modal.confirm({
+      title: '提示',
+      content: `是否要发布本次排产任务？`,
+      maskClosable: true,
+      cancelText: '取消',
+      okText: '确定',
+      onOk: async () => {
+        let params = {
+          task_info,
+          rec_time: lib.now()
+        };
+        let { data } = await db.addPrintHechatask(params);
+        let success = data[0].affected_rows > 0;
+        if (success) {
+          this.props.dispatch({
+            type: 'addcart/setStore',
+            payload: {
+              rec_time: params.rec_time
+            }
+          });
+        }
+
+        notification.open({
+          message: '系统提示',
+          description: '任务发布' + (success ? '成功' : '失败'),
+          icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
+        });
+      }
+    });
+  };
+
   render() {
     const { getFieldDecorator } = this.props.form;
     const {
@@ -226,7 +261,6 @@ class DynamicRule extends React.Component {
     let curUser = operator_detail.length
       ? operator_detail[curUserIdx]
       : curUserInfo;
-
     return (
       <Form>
         <Modal
@@ -379,6 +413,14 @@ class DynamicRule extends React.Component {
                 style={{ marginLeft: 20 }}
                 onClick={(e) => this.props.form.resetFields()}>
                 重置
+              </Button>
+
+              <Button
+                type="danger"
+                disabled={this.props.hechaTask.task_list.length == 0}
+                style={{ marginLeft: 20 }}
+                onClick={this.publishTask}>
+                发布排产任务
               </Button>
             </FormItem>
           </Col>

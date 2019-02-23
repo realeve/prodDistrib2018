@@ -1,4 +1,4 @@
-import { axios, DEV, mock } from '../../../utils/axios';
+import { axios, DEV, mock, _commonData } from '@/utils/axios';
 import http from 'axios';
 /**
 *   @database: { 质量信息系统 }
@@ -84,7 +84,18 @@ export const getPrintSampleCartlist = (params) =>
     params
   });
 
-export const getUserList = () => mock(require('../../../../mock/userList.js'));
+/**
+ *   @database: { MES_MAIN }
+ *   @desc:     { 图核排产_人员列表 }
+ */
+export const getUserList = () =>
+  DEV
+    ? mock(require('@/mock/365_2f288db095.json'))
+    : axios({
+        url: '/365/2f288db095.json'
+      });
+
+// export const getUserList = () => mock(require('../../../../mock/userList.js'));
 
 // 判废人员名单信息存储
 const KEY_OPERATOR = 'image_check_operator';
@@ -103,9 +114,37 @@ export const loadOperatorList = () => {
 // 图核排产
 export const getHechaTasks = (data) =>
   DEV
-    ? mock(require('../../../../mock/addcart_task.js').data)
+    ? mock(require('@/mock/addcart_task.js').data)
     : http({
-        url: 'http://10.8.1.27:4000/api/hecha/task',
+        url: 'http://10.8.1.27:4000/api/hecha/task', // 'http://localhost:3000/api/hecha/task', //
         method: 'post',
         data
+      }).then(({ data }) => data);
+
+/**
+*   @database: { 质量信息系统 }
+*   @desc:     { 记录核查任务信息 } 
+    const { task_info, rec_time } = params;
+*/
+export const addPrintHechatask = (params) =>
+  DEV
+    ? mock(_commonData)
+    : axios({
+        method: 'post',
+        data: {
+          ...params,
+          id: 366,
+          nonce: 'f34a198b23'
+        }
+      });
+
+/**
+ *   @database: { 质量信息系统 }
+ *   @desc:     { 读取最近排产任务 }
+ */
+export const getPrintHechatask = () =>
+  DEV
+    ? mock(require('@/mock/367_ffd6916add.json'))
+    : axios({
+        url: '/367/ffd6916add.json'
       });

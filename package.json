@@ -19,7 +19,7 @@
     "rc-tween-one": "^1.7.3",
     "react": "^16.3.2",
     "react-transition-group": "^2.3.1",
-    "umi": "^2.1.2",
+    "umi": "^2.5.5",
     "umi-plugin-dva": "^1.1.1",
     "umi-plugin-react": "^1.1.1"
   },

@@ -32,7 +32,7 @@ const taskList = ({ task_list, loading }) => {
               }}
               style={{
                 marginTop: 10,
-                minHeight: 500,
+                minHeight: 660,
                 fontSize: 15
               }}>
               <ul className={styles.detailInfo}>
@@ -98,7 +98,6 @@ const taskList = ({ task_list, loading }) => {
       )}
     </Row>
   );
-
   return (
     <Card
       title="排产结果"
@@ -107,7 +106,13 @@ const taskList = ({ task_list, loading }) => {
       bodyStyle={{
         padding: 0
       }}>
-      {loading ? <Skeleton /> : task_list.length == 0 ? <Empty /> : result}
+      {loading ? (
+        <Skeleton active />
+      ) : task_list.length == 0 ? (
+        <Empty />
+      ) : (
+        result
+      )}
     </Card>
   );
 };

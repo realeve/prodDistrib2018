@@ -1,3 +1,4 @@
+const path = require('path');
 export default {
   hash: true, //添加hash后缀
   plugins: [
@@ -24,4 +25,7 @@ export default {
       }
     ]
   ]
+  // alias: {
+  //   '@': path.resolve('src/')
+  // }
 };

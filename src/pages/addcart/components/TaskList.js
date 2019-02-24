@@ -19,7 +19,7 @@ const taskList = ({ task_list, loading }) => {
           data,
           delta_num
         }) => (
-          <Col span={8} key={user_name}>
+          <Col span={8} lg={8} md={12} sm={24} key={user_name}>
             <Card
               title={
                 <div>
@@ -69,7 +69,7 @@ const taskList = ({ task_list, loading }) => {
               </ul>
               <div className={styles.styles}>
                 <div className={styles.cartListTitle}>
-                  <span>车号列表</span>
+                  <span className={styles.title}>车号列表</span>
                 </div>
                 <ul className={styles.cartList}>
                   <li>

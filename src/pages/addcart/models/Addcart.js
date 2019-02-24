@@ -20,7 +20,8 @@ export default {
     operatorList: [],
     hechaTask: { task_list: [], unhandle_carts: [], unupload_carts: [] },
     hechaLoading: false,
-    rec_time: ''
+    rec_time: '',
+    pfNums: []
   },
   reducers: {
     setStore,
@@ -74,7 +75,7 @@ export default {
         payload: dateRange
       });
     },
-    *getLockCart(payload, { call, put, select }) {
+    *getLockCart(_, { call, put, select }) {
       const [ts, te] = dateRanges['本周'];
       const [tstart, tend] = [ts.format('YYYYMMDD'), te.format('YYYYMMDD')];
 
@@ -107,7 +108,7 @@ export default {
         }
       });
     },
-    *handleReportData(payload, { call, put, select }) {
+    *handleReportData(_, { call, put, select }) {
       yield put({
         type: 'save',
         payload: {
@@ -241,6 +242,27 @@ export default {
           rec_time
         }
       });
+    },
+    *loadPfNums(_, { put, call, select }) {
+      yield put({
+        type: 'setStore',
+        payload: {
+          hechaLoading: true
+        }
+      });
+      const store = yield select((state) => state[namespace]);
+      const {
+        dateRange: [tstart, tend]
+      } = store;
+
+      let { data: pfNums } = yield call(db.getQfmWipProdLogs, { tstart, tend });
+      yield put({
+        type: 'setStore',
+        payload: {
+          pfNums,
+          hechaLoading: false
+        }
+      });
     }
   },
   subscriptions: {
@@ -248,14 +270,15 @@ export default {
       return history.listen(async ({ pathname, query }) => {
         const match = pathToRegexp('/' + namespace).exec(pathname);
 
-        if (match && match[0] === '/' + namespace) {
-          const [tstart, tend] = dateRanges['最近一月'];
-          const [ts, te] = [tstart.format('YYYYMMDD'), tend.format('YYYYMMDD')];
+        const [tstart, tend] = dateRanges['本月'];
+        const [ts, te] = [tstart.format('YYYYMMDD'), tend.format('YYYYMMDD')];
 
-          await dispatch({
-            type: 'updateDateRange',
-            payload: [ts, te]
-          });
+        await dispatch({
+          type: 'updateDateRange',
+          payload: [ts, te]
+        });
+
+        if (match && match[0] === '/' + namespace) {
           dispatch({
             type: 'handleReportData'
           });
@@ -277,6 +300,10 @@ export default {
 
           dispatch({
             type: 'loadHechaTask'
+          });
+
+          dispatch({
+            type: 'loadPfNums'
           });
         }
       });

@@ -148,3 +148,16 @@ export const getPrintHechatask = () =>
     : axios({
         url: '/367/ffd6916add.json'
       });
+
+/**
+*   @database: { 全幅面 }
+*   @desc:     { 图像判废月度产量汇总 } 
+    const { tstart, tend } = params;
+*/
+export const getQfmWipProdLogs = (params) =>
+  DEV
+    ? mock(require('@/mock/186_9a8e4c9d74.json'))
+    : axios({
+        url: '/186/9a8e4c9d74.json',
+        params
+      });

@@ -47,6 +47,9 @@ export default {
         payload: {
           productList: data.map((item) => {
             item.name = item.name.trim();
+            if (item.name == '9606品') {
+              item.name = '9606T';
+            }
             return item;
           })
         }

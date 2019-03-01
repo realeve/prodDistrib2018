@@ -65,6 +65,8 @@ function UnhandleInfo({
         <span>{item.operator_name}</span>
         <span>{item.cart_nums}</span>
         <span>{item.pf_num}</span>
+        <span>{item.check_num}</span>
+        <span>{item.total_num}</span>
       </li>
     ))
   );
@@ -150,7 +152,9 @@ function UnhandleInfo({
                   <span>序号</span>
                   <span>姓名</span>
                   <span>大万数</span>
-                  <span>产量</span>
+                  <span>图核</span>
+                  <span>审核</span>
+                  <span>总产量</span>
                 </li>
                 {pfnumList}
               </ul>

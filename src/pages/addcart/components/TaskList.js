@@ -105,16 +105,7 @@ const taskList = ({ task_list, loading, allCheckList }) => {
     rows: 0,
     time: '',
     title: '图核判废确认单',
-    header: [
-      '序号',
-      '车号',
-      '类型',
-      '品种',
-      '判废量',
-      '生产时间',
-      '判废人员',
-      '确认签字'
-    ]
+    header: ['序号', '车号', '类型', '品种', '判废量', '判废人员', '确认签字']
   };
 
   let idx = 1;

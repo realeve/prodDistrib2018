@@ -1,64 +1,64 @@
-import * as db from './MultipleLock'
-import * as lib from "../../../utils/lib";
-import wms from "../../index/services/wms";
+import * as db from './MultipleLock';
+import * as lib from '../../../utils/lib';
+import wms from '../../index/services/wms';
 
-let R = require("ramda");
+let R = require('ramda');
 
 /**
  * @desc:根据id信息获取具体的工艺流程
  * 对于多工艺自由组合的情况（人工拉号+全检、人工拉号+码后验证），按全检或码后验证工艺执行，同时在车号列表中记录该万信息，人工可手工抽取该车号；
  * 通过对自由组合的车号列表（均包含人工拉号），由大张班自主手工选定车号，解决需要自动根据产能情况排活的情况，更灵活。
  */
-let getProcStream = id => {
-  let streamInfo = [{
+let getProcStream = (id) => {
+  let streamInfo = [
+    {
       proc_stream_id: 0,
-      proc_stream_name: "全检品",
-      remark: "8位清分机全检"
+      proc_stream_name: '全检品',
+      remark: '8位清分机全检'
     },
     {
       proc_stream_id: 2,
-      proc_stream_name: "码后核查",
-      remark: "正常码后核查"
+      proc_stream_name: '码后核查',
+      remark: '正常码后核查'
     },
     {
       proc_stream_id: 4,
-      proc_stream_name: "全检品",
-      remark: "人工拉号或8位清分机全检"
+      proc_stream_name: '全检品',
+      remark: '人工拉号或8位清分机全检'
     },
     {
       proc_stream_id: 1,
-      proc_stream_name: "人工拉号",
-      remark: "人工拉号"
+      proc_stream_name: '人工拉号',
+      remark: '人工拉号'
     },
     {
       proc_stream_id: 3,
-      proc_stream_name: "码后核查工艺验证",
-      remark: "码后核查工艺验证 "
+      proc_stream_name: '码后核查工艺验证',
+      remark: '码后核查工艺验证 '
     },
     {
       proc_stream_id: 5,
-      proc_stream_name: "码后核查工艺验证",
-      remark: "人工拉号或码后核查工艺验证"
+      proc_stream_name: '码后核查工艺验证',
+      remark: '人工拉号或码后核查工艺验证'
     },
     {
       proc_stream_id: 6,
-      proc_stream_name: "补品",
-      remark: "补票"
+      proc_stream_name: '补品',
+      remark: '补票'
     },
     {
       proc_stream_id: 8,
-      proc_stream_name: "码后核查工艺验证",
-      remark: "取消码后核查工艺验证"
+      proc_stream_name: '码后核查工艺验证',
+      remark: '取消码后核查工艺验证'
     },
     {
       proc_stream_id: 7,
-      proc_stream_name: "只锁车,不转异常品",
-      remark: "只锁车,不转异常品"
+      proc_stream_name: '只锁车,不转异常品',
+      remark: '只锁车,不转异常品'
     }
   ];
-  return R.find(R.propEq("proc_stream_id", parseInt(id, 10)))(streamInfo);
+  return R.find(R.propEq('proc_stream_id', parseInt(id, 10)))(streamInfo);
 };
-
 
 /**
  * @desc:记录产品预置工艺，实际设置工艺
@@ -77,16 +77,16 @@ let recordRealProc = async (
   user_name
 ) => {
   let rec_time = lib.now();
-  console.log("此处读取产品冠字信息");
+  console.log('此处读取产品冠字信息');
   let gz_infos = await db.getViewCartfinderGZ(carnos);
 
-  let insertData = carnos.map(cart_number => {
-    let gz = R.find(R.propEq("cart_number", cart_number))(gz_infos.data);
+  let insertData = carnos.map((cart_number) => {
+    let gz = R.find(R.propEq('cart_number', cart_number))(gz_infos.data);
     let gz_num;
     if (!R.isNil(gz)) {
       gz_num = gz.gz_num;
       if (R.isNil(gz_num)) {
-        gz_num = "";
+        gz_num = '';
       }
     }
     return {
@@ -105,7 +105,11 @@ let recordRealProc = async (
 };
 
 // 人工拉号,默认设为人工异常品拉号，人工拉号时需锁定车号信息。
-let manualHandle = async (carnos, reason_code = "q_abnormalProd", log_id) =>
+let manualHandle = async (
+  carnos,
+  reason_code = '0579', //"q_abnormalProd",
+  log_id
+) =>
   await wms.setBlackList({
     carnos,
     reason_code,
@@ -113,11 +117,12 @@ let manualHandle = async (carnos, reason_code = "q_abnormalProd", log_id) =>
   });
 
 // 码后工艺验证
-let mahouProcVerify = async (carnos, log_id, review) => await wms.setReviewList({
-  carnos,
-  review: review ? 1 : 0,
-  log_id
-})
+let mahouProcVerify = async (carnos, log_id, review) =>
+  await wms.setReviewList({
+    carnos,
+    review: review ? 1 : 0,
+    log_id
+  });
 
 // 设置工艺流程至立体库
 let adjustProcInfo = async ({
@@ -132,20 +137,22 @@ let adjustProcInfo = async ({
 
   // 记录日志信息，wms提交及返回的数据全部入库
   // 20180515调整日志添加接口
-  let logInfo = await db.addPrintWmsLog([{
-    remark: JSON.stringify({
-      carnos,
-      proc_stream
-    }),
-    rec_time: lib.now()
-  }]);
+  let logInfo = await db.addPrintWmsLog([
+    {
+      remark: JSON.stringify({
+        carnos,
+        proc_stream
+      }),
+      rec_time: lib.now()
+    }
+  ]);
 
   // 添加日志正常？
   if (logInfo.rows < 1 || logInfo.data[0].affected_rows < 1) {
     console.log(logInfo);
     return {
       status: false
-    }
+    };
   }
 
   let log_id = logInfo.data[0].id;
@@ -183,17 +190,13 @@ let adjustProcInfo = async ({
   return result;
 };
 
-let getLockCarts = ({
-  proc_stream,
-  carnos,
-  remark_info
-}) => {
+let getLockCarts = ({ proc_stream, carnos, remark_info }) => {
   let rec_date = lib.now();
   let complete_status = 1,
     reason = remark_info,
-    abnormal_type = '批量人工拉号'
+    abnormal_type = '批量人工拉号';
 
-  return carnos.map(cart_number => ({
+  return carnos.map((cart_number) => ({
     prod_id: cart_number[2],
     cart_number,
     reason,
@@ -227,10 +230,7 @@ let handleProcStream = async ({
   }
 
   // 工艺流转换
-  let {
-    proc_stream_name,
-    remark
-  } = getProcStream(proc_stream);
+  let { proc_stream_name, remark } = getProcStream(proc_stream);
 
   // 设置工艺流程至立体库
   let res = await adjustProcInfo({
@@ -246,24 +246,22 @@ let handleProcStream = async ({
     return res;
   }
 
-  let {
-    result
-  } = res;
+  let { result } = res;
 
   console.log('当前处理的车数：' + carnos.length);
 
   console.log(
-    "立体库返回信息,失败车数：" +
-    result.unhandledList.length +
-    ",成功车数：" +
-    result.handledList.length
+    '立体库返回信息,失败车数：' +
+      result.unhandledList.length +
+      ',成功车数：' +
+      result.handledList.length
   );
 
   if (result.handledList) {
-    if (R.type(result.handledList[0]) === "Object") {
+    if (R.type(result.handledList[0]) === 'Object') {
       // 处理成功的车号列表，[Object,Object] -> [String,String]
       // 测试环境测未部署
-      result.handledList = R.map(R.prop("carno"))(result.handledList);
+      result.handledList = R.map(R.prop('carno'))(result.handledList);
     }
 
     // 记录实际工艺
@@ -284,4 +282,4 @@ let handleProcStream = async ({
 export default {
   getProcStream,
   handleProcStream
-}
+};

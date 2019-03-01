@@ -1,5 +1,5 @@
-import React from "react";
-import { connect } from "dva";
+import React from 'react';
+import { connect } from 'dva';
 import {
   Card,
   Form,
@@ -12,21 +12,21 @@ import {
   Col,
   Radio,
   DatePicker
-} from "antd";
+} from 'antd';
 
-import styles from "./Report.less";
-import * as lib from "../../../utils/lib";
-import userLib from "../../../utils/users";
+import styles from './Report.less';
+import * as lib from '../../../utils/lib';
+import userLib from '../../../utils/users';
 
-import * as db from "../services/MultipleLock";
-import handler from "../services/procHandler";
-import moment from "moment";
+import * as db from '../services/MultipleLock';
+import handler from '../services/procHandler';
+import moment from 'moment';
 
-import wms from "../../index/services/wms";
+import wms from '../../index/services/wms';
 const FormItem = Form.Item;
 const Option = Select.Option;
 
-const reason_code = "q_batchLock";
+const reason_code = '0577'; //"q_batchLock";
 
 const formItemLayout = {
   labelCol: { span: 6 },
@@ -37,7 +37,7 @@ const formTailLayout = {
   wrapperCol: { span: 18, offset: 6 }
 };
 
-const R = require("ramda");
+const R = require('ramda');
 
 class DynamicRule extends React.Component {
   state = {
@@ -45,7 +45,7 @@ class DynamicRule extends React.Component {
     cartList: [],
     operationType: 0,
     submitting: false,
-    user_name: "",
+    user_name: '',
     unValidCarts: [],
     manualCheckCarts: []
   };
@@ -66,7 +66,7 @@ class DynamicRule extends React.Component {
   submit = () => {
     this.setState({ submitting: true });
 
-    this.props.form.validateFields(err => {
+    this.props.form.validateFields((err) => {
       if (err) {
         this.setState({ submitting: false });
         return;
@@ -76,7 +76,7 @@ class DynamicRule extends React.Component {
       handler.handleProcStream({
         carnos: this.state.cartList,
         proc_stream: data.proc_stream,
-        check_type: "批量车号工艺调整",
+        check_type: '批量车号工艺调整',
         reason_code,
         task_id: 0,
         remark_info: data.reason,
@@ -84,9 +84,9 @@ class DynamicRule extends React.Component {
       });
 
       notification.open({
-        message: "系统提示",
-        description: "工艺批量设置完毕",
-        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+        message: '系统提示',
+        description: '工艺批量设置完毕',
+        icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
       });
 
       this.reload();
@@ -104,7 +104,7 @@ class DynamicRule extends React.Component {
     let complete_status = 1,
       proc_stream = 7; // 只锁车，不转异常品
 
-    return cartList.map(cart_number => ({
+    return cartList.map((cart_number) => ({
       prod_id: cart_number[2],
       cart_number,
       reason,
@@ -114,7 +114,7 @@ class DynamicRule extends React.Component {
       proc_stream,
       only_lock_cart: 1,
       user_name: this.props.userSetting.name,
-      unlock_date: moment(unlock_date).format("YYYY-MM-DD")
+      unlock_date: moment(unlock_date).format('YYYY-MM-DD')
     }));
   };
 
@@ -124,7 +124,7 @@ class DynamicRule extends React.Component {
 
   lockCarts = () => {
     this.setState({ submitting: true });
-    this.props.form.validateFields(async err => {
+    this.props.form.validateFields(async (err) => {
       if (err) {
         this.submitted();
         return;
@@ -134,9 +134,9 @@ class DynamicRule extends React.Component {
       let { data } = await db.addLockCartlist(insertData);
       if (data.length === 0 || data[0].affected_rows === 0) {
         notification.open({
-          message: "系统提示",
-          description: "批量锁车失败",
-          icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+          message: '系统提示',
+          description: '批量锁车失败',
+          icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
         });
         this.submitted();
         return;
@@ -174,11 +174,11 @@ class DynamicRule extends React.Component {
 
       if (result.unhandledList.length) {
         notification.open({
-          message: "系统提示",
+          message: '系统提示',
           description:
             `以下车号锁车失败(共${result.unhandledList.length}车):` +
-            result.unhandledList.join(","),
-          icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+            result.unhandledList.join(','),
+          icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
         });
       }
 
@@ -188,15 +188,15 @@ class DynamicRule extends React.Component {
       });
 
       notification.open({
-        message: "系统提示",
-        description: "批量锁车成功",
-        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+        message: '系统提示',
+        description: '批量锁车成功',
+        icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
       });
       this.reload();
     });
   };
 
-  handleLockedUsers = async values => {
+  handleLockedUsers = async (values) => {
     // 管理员能解锁所有车号
     if (lib.adminUserList.includes(this.state.user_name)) {
       return values;
@@ -204,11 +204,11 @@ class DynamicRule extends React.Component {
 
     let { data } = await db.getLockedUsers(values);
     // 其它人员仅允许解锁自己的产品
-    let validData = data.filter(item => this.state.user_name === item[1]);
+    let validData = data.filter((item) => this.state.user_name === item[1]);
 
     // 禁止解锁的车号列表
     this.setState({
-      unValidCarts: data.filter(item => item[1] !== this.state.user_name)
+      unValidCarts: data.filter((item) => item[1] !== this.state.user_name)
     });
     return validData;
   };
@@ -216,9 +216,9 @@ class DynamicRule extends React.Component {
   unlockCarts = async () => {
     this.setState({ submitting: true });
     let { reason, cart_number } = this.props.form.getFieldsValue();
-    let carts = await this.handleLockedUsers(cart_number.split(","));
+    let carts = await this.handleLockedUsers(cart_number.split(','));
 
-    this.props.form.validateFields(async err => {
+    this.props.form.validateFields(async (err) => {
       if (err) {
         this.setState({ submitting: false });
         return;
@@ -228,7 +228,7 @@ class DynamicRule extends React.Component {
       db.setPrintAbnormalProd({
         carts,
         remark: reason
-      }).then(res => {
+      }).then((res) => {
         this.setState({ submitting: false });
       });
 
@@ -246,18 +246,18 @@ class DynamicRule extends React.Component {
       let { result } = await wms.setWhiteList(this.state.cartList);
       if (result.unhandledList.length) {
         notification.open({
-          message: "系统提示",
+          message: '系统提示',
           description:
             `以下车号解锁失败(共${result.unhandledList.length}车):` +
-            result.unhandledList.join(","),
-          icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+            result.unhandledList.join(','),
+          icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
         });
       }
 
       notification.open({
-        message: "系统提示",
-        description: "批量解锁成功",
-        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+        message: '系统提示',
+        description: '批量解锁成功',
+        icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
       });
 
       this.reload();
@@ -270,22 +270,22 @@ class DynamicRule extends React.Component {
 
     // 重载报表数据
     this.props.dispatch({
-      type: "multilock/handleReportData"
+      type: 'multilock/handleReportData'
     });
     // this.setState({ submitting: false });
   };
 
-  convertCart = async e => {
+  convertCart = async (e) => {
     e.preventDefault();
     this.setState({ manualCheckCarts: [] });
     let val = e.target.value.toUpperCase().trim();
     if (val.length < 8) {
       return;
     }
-    const splitStr = val.includes("\n") ? "\n" : val.includes(",") ? "," : " ";
+    const splitStr = val.includes('\n') ? '\n' : val.includes(',') ? ',' : ' ';
 
     // 过滤有效车号列表
-    const validCart = cart => /^\d{4}[A-Z]\d{3}$/.test(cart);
+    const validCart = (cart) => /^\d{4}[A-Z]\d{3}$/.test(cart);
     let cartList = val.split(splitStr).filter(validCart);
 
     // 批量调整工艺时不做后续过滤
@@ -298,18 +298,18 @@ class DynamicRule extends React.Component {
     // 当前产品是否是本周人工拉号产品
     let { data } = await db.getPrintSampleCartlist(cartList);
     let manualCheckCarts = R.compose(
-      R.map(R.prop("cart_number")),
-      R.filter(R.propEq("status", "1"))
+      R.map(R.prop('cart_number')),
+      R.filter(R.propEq('status', '1'))
     )(data);
 
     // 求两数组差值
     cartList = R.difference(cartList, manualCheckCarts);
     // cartList = R.reject(item => R.contains(item, manualCheckCarts))(cartList);
     this.setState({ cartList, manualCheckCarts });
-    this.props.form.setFieldsValue({ cart_number: cartList.join(",") });
+    this.props.form.setFieldsValue({ cart_number: cartList.join(',') });
   };
 
-  handleOperationType = e => {
+  handleOperationType = (e) => {
     const operationType = e.target.value;
     this.setState({ operationType });
   };
@@ -318,17 +318,17 @@ class DynamicRule extends React.Component {
     const { getFieldDecorator } = this.props.form;
     const { operationType } = this.state;
 
-    let extraInfo = "";
+    let extraInfo = '';
     switch (operationType) {
       case 0:
-        extraInfo = "锁定一批车号，不做工艺调整。";
+        extraInfo = '锁定一批车号，不做工艺调整。';
         break;
       case 1:
         extraInfo =
-          "当前状态下仅允许解锁本人锁车的产品列表，其它车号请联系相关人员。";
+          '当前状态下仅允许解锁本人锁车的产品列表，其它车号请联系相关人员。';
         break;
       default:
-        extraInfo = "将一组车号批量设定为指定工艺。";
+        extraInfo = '将一组车号批量设定为指定工艺。';
         break;
     }
 
@@ -340,12 +340,10 @@ class DynamicRule extends React.Component {
               {...formItemLayout}
               label="操作类型"
               className={styles.radioButton}
-              extra={extraInfo}
-            >
+              extra={extraInfo}>
               <Radio.Group
                 value={operationType}
-                onChange={this.handleOperationType}
-              >
+                onChange={this.handleOperationType}>
                 <Radio.Button value={0}>批量锁车</Radio.Button>
                 <Radio.Button value={1}>批量解锁</Radio.Button>
                 <Radio.Button value={2}>批量调整工艺</Radio.Button>
@@ -369,22 +367,21 @@ class DynamicRule extends React.Component {
                     <p>
                       以下车号属于本周人工拉号产品，禁止
                       {operationType === 0
-                        ? "锁车(拉号期间无法成功锁车，完工后系统会重新锁定)"
-                        : "解锁(拉号未完工产品应继续拉号，此时解锁会导致未完工产品付下工序)"}
+                        ? '锁车(拉号期间无法成功锁车，完工后系统会重新锁定)'
+                        : '解锁(拉号未完工产品应继续拉号，此时解锁会导致未完工产品付下工序)'}
                       ：
                       <span className={styles.bold}>
-                        {this.state.manualCheckCarts.join(",")}
+                        {this.state.manualCheckCarts.join(',')}
                       </span>
                     </p>
                   )}
                 </div>
-              }
-            >
-              {getFieldDecorator("cart_number", {
+              }>
+              {getFieldDecorator('cart_number', {
                 rules: [
                   {
                     required: true,
-                    message: "车号列表信息必须填写"
+                    message: '车号列表信息必须填写'
                   }
                 ]
               })(
@@ -399,47 +396,44 @@ class DynamicRule extends React.Component {
               <FormItem
                 {...formItemLayout}
                 label="截止日期"
-                extra="从这一天开始，产品若未解锁，系统将推送解锁提示"
-              >
-                {getFieldDecorator("unlock_date", {
+                extra="从这一天开始，产品若未解锁，系统将推送解锁提示">
+                {getFieldDecorator('unlock_date', {
                   rules: [
                     {
                       required: true,
-                      message: "必须输入解锁日期提示"
+                      message: '必须输入解锁日期提示'
                     }
                   ],
-                  initialValue: moment().add(1, "weeks")
+                  initialValue: moment().add(1, 'weeks')
                 })(
                   <DatePicker
                     format="YYYYMMDD"
                     // onChange={(e, pushMsgAt) => this.setState({ pushMsgAt })}
                     locale={{
-                      rangePlaceholder: "在某日开始推送解锁提示"
+                      rangePlaceholder: '在某日开始推送解锁提示'
                     }}
                   />
                 )}
               </FormItem>
             )}
-            {operationType === 1 &&
-              this.state.unValidCarts.length > 0 && (
-                <div>
-                  <p className="ant-col-18 ant-col-offset-6 ant-form-item-control-wrapper">
-                    以下车号系统禁止解锁：
+            {operationType === 1 && this.state.unValidCarts.length > 0 && (
+              <div>
+                <p className="ant-col-18 ant-col-offset-6 ant-form-item-control-wrapper">
+                  以下车号系统禁止解锁：
+                </p>
+                {this.state.unValidCarts.map((item, idx) => (
+                  <p
+                    className="ant-col-18 ant-col-offset-6 ant-form-item-control-wrapper"
+                    key={idx}>
+                    {idx + 1}.<span>{item[0]}</span>
+                    ,请联系{' '}
+                    <span style={{ color: '#f23', fontWeight: 'bold' }}>
+                      {item[1]}
+                    </span>
                   </p>
-                  {this.state.unValidCarts.map((item, idx) => (
-                    <p
-                      className="ant-col-18 ant-col-offset-6 ant-form-item-control-wrapper"
-                      key={idx}
-                    >
-                      {idx + 1}.<span>{item[0]}</span>
-                      ,请联系{" "}
-                      <span style={{ color: "#f23", fontWeight: "bold" }}>
-                        {item[1]}
-                      </span>
-                    </p>
-                  ))}
-                </div>
-              )}
+                ))}
+              </div>
+            )}
 
             {this.state.cartList.length > 0 && (
               <FormItem {...formTailLayout}>
@@ -447,9 +441,8 @@ class DynamicRule extends React.Component {
                   <Button
                     type="danger"
                     disabled={this.state.submitting}
-                    onClick={this.lockCarts}
-                  >
-                    <Icon type={this.state.submitting ? "loading" : "lock"} />
+                    onClick={this.lockCarts}>
+                    <Icon type={this.state.submitting ? 'loading' : 'lock'} />
                     批量锁车
                   </Button>
                 )}
@@ -457,9 +450,8 @@ class DynamicRule extends React.Component {
                   <Button
                     type="danger"
                     disabled={this.state.submitting}
-                    onClick={this.unlockCarts}
-                  >
-                    <Icon type={this.state.submitting ? "loading" : "unlock"} />
+                    onClick={this.unlockCarts}>
+                    <Icon type={this.state.submitting ? 'loading' : 'unlock'} />
                     批量解锁
                   </Button>
                 )}
@@ -471,8 +463,7 @@ class DynamicRule extends React.Component {
                 )}
                 <Button
                   style={{ marginLeft: 20 }}
-                  onClick={e => this.props.form.resetFields()}
-                >
+                  onClick={(e) => this.props.form.resetFields()}>
                   重置
                 </Button>
               </FormItem>
@@ -492,10 +483,9 @@ class DynamicRule extends React.Component {
                     </span>
                     .
                   </label>
-                }
-              >
-                {getFieldDecorator("proc_stream", {
-                  rules: [{ required: true, message: "请选择产品工艺流程" }]
+                }>
+                {getFieldDecorator('proc_stream', {
+                  rules: [{ required: true, message: '请选择产品工艺流程' }]
                 })(
                   <Select placeholder="请选择产品工艺流程">
                     {this.props.procList.map(({ value, name }) => (
@@ -509,8 +499,8 @@ class DynamicRule extends React.Component {
             )}
             {operationType === 0 && (
               <FormItem {...formItemLayout} label="原因">
-                {getFieldDecorator("abnormal_type", {
-                  rules: [{ required: true, message: "请选择原因" }]
+                {getFieldDecorator('abnormal_type', {
+                  rules: [{ required: true, message: '请选择原因' }]
                 })(
                   <Select placeholder="请选择原因">
                     {this.props.abnormalTypeList.map(({ proc_name }) => (
@@ -524,11 +514,11 @@ class DynamicRule extends React.Component {
             )}
 
             <FormItem {...formItemLayout} label="备注">
-              {getFieldDecorator("reason", {
+              {getFieldDecorator('reason', {
                 rules: [
                   {
                     required: true,
-                    message: "其它备注说明"
+                    message: '其它备注说明'
                   }
                 ]
               })(<Input.TextArea rows={3} placeholder="请输入备注说明" />)}
@@ -552,8 +542,7 @@ function MultipleLock(props) {
           </div>
         }
         loading={props.loading}
-        style={{ width: "100%" }}
-      >
+        style={{ width: '100%' }}>
         <WrappedDynamicRule {...props} />
       </Card>
     </div>

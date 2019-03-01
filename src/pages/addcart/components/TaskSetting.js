@@ -103,6 +103,13 @@ class DynamicRule extends React.Component {
     console.log('排产任务设置：', params);
   };
 
+  onDateChange = (dates, daterange) => {
+    this.dispatch({
+      type: 'addcart/updateAllCheckList',
+      payload: { daterange }
+    });
+  };
+
   submit = async () => {
     const form = this.props.form;
     const getParams = () =>
@@ -297,6 +304,7 @@ class DynamicRule extends React.Component {
                 <RangePicker
                   ranges={dateRanges}
                   format="YYYYMMDD"
+                  onChange={this.onDateChange}
                   locale={{
                     rangePlaceholder: ['开始日期', '结束日期']
                   }}

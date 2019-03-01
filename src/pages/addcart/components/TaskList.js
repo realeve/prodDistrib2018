@@ -1,9 +1,10 @@
 import React from 'react';
 import { connect } from 'dva';
 import { Row, Col, Card, Empty, Skeleton } from 'antd';
+import VTable from '@/components/Table';
 import styles from './Report.less';
 
-const taskList = ({ task_list, loading }) => {
+const taskList = ({ task_list, loading, allCheckList }) => {
   const result = (
     <Row gutter={10}>
       {task_list.map(
@@ -98,28 +99,66 @@ const taskList = ({ task_list, loading }) => {
       )}
     </Row>
   );
+
+  const printCartList = {
+    data: [],
+    rows: 0,
+    time: '',
+    title: '图核判废确认单',
+    header: [
+      '序号',
+      '车号',
+      '类型',
+      '品种',
+      '判废量',
+      '生产时间',
+      '判废人员',
+      '确认签字'
+    ]
+  };
+
+  let idx = 1;
+  task_list.forEach(({ user_name, data }) => {
+    let res = data.map(({ type, cart_number, product_name, pf_num }) => [
+      idx++,
+      cart_number,
+      type == 0 ? '码后' : '丝印',
+      product_name,
+      pf_num,
+      user_name,
+      '  '
+    ]);
+    printCartList.data = [...printCartList.data, ...res];
+  });
+  printCartList.rows = printCartList.data.length;
+
   return (
-    <Card
-      title="排产结果"
-      style={{ marginTop: 10 }}
-      bordered={false}
-      bodyStyle={{
-        padding: 0
-      }}>
-      {loading ? (
-        <Skeleton active />
-      ) : task_list.length == 0 ? (
-        <Empty />
-      ) : (
-        result
-      )}
-    </Card>
+    <div>
+      <Card
+        title="排产结果"
+        style={{ marginTop: 10 }}
+        bordered={false}
+        bodyStyle={{
+          padding: 0
+        }}>
+        {loading ? (
+          <Skeleton active />
+        ) : task_list.length == 0 ? (
+          <Empty />
+        ) : (
+          result
+        )}
+      </Card>
+      <VTable dataSrc={printCartList} />
+      <VTable dataSrc={allCheckList} loading={loading} />
+    </div>
   );
 };
 
 const mapStateToProps = (state) => ({
   task_list: state.addcart.hechaTask.task_list,
-  loading: state.addcart.hechaLoading
+  loading: state.addcart.hechaLoading,
+  allCheckList: state.addcart.allCheckList
 });
 
 export default connect(mapStateToProps)(taskList);

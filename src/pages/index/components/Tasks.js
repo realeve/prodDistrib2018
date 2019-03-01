@@ -168,7 +168,7 @@ function Tasks({
       let log_id = logInfo.data[0].id;
 
       let lockData = await wms.setBlackList({
-        reason_code: 'q_handCheck',
+        reason_code: '0576', // 'q_handCheck',
         carnos,
         log_id
       });

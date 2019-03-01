@@ -161,3 +161,14 @@ export const getQfmWipProdLogs = (params) =>
         url: '/186/9a8e4c9d74.json',
         params
       });
+
+export const getVCbpcCartlist = (params) =>
+  DEV
+    ? mock(require('@/mock/373_c990d890b4.json')).then((res) => {
+        res.data = res.data.map((item) => Object.values(item));
+        return res;
+      })
+    : axios({
+        url: '/373/c990d890b4/array.json',
+        params
+      });

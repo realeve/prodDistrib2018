@@ -21,7 +21,8 @@ export default {
     hechaTask: { task_list: [], unhandle_carts: [], unupload_carts: [] },
     hechaLoading: false,
     rec_time: '',
-    pfNums: []
+    pfNums: [],
+    allCheckList: {}
   },
   reducers: {
     setStore,
@@ -201,6 +202,34 @@ export default {
         }
       });
     },
+    *updateAllCheckList(
+      {
+        payload: {
+          daterange: [tstart, tend]
+        }
+      },
+      { put, call }
+    ) {
+      yield put({
+        type: 'setStore',
+        payload: {
+          dateRange: [tstart, tend]
+        }
+      });
+
+      let allCheckList = yield call(db.getVCbpcCartlist, {
+        tstart,
+        tend,
+        tstart2: tstart,
+        tend2: tend
+      });
+
+      yield put({
+        type: 'setStore',
+        payload: { allCheckList }
+      });
+    },
+    // 核查排产
     *getHechaTask(
       {
         payload: { params }
@@ -214,6 +243,7 @@ export default {
         }
       });
       let hechaTask = yield call(db.getHechaTasks, params);
+
       yield put({
         type: 'setStore',
         payload: {
@@ -274,8 +304,10 @@ export default {
         const [ts, te] = [tstart.format('YYYYMMDD'), tend.format('YYYYMMDD')];
 
         await dispatch({
-          type: 'updateDateRange',
-          payload: [ts, te]
+          type: 'setStore',
+          payload: {
+            dateRange: [ts, te]
+          }
         });
 
         if (match && match[0] === '/' + namespace) {
@@ -304,6 +336,13 @@ export default {
 
           dispatch({
             type: 'loadPfNums'
+          });
+
+          const [tstart, tend] = dateRanges['昨天'];
+          const [ts, te] = [tstart.format('YYYYMMDD'), tend.format('YYYYMMDD')];
+          dispatch({
+            type: 'updateAllCheckList',
+            payload: { daterange: [ts, te] }
           });
         }
       });

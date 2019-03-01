@@ -104,7 +104,7 @@ class DynamicRule extends React.Component {
   };
 
   onDateChange = (dates, daterange) => {
-    this.dispatch({
+    this.props.dispatch({
       type: 'addcart/updateAllCheckList',
       payload: { daterange }
     });

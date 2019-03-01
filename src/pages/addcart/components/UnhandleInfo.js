@@ -86,7 +86,7 @@ function UnhandleInfo({
   return (
     <div>
       <Row gutter={20}>
-        <Col span={17} md={17} sm={24}>
+        <Col span={17} md={24} sm={24}>
           <p className={styles.recTime}>
             最近排产任务：<span>{rec_time}</span>
           </p>
@@ -132,7 +132,7 @@ function UnhandleInfo({
             </Col>
           </Row>
         </Col>
-        <Col span={7} md={7} sm={24}>
+        <Col span={7} md={24} sm={24} style={{ marginTop: 10 }}>
           <Card hoverable>
             <div>
               <div className={styles['pf-board']}>
@@ -152,8 +152,8 @@ function UnhandleInfo({
                   <span>序号</span>
                   <span>姓名</span>
                   <span>大万数</span>
-                  <span>图核</span>
-                  <span>审核</span>
+                  <span>判废</span>
+                  <span>抽查</span>
                   <span>总产量</span>
                 </li>
                 {pfnumList}

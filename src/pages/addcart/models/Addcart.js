@@ -285,7 +285,12 @@ export default {
         dateRange: [tstart, tend]
       } = store;
 
-      let { data: pfNums } = yield call(db.getQfmWipProdLogs, { tstart, tend });
+      let { data: pfNums } = yield call(db.getQfmWipProdLogs, {
+        tstart,
+        tend,
+        tstart2: tstart,
+        tend2: tend
+      });
       yield put({
         type: 'setStore',
         payload: {

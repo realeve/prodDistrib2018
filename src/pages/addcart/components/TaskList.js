@@ -18,9 +18,10 @@ const taskList = ({ task_list, loading, allCheckList }) => {
           user_no,
           work_long_time,
           data,
-          delta_num
+          delta_num,
+          prod7
         }) => (
-          <Col span={8} lg={8} md={12} sm={24} key={user_name}>
+          <Col span={8} lg={12} md={12} sm={24} key={user_name}>
             <Card
               title={
                 <div>
@@ -64,8 +65,12 @@ const taskList = ({ task_list, loading, allCheckList }) => {
                   <span>{delta_num}</span>
                 </li>
                 <li>
-                  <span>工作时长:</span>
-                  <span>{work_long_time}</span>
+                  <span>码后7T大万数:</span>
+                  <span>{prod7}</span>
+                </li>
+                <li>
+                  <span>工作时长(小时):</span>
+                  <span>{work_long_time * 8}</span>
                 </li>
               </ul>
               <div className={styles.styles}>
@@ -84,7 +89,14 @@ const taskList = ({ task_list, loading, allCheckList }) => {
                   {data.map((item, i) => (
                     <li key={item.cart_number}>
                       <span>{i + 1}</span>
-                      <span>{item.cart_number}</span>
+                      <span
+                        style={
+                          item.product_name === '9607T' && item.type == 0
+                            ? { background: '#f2939b' }
+                            : null
+                        }>
+                        {item.cart_number}
+                      </span>
                       <span>{item.pf_num}</span>
                       <span>{item.product_name}</span>
                       <span>{item.type == 0 ? '码后' : '丝印'}</span>

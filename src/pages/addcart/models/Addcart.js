@@ -22,7 +22,8 @@ export default {
     hechaLoading: false,
     rec_time: '',
     pfNums: [],
-    allCheckList: {}
+    allCheckList: {},
+    pfList: {}
   },
   reducers: {
     setStore,
@@ -296,10 +297,23 @@ export default {
         tstart4: tstart,
         tend4: tend
       });
+
+      let res = yield call(db.getWipProdLogs, {
+        tstart: tend,
+        tend,
+        tstart2: tend,
+        tend2: tend,
+        tstart3: tend,
+        tend3: tend,
+        tstart4: tend,
+        tend4: tend
+      });
+
       yield put({
         type: 'setStore',
         payload: {
           pfNums,
+          pfList: res,
           hechaLoading: false
         }
       });
@@ -313,14 +327,13 @@ export default {
         const [tstart, tend] = dateRanges['本月'];
         const [ts, te] = [tstart.format('YYYYMMDD'), tend.format('YYYYMMDD')];
 
-        await dispatch({
-          type: 'setStore',
-          payload: {
-            dateRange: [ts, te]
-          }
-        });
-
         if (match && match[0] === '/' + namespace) {
+          await dispatch({
+            type: 'setStore',
+            payload: {
+              dateRange: [ts, te]
+            }
+          });
           dispatch({
             type: 'handleReportData'
           });
@@ -336,6 +349,15 @@ export default {
 
         // 自动排产载入人员信息
         if (pathname === `/${namespace}/task`) {
+          const [tstart, tend] = dateRanges['今天'];
+          const [ts, te] = [tstart.format('YYYYMMDD'), tend.format('YYYYMMDD')];
+          await dispatch({
+            type: 'setStore',
+            payload: {
+              dateRange: [ts, te]
+            }
+          });
+
           dispatch({
             type: 'getOperatorList'
           });
@@ -348,8 +370,6 @@ export default {
             type: 'loadPfNums'
           });
 
-          const [tstart, tend] = dateRanges['昨天'];
-          const [ts, te] = [tstart.format('YYYYMMDD'), tend.format('YYYYMMDD')];
           dispatch({
             type: 'updateAllCheckList',
             payload: { daterange: [ts, te] }

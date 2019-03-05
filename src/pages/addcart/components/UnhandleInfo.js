@@ -7,6 +7,8 @@ import moment from 'moment';
 import 'moment/locale/zh-cn';
 import dateRanges from '@/utils/ranges';
 
+import VTable from '@/components/Table';
+
 const R = require('ramda');
 
 const RangePicker = DatePicker.RangePicker;
@@ -19,6 +21,7 @@ function UnhandleInfo({
   rec_time,
   pfNums,
   dateRange,
+  pfList,
   dispatch
 }) {
   const unhandle = loading ? (
@@ -85,54 +88,52 @@ function UnhandleInfo({
 
   return (
     <div>
-      <Row gutter={20}>
-        <Col span={17} md={24} sm={24}>
+      <Row gutter={10}>
+        <Col span={24} md={24} sm={24}>
           <p className={styles.recTime}>
             最近排产任务：<span>{rec_time}</span>
           </p>
-          <Row gutter={10}>
-            <Col span={12} md={12} sm={24} style={{ marginTop: 10 }}>
-              <Card hoverable>
-                <div>
-                  <div className={styles.cartListTitle}>
-                    <span className={styles.title}>不参与排活车号列表</span>
-                  </div>
-                  <ul className={styles.cartList}>
-                    <li>
-                      <span>序号</span>
-                      <span>车号</span>
-                      <span>判废数</span>
-                      <span>品种</span>
-                      <span>机台</span>
-                      <span>工艺</span>
-                    </li>
-                    {unhandle}
-                  </ul>
+          <Col span={12} md={12} sm={24} style={{ marginTop: 10 }}>
+            <Card hoverable>
+              <div>
+                <div className={styles.cartListTitle}>
+                  <span className={styles.title}>不参与排活车号列表</span>
                 </div>
-              </Card>
-            </Col>
-            <Col span={12} md={12} sm={24} style={{ marginTop: 10 }}>
-              <Card hoverable>
-                <div>
-                  <div className={styles.cartListTitle}>
-                    <span className={styles.title}>未上传车号列表</span>
-                  </div>
-                  <ul className={styles.cartList}>
-                    <li>
-                      <span>序号</span>
-                      <span>车号</span>
-                      <span>品种</span>
-                      <span>机台</span>
-                      <span>工艺</span>
-                    </li>
-                    {unupload}
-                  </ul>
+                <ul className={styles.cartList}>
+                  <li>
+                    <span>序号</span>
+                    <span>车号</span>
+                    <span>判废数</span>
+                    <span>品种</span>
+                    <span>机台</span>
+                    <span>工艺</span>
+                  </li>
+                  {unhandle}
+                </ul>
+              </div>
+            </Card>
+          </Col>
+          <Col span={12} md={12} sm={24} style={{ marginTop: 10 }}>
+            <Card hoverable>
+              <div>
+                <div className={styles.cartListTitle}>
+                  <span className={styles.title}>未上传车号列表</span>
                 </div>
-              </Card>
-            </Col>
-          </Row>
+                <ul className={styles.cartList}>
+                  <li>
+                    <span>序号</span>
+                    <span>车号</span>
+                    <span>品种</span>
+                    <span>机台</span>
+                    <span>工艺</span>
+                  </li>
+                  {unupload}
+                </ul>
+              </div>
+            </Card>
+          </Col>
         </Col>
-        <Col span={7} md={24} sm={24} style={{ marginTop: 10 }}>
+        <Col span={12} md={12} sm={24} style={{ marginTop: 10 }}>
           <Card hoverable>
             <div>
               <div className={styles['pf-board']}>
@@ -161,6 +162,9 @@ function UnhandleInfo({
             </div>
           </Card>
         </Col>
+        <Col span={12} md={12} sm={24} style={{ marginTop: 10 }}>
+          <VTable dataSrc={pfList} loading={loading} />
+        </Col>
       </Row>
     </div>
   );
@@ -171,7 +175,8 @@ const mapStateToProps = (state) => ({
   rec_time: state.addcart.rec_time,
   pfNums: state.addcart.pfNums,
   loading: state.addcart.hechaLoading,
-  dateRange: state.addcart.dateRange
+  dateRange: state.addcart.dateRange,
+  pfList: state.addcart.pfList
 });
 
 export default connect(mapStateToProps)(UnhandleInfo);

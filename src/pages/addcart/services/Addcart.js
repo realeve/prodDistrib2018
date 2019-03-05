@@ -151,6 +151,20 @@ export const getPrintHechatask = () =>
 
 /**
 *   @database: { 全幅面 }
+*   @desc:     { 图像判废日均产量原始记录 } 
+    const { tstart, tend, tstart2, tend2, tstart3, tend3, tstart4, tend4 } = params;
+*/
+export const getWipProdLogs = (params) =>
+  // DEV
+  //   ? mock(require('@/mock/383_7f95a2c2a7.json'))
+  //   :
+  axios({
+    url: '/383/7f95a2c2a7/array.json',
+    params
+  });
+
+/**
+*   @database: { 全幅面 }
 *   @desc:     { 图像判废月度产量汇总 } 
     const { tstart, tend } = params;
 */

@@ -43,7 +43,7 @@ export default {
       .subtract(1, 'year')
       .endOf('month')
   ],
-  本月: [moment().startOf('month'), moment().endOf('month')],
+  本月: [moment().startOf('month'), moment()],
   上月: [
     moment()
       .subtract(1, 'month')

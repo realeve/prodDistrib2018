@@ -34,7 +34,7 @@ const taskList = ({ task_list, loading, allCheckList }) => {
               }}
               style={{
                 marginTop: 10,
-                minHeight: 660,
+                minHeight: 700,
                 fontSize: 15
               }}>
               <ul className={styles.detailInfo}>

@@ -415,7 +415,7 @@ class DynamicRule extends React.Component {
           <Col span={12}>
             <FormItem {...formTailLayout}>
               <Button type="primary" onClick={this.submit}>
-                提交
+                排产计算
               </Button>
               <Button
                 style={{ marginLeft: 20 }}

@@ -239,7 +239,8 @@ export default {
       yield put({
         type: 'setStore',
         payload: {
-          hechaLoading: true
+          hechaLoading: true,
+          hechaTask: { task_list: [], unhandle_carts: [], unupload_carts: [] }
         }
       });
       let hechaTask = yield call(db.getHechaTasks, params);

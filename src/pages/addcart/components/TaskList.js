@@ -38,12 +38,12 @@ const taskList = ({ task_list, loading, allCheckList }) => {
                 fontSize: 15
               }}>
               <ul className={styles.detailInfo}>
-                <li>
+                {/* <li>
                   <span>本月判废数:</span>
                   <span>
                     {month.pf_num}条/{month.cart_nums}万
                   </span>
-                </li>
+                </li> */}
                 <li>
                   <span>期望万数:</span>
                   <span>{expect_carts}</span>

@@ -290,7 +290,11 @@ export default {
         tstart,
         tend,
         tstart2: tstart,
-        tend2: tend
+        tend2: tend,
+        tstart3: tstart,
+        tend3: tend,
+        tstart4: tstart,
+        tend4: tend
       });
       yield put({
         type: 'setStore',

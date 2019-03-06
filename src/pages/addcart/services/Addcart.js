@@ -186,3 +186,29 @@ export const getVCbpcCartlist = (params) =>
         url: '/373/c990d890b4/array.json',
         params
       });
+
+/**
+*   @database: { 号码三合一 }
+*   @desc:     { 号码判废量原始记录 } 
+    const { tstart, tend } = params;
+*/
+export const getWipProdLogsCode = (params) =>
+  DEV
+    ? mock(require('@/mock/385_29fd5573a4.json'))
+    : axios({
+        url: '/385/29fd5573a4/array.json',
+        params
+      });
+
+/**
+*   @database: { 号码三合一 }
+*   @desc:     { 号码判废量汇总 } 
+    const { tstart, tend } = params;
+*/
+export const getWipProdLogsCodeCount = (params) =>
+  DEV
+    ? mock(require('@/mock/386_666b98f1d1.json'))
+    : axios({
+        url: '/386/666b98f1d1.json',
+        params
+      });

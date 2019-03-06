@@ -298,6 +298,31 @@ export default {
         tend4: tend
       });
 
+      let { data: codeNumCount } = yield call(db.getWipProdLogsCodeCount, {
+        tstart,
+        tend
+      });
+
+      codeNumCount.forEach((item) => {
+        let idx = pfNums.findIndex(
+          (all) => all.operator_name == item.operator_name
+        );
+        if (idx < 0) {
+          pfNums.push({
+            ...item,
+            pf_num: 0,
+            check_num: 0,
+            total_num: item.code_num
+          });
+        } else {
+          pfNums[idx].code_num = parseInt(item.code_num, 10);
+          pfNums[idx].cart_nums =
+            parseInt(pfNums[idx].cart_nums, 10) + parseInt(item.cart_nums, 10);
+          pfNums[idx].total_num =
+            parseInt(pfNums[idx].total_num, 10) + pfNums[idx].code_num;
+        }
+      });
+
       let res = yield call(db.getWipProdLogs, {
         tstart: tend,
         tend,
@@ -309,11 +334,23 @@ export default {
         tend4: tend
       });
 
+      // 号码数据同票面数据合并
+      let codeList = yield call(db.getWipProdLogsCode, {
+        tstart: tend,
+        tend
+      });
+      res.data = res.data.map((item) => {
+        item.push(0);
+        return item;
+      });
+      codeList.data = [...res.data, ...codeList.data];
+      codeList.rows = codeList.data.length;
+
       yield put({
         type: 'setStore',
         payload: {
           pfNums,
-          pfList: res,
+          pfList: codeList,
           hechaLoading: false
         }
       });

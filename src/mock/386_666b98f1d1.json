@@ -1,0 +1,25 @@
+{
+  "data": [{
+    "operator_name": "权荃",
+    "cart_nums": "130",
+    "code_num": "54866"
+  }, {
+    "operator_name": "彭瑶",
+    "cart_nums": "55",
+    "code_num": "13786"
+  }, {
+    "operator_name": "李小平",
+    "cart_nums": "45",
+    "code_num": "7353"
+  }, {
+    "operator_name": "龚季敏",
+    "cart_nums": "24",
+    "code_num": "4077"
+  }],
+  "rows": 4,
+  "ip": "10.8.18.243",
+  "header": ["operator_name", "cart_nums", "code_num"],
+  "title": "号码判废量汇总",
+  "time": "143.546ms",
+  "source": "数据来源：号码三合一"
+}

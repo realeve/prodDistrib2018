@@ -67,8 +67,9 @@ function UnhandleInfo({
         <span>{i + 1}</span>
         <span>{item.operator_name}</span>
         <span>{item.cart_nums}</span>
-        <span>{item.pf_num}</span>
-        <span>{item.check_num}</span>
+        <span>{item.pf_num == 0 ? '' : item.pf_num}</span>
+        <span>{item.check_num == 0 ? '' : item.check_num}</span>
+        <span>{item.code_num == 0 ? '' : item.code_num}</span>
         <span>{item.total_num}</span>
       </li>
     ))
@@ -153,8 +154,9 @@ function UnhandleInfo({
                   <span>序号</span>
                   <span>姓名</span>
                   <span>大万数</span>
-                  <span>判废</span>
-                  <span>抽查</span>
+                  <span>票面判废</span>
+                  <span>票面审核</span>
+                  <span>号码审核</span>
                   <span>总产量</span>
                 </li>
                 {pfnumList}

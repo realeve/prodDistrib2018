@@ -195,7 +195,8 @@ class PackageComponent extends React.PureComponent<PropType, StateType> {
     // 从其它机台取消领用。
     await db.setPrintCutProdLogByCarts(carts);
 
-    // 车号列表增加至当前机台
+    // 车号列表增加至当前机台 
+    console.log(params)
     let {
       data: [{ affected_rows }]
     } = await db.addPrintCutProdLog(params);

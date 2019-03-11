@@ -1,6 +1,7 @@
 import * as db from './MultipleLock';
 import * as lib from '../../../utils/lib';
 import wms from '../../index/services/wms';
+import moment from 'moment';
 
 let R = require('ramda');
 
@@ -105,6 +106,9 @@ let recordRealProc = async (
 };
 
 // 人工拉号,默认设为人工异常品拉号，人工拉号时需锁定车号信息。
+
+// 人工拉号产品需满足当前完成工序为印码
+// 如果在印码前，添加到计划任务中，如果在印码后，提示已完成
 let manualHandle = async (
   carnos,
   reason_code = '0579', //"q_abnormalProd",
@@ -130,7 +134,8 @@ let adjustProcInfo = async ({
   proc_stream_name,
   carnos,
   reason_code,
-  remark_info
+  remark_info,
+  user_name
 }) => {
   let result;
   let pStream = parseInt(proc_stream, 10);
@@ -174,7 +179,8 @@ let adjustProcInfo = async ({
     let insertData = getLockCarts({
       proc_stream: pStream,
       carnos,
-      remark_info
+      remark_info,
+      user_name
     });
 
     // 批量产品添加至异常品信息
@@ -190,7 +196,7 @@ let adjustProcInfo = async ({
   return result;
 };
 
-let getLockCarts = ({ proc_stream, carnos, remark_info }) => {
+let getLockCarts = ({ proc_stream, carnos, remark_info, user_name }) => {
   let rec_date = lib.now();
   let complete_status = 1,
     reason = remark_info,
@@ -204,7 +210,11 @@ let getLockCarts = ({ proc_stream, carnos, remark_info }) => {
     rec_date,
     complete_status,
     proc_stream,
-    only_lock_cart: 0
+    only_lock_cart: 0,
+    user_name,
+    unlock_date: moment(rec_date)
+      .add(10, 'days')
+      .format('YYYY-MM-DD HH:mm:ss')
   }));
 };
 
@@ -238,7 +248,8 @@ let handleProcStream = async ({
     proc_stream_name,
     proc_stream,
     reason_code,
-    remark_info
+    remark_info,
+    user_name
   });
 
   console.log(res);

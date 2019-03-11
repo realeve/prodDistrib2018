@@ -130,8 +130,14 @@ class DynamicRule extends React.Component {
         return;
       }
       let insertData = this.getLockCarts();
-
-      let { data } = await db.addLockCartlist(insertData);
+      let { data } = await db.addLockCartlist(insertData).catch((e) => {
+        notification.open({
+          message: '系统提示',
+          description: '批量锁车失败',
+          icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
+        });
+        throw e;
+      });
       if (data.length === 0 || data[0].affected_rows === 0) {
         notification.open({
           message: '系统提示',

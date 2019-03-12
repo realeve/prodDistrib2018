@@ -1,5 +1,5 @@
-import React from "react";
-import { connect } from "dva";
+import React from 'react';
+import { connect } from 'dva';
 import {
   Card,
   Form,
@@ -11,21 +11,21 @@ import {
   Row,
   Col,
   Radio
-} from "antd";
+} from 'antd';
 
-import moment from "moment";
-import "moment/locale/zh-cn";
-import * as db from "../services/multiweak";
+import moment from 'moment';
+import 'moment/locale/zh-cn';
+import * as db from '../services/multiweak';
 
-import VTable from "../../../components/Table";
+import VTable from '../../../components/Table';
 
-import styles from "./Report.less";
-import * as lib from "../../../utils/lib";
-import fakeTypes from "../../../utils/fakeTypes";
+import styles from './Report.less';
+import * as lib from '../../../utils/lib';
+import fakeTypes from '../../../utils/fakeTypes';
 
-const R = require("ramda");
+const R = require('ramda');
 
-moment.locale("zh-cn");
+moment.locale('zh-cn');
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -66,32 +66,32 @@ class DynamicRule extends React.Component {
 
   insertData = async () => {
     let data = this.getInsertedData();
-    if (typeof data.remark === "undefined") {
-      data.remark = "";
+    if (typeof data.remark === 'undefined') {
+      data.remark = '';
     }
     data.user_name = this.props.userSetting.name;
     let insertRes = await db.addPrintMachinecheckMultiweak(data);
 
     if (!insertRes.rows) {
       notification.error({
-        message: "系统错误",
-        description: "数据插入失败，请联系管理员",
-        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+        message: '系统错误',
+        description: '数据插入失败，请联系管理员',
+        icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
       });
       return;
     }
 
     notification.open({
-      message: "系统提示",
-      description: "数据插入成功",
-      icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+      message: '系统提示',
+      description: '数据插入成功',
+      icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
     });
 
     this.clearData();
 
     // 重载报表数据
     this.props.dispatch({
-      type: "multiweak/getData"
+      type: 'multiweak/getData'
     });
   };
 
@@ -105,33 +105,33 @@ class DynamicRule extends React.Component {
   clearData = () => {
     const { setFieldsValue } = this.props.form;
     setFieldsValue({
-      cart_number: "",
-      fake_type: "",
+      cart_number: '',
+      fake_type: '',
       kilo_num: [],
       pos_info: [],
-      remark: "",
-      fake_num: ""
+      remark: '',
+      fake_num: ''
     });
   };
 
   getInsertedData = () => {
     let data = this.props.form.getFieldsValue();
     let kilo_num =
-      typeof data.kilo_num === "string"
+      typeof data.kilo_num === 'string'
         ? data.kilo_num
-        : data.kilo_num.sort((a, b) => a - b).join(",");
+        : data.kilo_num.sort((a, b) => a - b).join(',');
     let pos_info =
-      typeof data.pos_info === "string"
+      typeof data.pos_info === 'string'
         ? data.pos_info
-        : data.pos_info.sort((a, b) => a - b).join(",");
+        : data.pos_info.sort((a, b) => a - b).join(',');
     let captain_name =
-      typeof data.captain_name === "string"
+      typeof data.captain_name === 'string'
         ? data.captain_name
-        : data.captain_name.join(",");
+        : data.captain_name.join(',');
 
     let prod_id = R.compose(
-      R.prop("value"),
-      R.find(R.propEq("name", data.prod_id))
+      R.prop('value'),
+      R.find(R.propEq('name', data.prod_id))
     )(this.props.productList);
 
     data = Object.assign(data, {
@@ -145,7 +145,7 @@ class DynamicRule extends React.Component {
   };
 
   submit = () => {
-    this.props.form.validateFields(err => {
+    this.props.form.validateFields((err) => {
       if (err) {
         return;
       }
@@ -153,26 +153,26 @@ class DynamicRule extends React.Component {
     });
   };
 
-  searchCart = async cart => {
+  searchCart = async (cart) => {
     // this.clearData();
     let params = { cart };
     let { data } = await db.getVIEWCARTFINDER(params);
 
     if (R.isNil(data) || !data.length) {
       notification.error({
-        message: "提示",
-        description: "当前车号未搜索到生产信息",
-        icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+        message: '提示',
+        description: '当前车号未搜索到生产信息',
+        icon: <Icon type="info-circle-o" style={{ color: '#108ee9' }} />
       });
       return;
     }
 
-    data = data.filter(item => item.PROCNAME.includes("印"));
-    let procList = R.uniq(R.map(R.prop("PROCNAME"), data));
+    data = data.filter((item) => item.PROCNAME.includes('印'));
+    let procList = R.uniq(R.map(R.prop('PROCNAME'), data));
     this.setState({ procList, prodInfo: data });
   };
 
-  searchCode = e => {
+  searchCode = (e) => {
     let { value } = e.target;
     let cart_number = value.toUpperCase().trim();
     e.target.value = cart_number;
@@ -185,21 +185,21 @@ class DynamicRule extends React.Component {
 
     setFieldsValue({
       prod_id: R.compose(
-        R.prop("name"),
-        R.find(R.propEq("value", cart_number[2]))
+        R.prop('name'),
+        R.find(R.propEq('value', cart_number[2]))
       )(this.props.productList)
     });
 
     this.searchCart(cart_number);
   };
 
-  changeProc = v => {
+  changeProc = (v) => {
     let { prodInfo, fakeTypes } = this.state;
     let proc = v.target.value;
     let machineList = R.compose(
       R.uniq,
-      R.map(R.prop("MACHINENAME")),
-      R.filter(R.propEq("PROCNAME", proc))
+      R.map(R.prop('MACHINENAME')),
+      R.filter(R.propEq('PROCNAME', proc))
     )(prodInfo);
     this.setState({ machineList });
 
@@ -215,12 +215,12 @@ class DynamicRule extends React.Component {
     this.setState({ fakeTypeList: fakeTypes[proc[0]] });
   };
 
-  changeMachine = v => {
+  changeMachine = (v) => {
     let { prodInfo } = this.state;
     let captainList = R.compose(
       R.uniq,
-      R.map(R.prop("CAPTAINNAME")),
-      R.filter(R.propEq("MACHINENAME", v))
+      R.map(R.prop('CAPTAINNAME')),
+      R.filter(R.propEq('MACHINENAME', v))
     )(prodInfo);
     this.setState({ captainList });
 
@@ -247,7 +247,7 @@ class DynamicRule extends React.Component {
     let { prod_id } = this.props.form.getFieldsValue();
     let kList = kInfoList.slice(
       0,
-      R.isNil(prod_id) || prod_id.includes("9602") || prod_id.includes("9603")
+      R.isNil(prod_id) || prod_id.includes('9602') || prod_id.includes('9603')
         ? 40
         : 35
     );
@@ -257,11 +257,11 @@ class DynamicRule extends React.Component {
         <Row>
           <Col span={8}>
             <FormItem {...formItemLayout} label="车号">
-              {getFieldDecorator("cart_number", {
+              {getFieldDecorator('cart_number', {
                 rules: [
                   {
                     required: true,
-                    message: "车号信息必须输入",
+                    message: '车号信息必须输入',
                     pattern: /^\d{4}[A-Z]\d{3}$/
                   }
                 ]
@@ -269,8 +269,8 @@ class DynamicRule extends React.Component {
             </FormItem>
 
             <FormItem {...formItemLayout} label="品种">
-              {getFieldDecorator("prod_id", {
-                rules: [{ required: true, message: "请选择品种" }]
+              {getFieldDecorator('prod_id', {
+                rules: [{ required: true, message: '请选择品种' }]
               })(
                 <Select placeholder="请选择品种">
                   {this.props.productList.map(({ name, value }) => (
@@ -285,13 +285,12 @@ class DynamicRule extends React.Component {
             <FormItem
               {...formItemLayout}
               label="工序"
-              className={styles.radioButton}
-            >
-              {getFieldDecorator("proc_name", {
-                rules: [{ required: true, message: "请选择工序" }]
+              className={styles.radioButton}>
+              {getFieldDecorator('proc_name', {
+                rules: [{ required: true, message: '请选择工序' }]
               })(
                 <Radio.Group onChange={this.changeProc}>
-                  {procList.map(name => (
+                  {procList.map((name) => (
                     <Radio.Button value={name} key={name}>
                       {name}
                     </Radio.Button>
@@ -300,11 +299,11 @@ class DynamicRule extends React.Component {
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="设备">
-              {getFieldDecorator("machine_name", {
-                rules: [{ required: true, message: "请选择机台" }]
+              {getFieldDecorator('machine_name', {
+                rules: [{ required: true, message: '请选择机台' }]
               })(
                 <Select placeholder="请选择机台" onChange={this.changeMachine}>
-                  {machineList.map(name => (
+                  {machineList.map((name) => (
                     <Option value={name} key={name}>
                       {name}
                     </Option>
@@ -313,11 +312,11 @@ class DynamicRule extends React.Component {
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="机长">
-              {getFieldDecorator("captain_name", {
-                rules: [{ required: true, message: "请选择机长" }]
+              {getFieldDecorator('captain_name', {
+                rules: [{ required: true, message: '请选择机长' }]
               })(
                 <Select mode="multiple" placeholder="请选择机长">
-                  {captainList.map(name => (
+                  {captainList.map((name) => (
                     <Option value={name} key={name}>
                       {name}
                     </Option>
@@ -326,11 +325,11 @@ class DynamicRule extends React.Component {
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="分类" extra={procTipInfo}>
-              {getFieldDecorator("fake_type", {
-                rules: [{ required: true, message: "请选择分类" }]
+              {getFieldDecorator('fake_type', {
+                rules: [{ required: true, message: '请选择分类' }]
               })(
                 <Select placeholder="请选择分类">
-                  {fakeTypeList.map(name => (
+                  {fakeTypeList.map((name) => (
                     <Option value={name} key={name}>
                       {name}
                     </Option>
@@ -342,16 +341,16 @@ class DynamicRule extends React.Component {
 
           <Col span={8}>
             <FormItem {...formItemLayout} label="千位数">
-              {getFieldDecorator("kilo_num", {
+              {getFieldDecorator('kilo_num', {
                 rules: [
                   {
                     required: true,
-                    message: "请选择千位数"
+                    message: '请选择千位数'
                   }
                 ]
               })(
                 <Select mode="multiple" placeholder="请输入千位数">
-                  {"0123456789".split("").map(name => (
+                  {'0123456789'.split('').map((name) => (
                     <Option value={name} key={name}>
                       {name}
                     </Option>
@@ -360,16 +359,16 @@ class DynamicRule extends React.Component {
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="产品开位">
-              {getFieldDecorator("pos_info", {
+              {getFieldDecorator('pos_info', {
                 rules: [
                   {
                     required: true,
-                    message: "请输入产品开位"
+                    message: '请输入产品开位'
                   }
                 ]
               })(
                 <Select mode="multiple" placeholder="请选择产品开位">
-                  {kList.map(name => (
+                  {kList.map((name) => (
                     <Option value={name} key={name}>
                       {name}
                     </Option>
@@ -381,9 +380,8 @@ class DynamicRule extends React.Component {
             <FormItem
               {...formItemLayout}
               label="预计作废张数"
-              extra="请填写此信息，系统将根据情况通知产品后续工艺。"
-            >
-              {getFieldDecorator("fake_num", {
+              extra="请填写此信息，系统将根据情况通知产品后续工艺。">
+              {getFieldDecorator('fake_num', {
                 rules: [
                   {
                     pattern: /^\d+$/
@@ -393,7 +391,7 @@ class DynamicRule extends React.Component {
             </FormItem>
 
             <FormItem {...formItemLayout} label="备注">
-              {getFieldDecorator("remark")(
+              {getFieldDecorator('remark')(
                 <Input.TextArea rows={3} placeholder="请输入备注信息" />
               )}
             </FormItem>
@@ -415,13 +413,12 @@ class DynamicRule extends React.Component {
 
 const WrappedDynamicRule = Form.create()(DynamicRule);
 
-const multiweak = props => (
+const multiweak = (props) => (
   <>
     <Card
       title={<h3 className={styles.header}>连续废信息通知</h3>}
       loading={props.loading}
-      style={{ width: "100%" }}
-    >
+      style={{ width: '100%' }}>
       <WrappedDynamicRule {...props} />
     </Card>
     <VTable dataSrc={props.dataWeakList} loading={props.loading} />

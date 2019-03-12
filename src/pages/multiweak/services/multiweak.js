@@ -18,7 +18,7 @@ import { axios } from '../../../utils/axios';
  */
 export const getVIEWCARTFINDER = (params) =>
   axios({
-    url: '/351/982001ccc7.json',
+    url: '/404/afe4110b5e.json',
     params
   });
 

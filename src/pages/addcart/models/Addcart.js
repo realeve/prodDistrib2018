@@ -5,6 +5,73 @@ import wms from '../../index/services/wms';
 import { setStore } from '@/utils/lib';
 const R = require('ramda');
 
+const handleTasklist = (hechaTask) => {
+  let taskList = hechaTask.task_list;
+  let sum = 0,
+    prodList = [];
+  let srcList = {};
+  // 求和
+  taskList.forEach((item) => {
+    item.data.forEach((detail) => {
+      if (detail.type == 0) {
+        prodList.push(detail.product_name);
+        sum += detail.pf_num;
+      }
+    });
+  });
+  prodList = R.uniq(prodList);
+  // 抽检比5%;
+  sum = sum * 0.05;
+  if (prodList.length == 0) {
+    return hechaTask;
+  }
+
+  // 平均条数
+  let avg = sum / prodList.length;
+  taskList.forEach((item) => {
+    item.data.forEach((detail) => {
+      if (detail.type == 0) {
+        if (typeof srcList[detail.product_name] == 'undefined') {
+          srcList[detail.product_name] = [detail];
+        } else {
+          srcList[detail.product_name].push(detail);
+        }
+      }
+    });
+  });
+
+  let cartList = prodList.map((key) => {
+    srcList[key] = srcList[key].sort((a, b) => a.pf_num - b.pf_num);
+    let status = false;
+    let result = '';
+    srcList[key].forEach((item) => {
+      if (!status && item.pf_num > avg) {
+        status = true;
+        result = item.cart_number;
+      }
+    });
+    // 如果某品种没有满足条件的，以最多的一万为准
+    if (!status) {
+      result = R.last(srcList[key]).cart_number;
+    }
+    return result;
+  });
+
+  hechaTask.task_list = hechaTask.task_list.map((item) => {
+    item.data = item.data.map((detail) => {
+      if (cartList.includes(detail.cart_number)) {
+        detail.is_check = true;
+      } else {
+        detail.is_check = false;
+      }
+      return detail;
+    });
+    return item;
+  });
+
+  return hechaTask;
+};
+
 const namespace = 'addcart';
 export default {
   namespace,
@@ -245,7 +312,8 @@ export default {
         }
       });
       let hechaTask = yield call(db.getHechaTasks, params);
-
+      hechaTask = handleTasklist(hechaTask);
+      // console.log(hechaTask);
       yield put({
         type: 'setStore',
         payload: {

@@ -223,6 +223,7 @@ class DynamicRule extends React.Component {
   };
 
   publishTask = () => {
+    // 处理抽检任务
     let task_info = JSON.stringify(this.props.hechaTask);
 
     Modal.confirm({

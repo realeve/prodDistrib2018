@@ -91,11 +91,14 @@ const taskList = ({ task_list, loading, allCheckList }) => {
                       <span>{i + 1}</span>
                       <span
                         style={
-                          item.product_name === '9607T' && item.type == 0
+                          item.is_check
+                            ? { background: '#93f29b' }
+                            : item.product_name === '9607T' && item.type == 0
                             ? { background: '#f2939b' }
                             : null
                         }>
                         {item.cart_number}
+                        {item.is_check && '(抽检品)'}
                       </span>
                       <span>{item.pf_num}</span>
                       <span>{item.product_name}</span>

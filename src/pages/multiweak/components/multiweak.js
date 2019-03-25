@@ -265,7 +265,7 @@ class DynamicRule extends React.Component {
                     pattern: /^\d{4}[A-Z]\d{3}$/
                   }
                 ]
-              })(<Input onChange={this.searchCode} maxLength="8" />)}
+              })(<Input onChange={this.searchCode} maxLength={8} />)}
             </FormItem>
 
             <FormItem {...formItemLayout} label="品种">

@@ -190,7 +190,7 @@ class DynamicRule extends React.Component {
                 <Input
                   placeholder="请输入异常品车号"
                   onChange={this.convertCart}
-                  maxLength="8"
+                  maxLength={8}
                 />
               )}
             </FormItem>

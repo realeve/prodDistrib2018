@@ -496,7 +496,7 @@ class DynamicRule extends React.Component {
                     <Input
                       placeholder="请输入印码号前6位"
                       onChange={this.searchCode}
-                      maxLength="6"
+                      maxLength={6}
                     />
                   )}
                 </FormItem>

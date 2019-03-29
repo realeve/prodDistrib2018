@@ -38,6 +38,9 @@ export const fetchData = async ({ url, params }) => {
 const isFilterColumn = (data, key) => {
   let isValid = true;
   const handleItem = (item) => {
+    if (R.isNil(item)) {
+      return;
+    }
     if (isValid) {
       item = item.trim();
       let isNum = lib.isNumOrFloat(item);
@@ -63,6 +66,7 @@ export function handleColumns({ dataSrc, sortedInfo, filteredInfo }) {
   if (!rows || rows === 0) {
     return [];
   }
+
   let column = header.map((title, i) => {
     let key = 'col' + i;
     let item = { title };
@@ -78,7 +82,6 @@ export function handleColumns({ dataSrc, sortedInfo, filteredInfo }) {
     if (!showURL) {
       return item;
     }
-
     if (lib.isCartOrReel(tdValue)) {
       item.render = (text) => {
         const attrs = {

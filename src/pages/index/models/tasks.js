@@ -9,7 +9,7 @@ export default {
   namespace,
   state: {
     dataSource: [],
-    dataSrc: [],
+    dataSrc: { data: [] },
     dataClone: [],
     columns: [],
     total: null,
@@ -105,7 +105,7 @@ export default {
       });
     },
     *changePage({ payload: page }, { put, select }) {
-      const store = yield select(state => state.tasks);
+      const store = yield select((state) => state.tasks);
       const { pageSize, dataClone } = store;
       const dataSource = db.getPageData({
         data: dataClone,
@@ -176,8 +176,9 @@ export default {
       });
     },
     *handleTaskData({ payload }, { call, put, select }) {
-      const store = yield select(state => state.tasks);
-      let { dataSrc: data } = yield select(state => state.table);
+      const store = yield select((state) => state.tasks);
+      let { dataSrc: data } = yield select((state) => state.table);
+      // console.log(data);
       if (data.rows === 0) {
         return;
       }
@@ -190,7 +191,7 @@ export default {
       } = store;
 
       // 车号列表，未确认是否在库
-      let unStockedData = data.data.map(item => Object.values(item).slice(1));
+      let unStockedData = data.data.map((item) => Object.values(item).slice(1));
       let uniqCarts = R.compose(
         R.uniqBy(R.prop(0)),
         R.filter(R.propEq(3, '印码'))
@@ -206,7 +207,7 @@ export default {
 
       let stockData = [];
       if (stockCarts.length > 0) {
-        stockCarts.forEach(item => {
+        stockCarts.forEach((item) => {
           let stockItem = R.filter(R.propEq('0', item.carno))(unStockedData);
           stockData = [...stockData, ...stockItem];
         });
@@ -264,7 +265,6 @@ export default {
         filteredInfo: {},
         sortedInfo: {}
       });
-
       yield put({
         type: 'setColumns',
         payload: {

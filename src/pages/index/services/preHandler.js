@@ -1,17 +1,16 @@
-import setting from "./setting";
-import {
-  getViewCartfinderByCarts
-} from './table'
-const R = require("ramda");
+import setting from './setting';
+import { getViewCartfinderByCarts } from './table';
+const R = require('ramda');
 
 // 数据预处理
-const preHandle = data => {
-  console.log("start:开始处理车号分配：");
-  let uniqCarts = R.compose(R.uniqBy(R.prop(0)), R.filter(R.propEq(3, "印码")))(
-    data
-  );
+const preHandle = (data) => {
+  console.log('start:开始处理车号分配：');
+  let uniqCarts = R.compose(
+    R.uniqBy(R.prop(0)),
+    R.filter(R.propEq(3, '印码'))
+  )(data);
 
-  let cartChecks = Math.ceil(uniqCarts.length * setting.percent / 100);
+  let cartChecks = Math.ceil((uniqCarts.length * setting.percent) / 100);
   return {
     total: uniqCarts.length,
     checks: cartChecks
@@ -190,25 +189,23 @@ const preHandle = data => {
 //   return taskList;
 // };
 
-let convertObj2Array = obj => {
+let convertObj2Array = (obj) => {
   const keys = R.keys(obj);
-  return R.map(key => ({
+  return R.map((key) => ({
     name: key,
     value: obj[key]
   }))(keys);
 };
 
-let countMachineCheckInfo = async cartList => {
+let countMachineCheckInfo = async (cartList) => {
   // let cartLog = R.compose(R.uniq, R.map(item => [...item.slice(0, 6), item[10]]), R.filter(item => cartList.includes(item[0])))(data)
   // let cartLog = R.filter(item => cartList.includes(item[0]))(data);
-  let {
-    data
-  } = await getViewCartfinderByCarts(cartList);
-  console.log(data)
-  console.log(cartList);
-  // 
-  console.log('从机台作业重新获取信息;')
-  console.log(data);
+  let { data } = await getViewCartfinderByCarts(cartList);
+  // console.log(data);
+  // console.log(cartList);
+  // //
+  console.log('从机台作业重新获取信息;');
+  // console.log(data);
 
   let className = R.countBy(R.prop(4), data);
   let machine = R.countBy(R.prop(5), data);
@@ -217,7 +214,7 @@ let countMachineCheckInfo = async cartList => {
     className: convertObj2Array(className),
     machine: convertObj2Array(machine),
     weekDay: convertObj2Array(weekDay),
-    log: R.filter(R.propEq(3, "印码"))(data),
+    log: R.filter(R.propEq(3, '印码'))(data),
     cartLog: data
   };
 };
@@ -225,7 +222,10 @@ let countMachineCheckInfo = async cartList => {
 let getMachinesByProcName = (prodName, machines, remainedCarts) => {
   // 先按车号整理生产信息
   remainedCarts = R.filter(R.propEq(11, prodName))(remainedCarts);
-  let filtedCarts = R.compose(R.uniq, R.map(R.prop(0)))(remainedCarts);
+  let filtedCarts = R.compose(
+    R.uniq,
+    R.map(R.prop(0))
+  )(remainedCarts);
   // 待抽机台
   let pMachineList = R.compose(
     R.uniq,
@@ -234,7 +234,7 @@ let getMachinesByProcName = (prodName, machines, remainedCarts) => {
   )(machines);
   // console.log(remainedCarts);
   // let codeCarts = R.filter(R.propEq(3, "印码"))(remainedCarts);
-  filtedCarts = R.map(cart => {
+  filtedCarts = R.map((cart) => {
     // 产品权重
     let uniqNums = 0;
     let machines = R.compose(
@@ -243,7 +243,7 @@ let getMachinesByProcName = (prodName, machines, remainedCarts) => {
       R.filter(R.propEq(0, cart))
     )(remainedCarts);
 
-    R.forEach(machine => {
+    R.forEach((machine) => {
       if (pMachineList.includes(machine)) {
         uniqNums++;
       }
@@ -284,7 +284,12 @@ let getMachinesByProcName = (prodName, machines, remainedCarts) => {
   //   filtedCarts
   // );
 
-  R.sortBy(R.compose(R.toLower, R.prop("name")));
+  R.sortBy(
+    R.compose(
+      R.toLower,
+      R.prop('name')
+    )
+  );
   // console.log("按时间排序：");
   // console.log(filtedCarts);
   return filtedCarts.length ? filtedCarts[0] : false;
@@ -292,7 +297,7 @@ let getMachinesByProcName = (prodName, machines, remainedCarts) => {
 
 const sampleByLessCarts = (data, sampledMachines, sampledCarts) => {
   let rejectArrByIdx = (arr, idx) =>
-    R.reject(item => R.contains(R.prop(idx)(item), arr));
+    R.reject((item) => R.contains(R.prop(idx)(item), arr));
 
   // 过滤已抽取的车号列表
   let remainedCarts = rejectArrByIdx(sampledCarts, 0)(data);
@@ -304,13 +309,16 @@ const sampleByLessCarts = (data, sampledMachines, sampledCarts) => {
     rejectArrByIdx(sampledMachines, 5)
   )(remainedCarts);
 
-  let prodList = R.compose(R.uniq, R.map(R.prop(0)))(taskMachineList);
+  let prodList = R.compose(
+    R.uniq,
+    R.map(R.prop(0))
+  )(taskMachineList);
   // console.log(prodList);
 
   // 方案3：周一第一万必抽，其它按车号最少,实际抽取16车
 
   // 方案2：按车号最少，实际抽取12车
-  R.forEach(prodName => {
+  R.forEach((prodName) => {
     let unSampledCarts = R.filter(R.propEq(0, prodName))(taskMachineList);
     while (unSampledCarts.length) {
       // 开始抽样
@@ -327,7 +335,7 @@ const sampleByLessCarts = (data, sampledMachines, sampledCarts) => {
         sampledMachines = R.uniq(
           sampledMachines.concat(newSampleCart.machines)
         );
-        unSampledCarts = R.reject(item =>
+        unSampledCarts = R.reject((item) =>
           newSampleCart.machines.includes(item[2])
         )(unSampledCarts);
       }
@@ -336,19 +344,17 @@ const sampleByLessCarts = (data, sampledMachines, sampledCarts) => {
   return sampledCarts;
 };
 
-const getUnionCarts = carts => {
-  let cartList = R.compose(R.uniq, R.map(R.prop(0)))(carts);
-  let newCarts = R.map(item => R.find(R.propEq(0, item))(carts))(cartList);
+const getUnionCarts = (carts) => {
+  let cartList = R.compose(
+    R.uniq,
+    R.map(R.prop(0))
+  )(carts);
+  let newCarts = R.map((item) => R.find(R.propEq(0, item))(carts))(cartList);
   // console.log(newCarts);
   return newCarts;
 };
 
-const init = async ({
-  data,
-  sampledMachines,
-  sampledCarts,
-  stockData
-}) => {
+const init = async ({ data, sampledMachines, sampledCarts, stockData }) => {
   let usedData = stockData;
 
   // 任务量
@@ -359,8 +365,8 @@ const init = async ({
 
   let taskList, sCarts;
 
-  console.log('已抽取车号列表：')
-  console.log(sampledMachines, sampledCarts);
+  console.log('已抽取车号列表：');
+  // console.log(sampledMachines, sampledCarts);
 
   // 使用历史数据
   sCarts = sampleByLessCarts(usedData, sampledMachines, sampledCarts);
@@ -373,8 +379,8 @@ const init = async ({
   // taskList = getCheckedCarts(usedData, taskInfo);
   // console.log(taskList);
   // sCarts = R.map(R.prop(0))(taskList);
-  console.log('抽取的车号列表，附异常品：')
-  console.log(sCarts);
+  console.log('抽取的车号列表，附异常品：');
+  // console.log(sCarts);
 
   // 未抽取的车号
   // let stockedCartList = R.map(R.prop(0))(usedData);
@@ -387,10 +393,8 @@ const init = async ({
   // let count = countMachineCheckInfo(sCarts, data);
 
   taskList = getUnionCarts(count.log);
-  return { ...count,
-    taskList,
-    taskInfo
-  };
+  // console.log(taskList);
+  return { ...count, taskList, taskInfo };
 };
 export default {
   init

@@ -12,7 +12,7 @@ const R = require('ramda');
 //   await axios({
 //     url: DEV
 //       ? "http://localhost:8000/public/40614909a0.json"
-//       : "/69/9e2d18889f/array.json",
+//       : "/69/bafd099930/array.json",
 //     params
 //   }).then(res => res);
 
@@ -176,7 +176,7 @@ export const addPrintSampleMachine = async (values) =>
     data: {
       values,
       id: 53,
-      nonce: '2bfaf3357e'
+      nonce: '807bb22f83'
     }
   }).then((res) => res);
 
@@ -192,7 +192,7 @@ export const addPrintSampleCartlist = async (values) =>
     data: {
       values,
       id: 52,
-      nonce: 'ecf47927ee'
+      nonce: 'c5f6f72a3c'
     }
   }).then((res) => res);
 

@@ -42,7 +42,7 @@ export const addPrintAbnormalProd = (params) =>
 */
 // export const getViewCartfinder = async (params) =>
 //   await axios({
-//     url: '/86/db8acd1ea1.json',
+//     url: '/86/2f2847fddf.json',
 //     params
 //   })
 

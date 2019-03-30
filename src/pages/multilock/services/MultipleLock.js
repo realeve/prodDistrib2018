@@ -41,7 +41,7 @@ export const addPrintAbnormalProd = async (params) =>
 */
 // export const getViewCartfinder = async params =>
 //     await axios({
-//         url: "/86/db8acd1ea1.json",
+//         url: "/86/2f2847fddf.json",
 //         params
 //     }).then(res => res);
 /**
@@ -119,7 +119,7 @@ export const setPrintAbnormalProd = async (params) =>
  */
 // export const getViewCartfinderGZ = async (carnos) =>
 //   await axios({
-//     url: '/105/153ec8ad02.json',
+//     url: '/105/8081338dc1.json',
 //     params: {
 //       carnos
 //     }

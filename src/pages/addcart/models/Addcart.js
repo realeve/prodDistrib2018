@@ -90,7 +90,8 @@ export default {
     rec_time: '',
     pfNums: [],
     allCheckList: {},
-    pfList: {}
+    pfList: {},
+    remarkData: {}
   },
   reducers: {
     setStore,
@@ -258,6 +259,18 @@ export default {
       yield put({
         type: 'setProc',
         payload: proc.data
+      });
+    },
+    *getRemarkData(_, { put, call, select }) {
+      const store = yield select((state) => state[namespace]);
+      const { dateRange } = store;
+      let remarkData = yield call(db.getVCbpcCartcare, {
+        tstart: dateRange[0],
+        tend: dateRange[1]
+      });
+      yield put({
+        type: 'setStore',
+        payload: { remarkData }
       });
     },
     *getOperatorList(_, { put, call }) {
@@ -470,7 +483,9 @@ export default {
           dispatch({
             type: 'loadHechaTask'
           });
-
+          dispatch({
+            type: 'getRemarkData'
+          });
           dispatch({
             type: 'loadPfNums'
           });

@@ -4,7 +4,7 @@ import { Row, Col, Card, Empty, Skeleton } from 'antd';
 import VTable from '@/components/Table';
 import styles from './Report.less';
 
-const taskList = ({ task_list, loading, allCheckList }) => {
+const taskList = ({ task_list, loading, allCheckList, remarkData }) => {
   const result = (
     <Row gutter={10}>
       {task_list.map(
@@ -155,6 +155,7 @@ const taskList = ({ task_list, loading, allCheckList }) => {
           result
         )}
       </Card>
+      <VTable dataSrc={remarkData} />
       <VTable dataSrc={printCartList} />
       <VTable dataSrc={allCheckList} loading={loading} />
     </div>
@@ -164,7 +165,8 @@ const taskList = ({ task_list, loading, allCheckList }) => {
 const mapStateToProps = (state) => ({
   task_list: state.addcart.hechaTask.task_list,
   loading: state.addcart.hechaLoading,
-  allCheckList: state.addcart.allCheckList
+  allCheckList: state.addcart.allCheckList,
+  remarkData: state.addcart.remarkData
 });
 
 export default connect(mapStateToProps)(taskList);

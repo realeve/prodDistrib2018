@@ -212,3 +212,16 @@ export const getWipProdLogsCodeCount = (params) =>
         url: '/386/666b98f1d1.json',
         params
       });
+
+/**
+*   @database: { MES_MAIN }
+*   @desc:     { 图核判废用户关注信息 } 
+    const { tstart, tend } = params;
+*/
+export const getVCbpcCartcare = (params) =>
+  DEV
+    ? mock(require('@/mock/481_77013f03b6.json'))
+    : axios({
+        url: '/481/77013f03b6/array.json',
+        params
+      });

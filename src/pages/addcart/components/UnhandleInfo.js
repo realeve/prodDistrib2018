@@ -85,6 +85,10 @@ function UnhandleInfo({
     dispatch({
       type: 'addcart/loadPfNums'
     });
+
+    dispatch({
+      type: 'addcart/getRemarkData'
+    });
   };
 
   return (

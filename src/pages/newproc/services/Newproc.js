@@ -59,7 +59,7 @@ export const addPrintNewprocPlan3 = async (params) =>
   }).then((res) => res);
 
 /**
-*   @database: { 机台作业 }
+*   @database: { 	MES系统_生产环境 }
 *   @desc:     { 印刷工序所有机台列表 } 
   
 */
@@ -69,7 +69,7 @@ export const getTBBASEMACHINEINFO = async () =>
   }).then((res) => res);
 
 /**
-*   @database: { 机台作业 }
+*   @database: { MES系统_生产环境 }
 *   @desc:     { 机台最近开印品种 } 
   
     const { machine_name } = params;

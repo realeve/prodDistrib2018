@@ -170,7 +170,7 @@ export const setPrintCutTask = (params) =>
  */
 export const getVwBlacklist = (carts) =>
   axios({
-    url: '/266/050298c7cf.json',
+    url: '/266/fb6e7e01eb.json',
     params: {
       carts
     }

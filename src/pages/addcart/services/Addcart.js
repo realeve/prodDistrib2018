@@ -225,3 +225,17 @@ export const getVCbpcCartcare = (params) =>
         url: '/481/77013f03b6/array.json',
         params
       });
+
+/**
+ *   @database: { MES系统_生产环境 }
+ *   @desc:     { 指定车号冠字信息查询 }
+ */
+export const getVCbpcCartLite = (carts) =>
+  DEV
+    ? mock(require('@/mock/588_9f836c859a.json'))
+    : axios({
+        url: '/588/9f836c859a.json',
+        params: {
+          carts
+        }
+      });

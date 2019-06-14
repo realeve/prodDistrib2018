@@ -4,7 +4,13 @@ import { Row, Col, Card, Empty, Skeleton } from 'antd';
 import VTable from '@/components/Table';
 import styles from './Report.less';
 
-const taskList = ({ task_list, loading, allCheckList, remarkData }) => {
+const taskList = ({
+  task_list,
+  loading,
+  allCheckList,
+  remarkData,
+  printCartList
+}) => {
   const result = (
     <Row gutter={10}>
       {task_list.map(
@@ -14,7 +20,7 @@ const taskList = ({ task_list, loading, allCheckList, remarkData }) => {
           carts_num,
           expect_num,
           real_num,
-          month,
+          // month,
           user_no,
           work_long_time,
           data,
@@ -115,29 +121,6 @@ const taskList = ({ task_list, loading, allCheckList, remarkData }) => {
     </Row>
   );
 
-  const printCartList = {
-    data: [],
-    rows: 0,
-    time: '',
-    title: '图核判废确认单',
-    header: ['序号', '车号', '类型', '品种', '判废量', '判废人员', '确认签字']
-  };
-
-  let idx = 1;
-  task_list.forEach(({ user_name, data }) => {
-    let res = data.map(({ type, cart_number, product_name, pf_num }) => [
-      idx++,
-      cart_number,
-      type == 0 ? '码后' : '丝印',
-      product_name,
-      pf_num,
-      user_name,
-      '  '
-    ]);
-    printCartList.data = [...printCartList.data, ...res];
-  });
-  printCartList.rows = printCartList.data.length;
-
   return (
     <div>
       <Card
@@ -166,7 +149,8 @@ const mapStateToProps = (state) => ({
   task_list: state.addcart.hechaTask.task_list,
   loading: state.addcart.hechaLoading,
   allCheckList: state.addcart.allCheckList,
-  remarkData: state.addcart.remarkData
+  remarkData: state.addcart.remarkData,
+  printCartList: state.addcart.printCartList
 });
 
 export default connect(mapStateToProps)(taskList);

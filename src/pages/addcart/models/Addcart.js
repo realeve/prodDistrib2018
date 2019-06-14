@@ -3,7 +3,58 @@ import * as db from '../services/Addcart';
 import dateRanges from '@/utils/ranges';
 import wms from '../../index/services/wms';
 import { setStore } from '@/utils/lib';
-const R = require('ramda');
+
+import * as R from 'ramda';
+
+function* getCarts(task_list,call) {
+  const printCartList = {
+    data: [],
+    rows: 0,
+    time: '',
+    title: '图核判废确认单',
+    header: [
+      '序号',
+      '车号',
+      '冠字',
+      '类型',
+      '品种',
+      '判废量',
+      '判废人员',
+      '确认签字'
+    ]
+  };
+
+  let idx = 1;
+  task_list.forEach(({ user_name, data }) => {
+    let res = data.map(({ type, cart_number, product_name, pf_num }) => [
+      idx++,
+      cart_number,
+      '',
+      type == 0 ? '码后' : '丝印',
+      product_name,
+      pf_num,
+      user_name,
+      '  '
+    ]);
+    printCartList.data = [...printCartList.data, ...res];
+  });
+  printCartList.rows = printCartList.data.length;
+
+  // 获取冠字信息
+  let carts = R.pluck(1)(printCartList.data);
+
+  let { data: cartInfo } = yield call(db.getVCbpcCartLite, carts);
+  printCartList.data = printCartList.data.map((item) => {
+    let cart = item[1];
+    let res = R.find(R.propEq('cart', cart))(cartInfo);
+    if (res) {
+      item[2] = res.gz;
+    }
+    return item;
+  });
+
+  return printCartList;
+}
 
 const handleTasklist = (hechaTask) => {
   let taskList = hechaTask.task_list;
@@ -91,7 +142,8 @@ export default {
     pfNums: [],
     allCheckList: {},
     pfList: {},
-    remarkData: {}
+    remarkData: {},
+    printCartList: { rows: 0, data: [] }
   },
   reducers: {
     setStore,
@@ -326,11 +378,14 @@ export default {
       });
       let hechaTask = yield call(db.getHechaTasks, params);
       hechaTask = handleTasklist(hechaTask);
+      let printCartList = yield getCarts(hechaTask.task_list,call);
+
       // console.log(hechaTask);
       yield put({
         type: 'setStore',
         payload: {
           hechaTask,
+          printCartList,
           hechaLoading: false
         }
       });
@@ -345,14 +400,17 @@ export default {
       let {
         data: [{ task_info, rec_time }]
       } = yield call(db.getPrintHechatask);
-
       let hechaTask = JSON.parse(task_info);
+
+      let printCartList = yield getCarts(hechaTask.task_list,call);
+
       yield put({
         type: 'setStore',
         payload: {
           hechaTask,
           hechaLoading: false,
-          rec_time
+          rec_time,
+          printCartList
         }
       });
     },

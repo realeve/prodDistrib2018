@@ -42,25 +42,36 @@ export default {
     },
     *getData(_, { call, put }) {
       // 机台列表
+      // let i = 0;
       let { data: machineList } = yield call(db.getPrintCutMachine);
+      // console.log(i++);
       // 工艺
       let { data: procTypeList } = yield call(db.getPrintCutProcList);
+      // console.log(i++);
       // 班次
       let { data: workTypeList } = yield call(db.getPrintCutWorktype);
+      // console.log(i++);
       //
       let { data: produceProdList } = yield call(db.getViewCartfinder);
+      // console.log(i++);
       // 锁车列表
       let { data: lockList } = yield call(db.getVwWimWhitelist);
-      lockList = lockList.map((item) => {
+
+      lockList = lockList.slice(0, 99).map((item) => {
         item.lock_reason = item.lock_reason.replace('锁车', '');
         return item;
       });
+      // console.log(i++, lockList);
 
       // 未完工列表
       let { data: unCompleteList } = yield call(db.getVwWimWhitelistUncomplete);
 
+      // console.log(i++);
+
       // 品种阈值
       let { data: prodList } = yield call(db.getProductdata);
+
+      // console.log(i++);
 
       let params = yield call(db.getThreadByProdname, prodList);
 
@@ -73,6 +84,7 @@ export default {
       // 排产结果
       let prodResult = yield call(db.getViewPrintCutProdLog);
 
+      // console.log(3);
       yield put({
         type: 'setStore',
         payload: {

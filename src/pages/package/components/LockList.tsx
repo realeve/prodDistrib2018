@@ -33,11 +33,11 @@ export default function LockList({
       {lockList.map(
         ({ gh, prodname, tech, carno, lock_reason, open_num }, key) => (
           <li key={key}>
-            {gh && <span>{gh}</span>}
-            <span>{prodname}</span>
+            {/* {gh && <span>{gh}</span>} */}
+            {/* <span>{prodname}</span> */}
             <span>{carno}</span>
             <span>{open_num}</span>
-            {tech && <span>{tech}</span>}
+            {/* {tech && <span>{tech}</span>} */}
             {lock_reason && <span>{lock_reason}</span>}
           </li>
         )

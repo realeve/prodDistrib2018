@@ -71,7 +71,8 @@ class DynamicRule extends React.Component {
       daterange: [tstart, tend],
       limit,
       prod,
-      precision
+      precision,
+      totalnum
     } = form.getFieldsValue();
     return {
       need_convert: 0,
@@ -80,7 +81,8 @@ class DynamicRule extends React.Component {
       user_list: this.state.operator_detail,
       limit,
       prod,
-      precision
+      precision,
+      totalnum
     };
   };
 
@@ -399,6 +401,17 @@ class DynamicRule extends React.Component {
                 initialValue: 20000,
                 rules: [{ required: true, message: '超过此数值不判废' }]
               })(<Input placeholder="请输入有效缺陷条数" />)}
+            </FormItem>
+          </Col>
+          <Col span={12}>
+            <FormItem
+              {...formItemLayout}
+              label="平均每人判废数"
+              extra="系统按此信息排产">
+              {getFieldDecorator('totalnum', {
+                initialValue: 20000,
+                rules: [{ required: true, message: '系统按此信息排产' }]
+              })(<Input placeholder="请输入平均每人判废数" />)}
             </FormItem>
           </Col>
           <Col span={12}>

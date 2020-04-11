@@ -1,11 +1,3 @@
-import Index from './main';
-import Tasks from './components/Tasks';
+import router from "umi/router";
 
-export default () => {
-  return (
-    <div>
-      <Index />
-      <Tasks />
-    </div>
-  );
-};
+router.push("/addcart/task");

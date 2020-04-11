@@ -9,9 +9,7 @@ export default {
     dateRange: []
   },
   reducers: {
-    setDateRange(state, {
-      payload: dateRange
-    }) {
+    setDateRange(state, { payload: dateRange }) {
       return {
         ...state,
         dateRange
@@ -19,11 +17,7 @@ export default {
     }
   },
   effects: {
-    * updateDateRange({
-      payload: dateRange
-    }, {
-      put
-    }) {
+    *updateDateRange({ payload: dateRange }, { put }) {
       yield put({
         type: "setDateRange",
         payload: dateRange
@@ -31,14 +25,8 @@ export default {
     }
   },
   subscriptions: {
-    setup({
-      dispatch,
-      history
-    }) {
-      return history.listen(async ({
-        pathname,
-        query
-      }) => {
+    setup({ dispatch, history }) {
+      return history.listen(async ({ pathname, query }) => {
         const match = pathToRegexp("/").exec(pathname);
 
         if (match && match[0] === "/") {
@@ -63,9 +51,9 @@ export default {
             }
           });
 
-          await dispatch({
-            type: "tasks/handleTaskData"
-          });
+          // await dispatch({
+          //   type: "tasks/handleTaskData"
+          // });
         }
       });
     }

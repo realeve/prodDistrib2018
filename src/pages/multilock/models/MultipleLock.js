@@ -1,10 +1,10 @@
-import pathToRegexp from 'path-to-regexp';
-import * as db from '../services/MultipleLock';
-import dateRanges from '../../../utils/ranges';
-import wms from '../../index/services/wms';
-const R = require('ramda');
+import pathToRegexp from "path-to-regexp";
+import * as db from "../services/MultipleLock";
+import dateRanges from "../../../utils/ranges";
+import wms from "../../index_task/services/wms";
+const R = require("ramda");
 
-const namespace = 'multilock';
+const namespace = "multilock";
 
 export default {
   namespace,
@@ -38,19 +38,19 @@ export default {
   effects: {
     *updateDateRange({ payload: dateRange }, { put }) {
       yield put({
-        type: 'setDateRange',
+        type: "setDateRange",
         payload: dateRange
       });
     },
     *handleReportData(payload, { call, put, select }) {
       yield put({
-        type: 'save',
+        type: "save",
         payload: {
           dataSource: []
         }
       });
 
-      const store = yield select((state) => state[namespace]);
+      const store = yield select(state => state[namespace]);
       const { dateRange } = store;
 
       let dataSource = yield call(db.getViewPrintAbnormalProd, {
@@ -69,25 +69,25 @@ export default {
       carts = R.uniq(carts);
 
       let abnormalWMS = yield call(db.getTbstock, carts);
-      abnormalWMS.data = abnormalWMS.data.map((item) => {
+      abnormalWMS.data = abnormalWMS.data.map(item => {
         item[6] = wms.getLockReason(item[6]);
         return item;
       });
       // 将库管系统数据合并
       dataSource.header = [
         ...dataSource.header.slice(0, 4),
-        '锁车状态(库管系统)',
-        '工艺(库管系统)',
-        '完成状态(调度服务)',
+        "锁车状态(库管系统)",
+        "工艺(库管系统)",
+        "完成状态(调度服务)",
         ...dataSource.header.slice(5, 9)
       ];
-      dataSource.data = dataSource.data.map((item) => {
+      dataSource.data = dataSource.data.map(item => {
         let iTemp = item.slice(0, 4);
         let lockStatus = abnormalWMS.data.filter(
-          (wmsItem) => wmsItem[2] === item[1]
+          wmsItem => wmsItem[2] === item[1]
         );
         if (lockStatus.length === 0) {
-          iTemp = [...iTemp, '', ''];
+          iTemp = [...iTemp, "", ""];
         } else {
           iTemp = [...iTemp, lockStatus[0][5], lockStatus[0][7]];
         }
@@ -95,7 +95,7 @@ export default {
       });
 
       yield put({
-        type: 'save',
+        type: "save",
         payload: {
           dataSource
         }
@@ -104,7 +104,7 @@ export default {
     *getProc(payload, { put, call }) {
       let proc = yield call(db.getPrintAbnormalProd);
       yield put({
-        type: 'setProc',
+        type: "setProc",
         payload: proc.data
       });
     }
@@ -112,19 +112,19 @@ export default {
   subscriptions: {
     setup({ dispatch, history }) {
       return history.listen(async ({ pathname, query }) => {
-        const match = pathToRegexp('/' + namespace).exec(pathname);
-        if (match && match[0] === '/' + namespace) {
-          const [tstart, tend] = dateRanges['最近一月'];
-          const [ts, te] = [tstart.format('YYYYMMDD'), tend.format('YYYYMMDD')];
+        const match = pathToRegexp("/" + namespace).exec(pathname);
+        if (match && match[0] === "/" + namespace) {
+          const [tstart, tend] = dateRanges["最近一月"];
+          const [ts, te] = [tstart.format("YYYYMMDD"), tend.format("YYYYMMDD")];
           await dispatch({
-            type: 'updateDateRange',
+            type: "updateDateRange",
             payload: [ts, te]
           });
           dispatch({
-            type: 'handleReportData'
+            type: "handleReportData"
           });
           dispatch({
-            type: 'getProc'
+            type: "getProc"
           });
         }
       });

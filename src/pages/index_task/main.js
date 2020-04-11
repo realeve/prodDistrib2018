@@ -22,9 +22,9 @@ function Tables({ dispatch, tid, dateRange, dataSrc, loading }) {
       type: "tasks/fetchSampledData",
       payload: { tstart, tend }
     });
-    await dispatch({
-      type: "tasks/handleTaskData"
-    });
+    // await dispatch({
+    //   type: "tasks/handleTaskData"
+    // });
     dispatch({
       type: "tableConf/setDateRange",
       payload: dateStrings

@@ -1,8 +1,8 @@
-import { Menu, Icon, Layout } from 'antd';
-import Link from 'umi/link';
+import { Menu, Icon, Layout } from "antd";
+import Link from "umi/link";
 
-import styles from './header.less';
-import LoginAvatar from './LoginAvatar';
+import styles from "./header.less";
+import LoginAvatar from "./LoginAvatar";
 
 const { Header } = Layout;
 const SubMenu = Menu.SubMenu;
@@ -15,8 +15,9 @@ function HeaderMenu({ location, avatar }) {
         selectedKeys={[location.pathname]}
         mode="horizontal"
         theme="dark"
-        className={styles.menu}>
-        <SubMenu
+        className={styles.menu}
+      >
+        {/* <SubMenu
           title={
             <span>
               <Icon type="calculator" />
@@ -41,7 +42,7 @@ function HeaderMenu({ location, avatar }) {
               数据报表
             </Link>
           </Menu.Item>
-        </SubMenu>
+        </SubMenu> */}
 
         <SubMenu
           title={
@@ -49,7 +50,8 @@ function HeaderMenu({ location, avatar }) {
               <Icon type="unlock" />
               图核及异常品 <Icon type="down" />
             </span>
-          }>
+          }
+        >
           <Menu.Item key="/addcart/task">
             <Link to="/addcart/task">
               <Icon type="exclamation-circle-o" />
@@ -87,7 +89,8 @@ function HeaderMenu({ location, avatar }) {
               <Icon type="eye-o" />
               机检弱项 <Icon type="down" />
             </span>
-          }>
+          }
+        >
           <Menu.Item key="/multiweak">
             <Link to="/multiweak">
               <Icon type="close-circle-o" />
@@ -119,7 +122,8 @@ function HeaderMenu({ location, avatar }) {
               <Icon type="eye-o" />
               裁封线排产 <Icon type="down" />
             </span>
-          }>
+          }
+        >
           <Menu.Item key="/package">
             <Link to="/package">
               <Icon type="setting" />

@@ -93,7 +93,7 @@ const taskList = ({
                     <span>生产日期</span>
                   </li>
                   {data.map((item, i) => (
-                    <li key={item.cart_number}>
+                    <li key={item.cart_number+i}>
                       <span>{i + 1}</span>
                       <span
                         style={

@@ -8,6 +8,7 @@ import Header from "./Header";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 import { Layout, Breadcrumb, BackTop } from "antd";
 import userTool from "../utils/users";
+import { DEV } from "@/utils/axios";
 
 const { Content, Footer } = Layout;
 
@@ -60,6 +61,9 @@ class Index extends Component {
     // handle login
     let { data, success } = userTool.getUserSetting();
     if (!success || !data.autoLogin) {
+      if (DEV) {
+        return;
+      }
       router.push("/login");
       return;
     }

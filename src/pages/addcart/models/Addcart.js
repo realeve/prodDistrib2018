@@ -1,26 +1,26 @@
-import pathToRegexp from 'path-to-regexp';
-import * as db from '../services/Addcart';
-import dateRanges from '@/utils/ranges';
-import wms from '../../index/services/wms';
-import { setStore } from '@/utils/lib';
+import pathToRegexp from "path-to-regexp";
+import * as db from "../services/Addcart";
+import dateRanges from "@/utils/ranges";
+import wms from "../../index_task/services/wms";
+import { setStore } from "@/utils/lib";
 
-import * as R from 'ramda';
+import * as R from "ramda";
 
-function* getCarts(task_list,call) {
+function* getCarts(task_list, call) {
   const printCartList = {
     data: [],
     rows: 0,
-    time: '',
-    title: '图核判废确认单',
+    time: "",
+    title: "图核判废确认单",
     header: [
-      '序号',
-      '车号',
-      '冠字',
-      '类型',
-      '品种',
-      '判废量',
-      '判废人员',
-      '确认签字'
+      "序号",
+      "车号",
+      "冠字",
+      "类型",
+      "品种",
+      "判废量",
+      "判废人员",
+      "确认签字"
     ]
   };
 
@@ -29,12 +29,12 @@ function* getCarts(task_list,call) {
     let res = data.map(({ type, cart_number, product_name, pf_num }) => [
       idx++,
       cart_number,
-      '',
-      type == 0 ? '码后' : '丝印',
+      "",
+      type == 0 ? "码后" : "丝印",
       product_name,
       pf_num,
       user_name,
-      '  '
+      "  "
     ]);
     printCartList.data = [...printCartList.data, ...res];
   });
@@ -44,9 +44,9 @@ function* getCarts(task_list,call) {
   let carts = R.pluck(1)(printCartList.data);
 
   let { data: cartInfo } = yield call(db.getVCbpcCartLite, carts);
-  printCartList.data = printCartList.data.map((item) => {
+  printCartList.data = printCartList.data.map(item => {
     let cart = item[1];
-    let res = R.find(R.propEq('cart', cart))(cartInfo);
+    let res = R.find(R.propEq("cart", cart))(cartInfo);
     if (res) {
       item[2] = res.gz;
     }
@@ -56,14 +56,14 @@ function* getCarts(task_list,call) {
   return printCartList;
 }
 
-const handleTasklist = (hechaTask) => {
+const handleTasklist = hechaTask => {
   let taskList = hechaTask.task_list;
   let sum = 0,
     prodList = [];
   let srcList = {};
   // 求和
-  taskList.forEach((item) => {
-    item.data.forEach((detail) => {
+  taskList.forEach(item => {
+    item.data.forEach(detail => {
       if (detail.type == 0) {
         prodList.push(detail.product_name);
         sum += detail.pf_num;
@@ -79,10 +79,10 @@ const handleTasklist = (hechaTask) => {
 
   // 平均条数
   let avg = sum / prodList.length;
-  taskList.forEach((item) => {
-    item.data.forEach((detail) => {
+  taskList.forEach(item => {
+    item.data.forEach(detail => {
       if (detail.type == 0) {
-        if (typeof srcList[detail.product_name] == 'undefined') {
+        if (typeof srcList[detail.product_name] == "undefined") {
           srcList[detail.product_name] = [detail];
         } else {
           srcList[detail.product_name].push(detail);
@@ -91,11 +91,11 @@ const handleTasklist = (hechaTask) => {
     });
   });
 
-  let cartList = prodList.map((key) => {
+  let cartList = prodList.map(key => {
     srcList[key] = srcList[key].sort((a, b) => a.pf_num - b.pf_num);
     let status = false;
-    let result = '';
-    srcList[key].forEach((item) => {
+    let result = "";
+    srcList[key].forEach(item => {
       if (!status && item.pf_num > avg) {
         status = true;
         result = item.cart_number;
@@ -108,8 +108,8 @@ const handleTasklist = (hechaTask) => {
     return result;
   });
 
-  hechaTask.task_list = hechaTask.task_list.map((item) => {
-    item.data = item.data.map((detail) => {
+  hechaTask.task_list = hechaTask.task_list.map(item => {
+    item.data = item.data.map(detail => {
       if (cartList.includes(detail.cart_number)) {
         detail.is_check = true;
       } else {
@@ -123,7 +123,7 @@ const handleTasklist = (hechaTask) => {
   return hechaTask;
 };
 
-const namespace = 'addcart';
+const namespace = "addcart";
 export default {
   namespace,
   state: {
@@ -138,7 +138,7 @@ export default {
     operatorList: [],
     hechaTask: { task_list: [], unhandle_carts: [], unupload_carts: [] },
     hechaLoading: false,
-    rec_time: '',
+    rec_time: "",
     pfNums: [],
     allCheckList: {},
     pfList: {},
@@ -193,13 +193,13 @@ export default {
   effects: {
     *updateDateRange({ payload: dateRange }, { put }) {
       yield put({
-        type: 'setDateRange',
+        type: "setDateRange",
         payload: dateRange
       });
     },
     *getLockCart(_, { call, put, select }) {
-      const [ts, te] = dateRanges['本周'];
-      const [tstart, tend] = [ts.format('YYYYMMDD'), te.format('YYYYMMDD')];
+      const [ts, te] = dateRanges["本周"];
+      const [tstart, tend] = [ts.format("YYYYMMDD"), te.format("YYYYMMDD")];
 
       // 获取每周人工拉号锁车产品信息
       let { data } = yield call(db.getPrintSampleCartlist, {
@@ -216,7 +216,7 @@ export default {
       };
 
       data.forEach(({ num, type }) => {
-        if (type === '1') {
+        if (type === "1") {
           lockInfo.checkByWeek = num;
         } else {
           lockInfo.abnormal = num;
@@ -224,7 +224,7 @@ export default {
       });
 
       yield put({
-        type: 'saveLockInfo',
+        type: "saveLockInfo",
         payload: {
           lockInfo
         }
@@ -232,20 +232,20 @@ export default {
     },
     *handleReportData(_, { call, put, select }) {
       yield put({
-        type: 'save',
+        type: "save",
         payload: {
           dataSource: []
         }
       });
 
       yield put({
-        type: 'saveWMS',
+        type: "saveWMS",
         payload: {
           abnormalWMS: []
         }
       });
 
-      const store = yield select((state) => state[namespace]);
+      const store = yield select(state => state[namespace]);
       const { dateRange } = store;
 
       let dataSource = yield call(db.getViewPrintAbnormalProd, {
@@ -260,7 +260,7 @@ export default {
         return;
       }
       let abnormalWMS = yield call(db.getTbstock, carts);
-      abnormalWMS.data = abnormalWMS.data.map((item) => {
+      abnormalWMS.data = abnormalWMS.data.map(item => {
         item[6] = wms.getLockReason(item[6]);
         return item;
       });
@@ -268,18 +268,18 @@ export default {
       // 将库管系统数据合并
       dataSource.header = [
         ...dataSource.header.slice(0, 8),
-        '锁车状态(库管系统)',
-        '工艺(库管系统)',
-        '完成状态(调度服务)',
+        "锁车状态(库管系统)",
+        "工艺(库管系统)",
+        "完成状态(调度服务)",
         ...dataSource.header.slice(9, 12)
       ];
-      dataSource.data = dataSource.data.map((item) => {
+      dataSource.data = dataSource.data.map(item => {
         let iTemp = item.slice(0, 8);
         let lockStatus = abnormalWMS.data.filter(
-          (wmsItem) => wmsItem[2] === item[1]
+          wmsItem => wmsItem[2] === item[1]
         );
         if (lockStatus.length === 0) {
-          iTemp = [...iTemp, '', ''];
+          iTemp = [...iTemp, "", ""];
         } else {
           iTemp = [...iTemp, lockStatus[0][5], lockStatus[0][7]];
         }
@@ -287,20 +287,20 @@ export default {
       });
 
       yield put({
-        type: 'save',
+        type: "save",
         payload: {
           dataSource
         }
       });
 
       yield put({
-        type: 'saveWMS',
+        type: "saveWMS",
         payload: {
           abnormalWMS
         }
       });
       yield put({
-        type: 'setLoading',
+        type: "setLoading",
         payload: {
           loading: false
         }
@@ -309,19 +309,19 @@ export default {
     *getProc(_, { put, call }) {
       let proc = yield call(db.getPrintAbnormalProd);
       yield put({
-        type: 'setProc',
+        type: "setProc",
         payload: proc.data
       });
     },
     *getRemarkData(_, { put, call, select }) {
-      const store = yield select((state) => state[namespace]);
+      const store = yield select(state => state[namespace]);
       const { dateRange } = store;
       let remarkData = yield call(db.getVCbpcCartcare, {
         tstart: dateRange[0],
         tend: dateRange[1]
       });
       yield put({
-        type: 'setStore',
+        type: "setStore",
         payload: { remarkData }
       });
     },
@@ -329,7 +329,7 @@ export default {
       let { data: operatorList } = yield call(db.getUserList);
 
       yield put({
-        type: 'setStore',
+        type: "setStore",
         payload: {
           operatorList
         }
@@ -344,7 +344,7 @@ export default {
       { put, call }
     ) {
       yield put({
-        type: 'setStore',
+        type: "setStore",
         payload: {
           dateRange: [tstart, tend]
         }
@@ -358,7 +358,7 @@ export default {
       });
 
       yield put({
-        type: 'setStore',
+        type: "setStore",
         payload: { allCheckList }
       });
     },
@@ -370,7 +370,7 @@ export default {
       { put, call }
     ) {
       yield put({
-        type: 'setStore',
+        type: "setStore",
         payload: {
           hechaLoading: true,
           hechaTask: { task_list: [], unhandle_carts: [], unupload_carts: [] }
@@ -378,11 +378,11 @@ export default {
       });
       let hechaTask = yield call(db.getHechaTasks, params);
       hechaTask = handleTasklist(hechaTask);
-      let printCartList = yield getCarts(hechaTask.task_list,call);
+      let printCartList = yield getCarts(hechaTask.task_list, call);
 
       // console.log(hechaTask);
       yield put({
-        type: 'setStore',
+        type: "setStore",
         payload: {
           hechaTask,
           printCartList,
@@ -392,7 +392,7 @@ export default {
     },
     *loadHechaTask(_, { put, call }) {
       yield put({
-        type: 'setStore',
+        type: "setStore",
         payload: {
           hechaLoading: true
         }
@@ -402,10 +402,10 @@ export default {
       } = yield call(db.getPrintHechatask);
       let hechaTask = JSON.parse(task_info);
 
-      let printCartList = yield getCarts(hechaTask.task_list,call);
+      let printCartList = yield getCarts(hechaTask.task_list, call);
 
       yield put({
-        type: 'setStore',
+        type: "setStore",
         payload: {
           hechaTask,
           hechaLoading: false,
@@ -416,12 +416,12 @@ export default {
     },
     *loadPfNums(_, { put, call, select }) {
       yield put({
-        type: 'setStore',
+        type: "setStore",
         payload: {
           hechaLoading: true
         }
       });
-      const store = yield select((state) => state[namespace]);
+      const store = yield select(state => state[namespace]);
       const {
         dateRange: [tstart, tend]
       } = store;
@@ -442,9 +442,9 @@ export default {
         tend
       });
 
-      codeNumCount.forEach((item) => {
+      codeNumCount.forEach(item => {
         let idx = pfNums.findIndex(
-          (all) => all.operator_name == item.operator_name
+          all => all.operator_name == item.operator_name
         );
         if (idx < 0) {
           pfNums.push({
@@ -478,7 +478,7 @@ export default {
         tstart: tend,
         tend
       });
-      res.data = res.data.map((item) => {
+      res.data = res.data.map(item => {
         item.push(0);
         return item;
       });
@@ -486,7 +486,7 @@ export default {
       codeList.rows = codeList.data.length;
 
       yield put({
-        type: 'setStore',
+        type: "setStore",
         payload: {
           pfNums,
           pfList: codeList,
@@ -498,58 +498,58 @@ export default {
   subscriptions: {
     setup({ dispatch, history }) {
       return history.listen(async ({ pathname, query }) => {
-        const match = pathToRegexp('/' + namespace).exec(pathname);
+        const match = pathToRegexp("/" + namespace).exec(pathname);
 
-        const [tstart, tend] = dateRanges['本月'];
-        const [ts, te] = [tstart.format('YYYYMMDD'), tend.format('YYYYMMDD')];
+        const [tstart, tend] = dateRanges["本月"];
+        const [ts, te] = [tstart.format("YYYYMMDD"), tend.format("YYYYMMDD")];
 
-        if (match && match[0] === '/' + namespace) {
+        if (match && match[0] === "/" + namespace) {
           await dispatch({
-            type: 'setStore',
+            type: "setStore",
             payload: {
               dateRange: [ts, te]
             }
           });
           dispatch({
-            type: 'handleReportData'
+            type: "handleReportData"
           });
 
           dispatch({
-            type: 'getProc'
+            type: "getProc"
           });
 
           dispatch({
-            type: 'getLockCart'
+            type: "getLockCart"
           });
         }
 
         // 自动排产载入人员信息
         if (pathname === `/${namespace}/task`) {
-          const [tstart, tend] = dateRanges['今天'];
-          const [ts, te] = [tstart.format('YYYYMMDD'), tend.format('YYYYMMDD')];
+          const [tstart, tend] = dateRanges["今天"];
+          const [ts, te] = [tstart.format("YYYYMMDD"), tend.format("YYYYMMDD")];
           await dispatch({
-            type: 'setStore',
+            type: "setStore",
             payload: {
               dateRange: [ts, te]
             }
           });
 
           dispatch({
-            type: 'getOperatorList'
+            type: "getOperatorList"
           });
 
           dispatch({
-            type: 'loadHechaTask'
+            type: "loadHechaTask"
           });
           dispatch({
-            type: 'getRemarkData'
+            type: "getRemarkData"
           });
           dispatch({
-            type: 'loadPfNums'
+            type: "loadPfNums"
           });
 
           dispatch({
-            type: 'updateAllCheckList',
+            type: "updateAllCheckList",
             payload: { daterange: [ts, te] }
           });
         }

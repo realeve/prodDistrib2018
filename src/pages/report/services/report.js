@@ -15,7 +15,10 @@ const isFilterColumn = (data, key) => {
     }
   };
 
-  let uniqColumn = R.compose(R.uniq, R.map(R.prop(key)))(data);
+  let uniqColumn = R.compose(
+    R.uniq,
+    R.map(R.prop(key))
+  )(data);
   R.map(handleItem)(uniqColumn);
 
   return { uniqColumn, filters: isValid };
@@ -117,4 +120,4 @@ export const getPrintSampleMachine = async params =>
   await axios({
     url: "/58/0695d9575b/array.json",
     params
-  }).then(res => res);
+  });

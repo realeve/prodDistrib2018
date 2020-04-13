@@ -54,8 +54,11 @@ class Tables extends Component {
 
     let dataSource = [];
 
-    if (data.rows) {
-      if (typeof data.data[0].key === "undefined") {
+    if (data.rows > 0) {
+      if (
+        typeof data.data[0].key === "undefined" &&
+        R.type(data.data[0]) === "Array"
+      ) {
         data.data = data.data.map((item, key) => {
           let col = { key };
           item.forEach((td, idx) => {

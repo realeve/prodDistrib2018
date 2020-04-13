@@ -1,9 +1,9 @@
-import pathToRegexp from 'path-to-regexp';
-import * as db from '../services/package';
+import pathToRegexp from "path-to-regexp";
+import * as db from "../services/package";
 
-import { setStore } from '@/utils/lib';
+import { setStore } from "@/utils/lib";
 
-const namespace = 'package';
+const namespace = "package";
 export default {
   namespace,
   state: {
@@ -25,7 +25,7 @@ export default {
       // 排产结果
       let prodResult = yield call(db.getViewPrintCutProdLog);
       yield put({
-        type: 'setStore',
+        type: "setStore",
         payload: {
           prodResult
         }
@@ -34,7 +34,7 @@ export default {
     *refreshMachineList(_, { call, put }) {
       let { data: machineList } = yield call(db.getPrintCutMachine);
       yield put({
-        type: 'setStore',
+        type: "setStore",
         payload: {
           machineList
         }
@@ -42,7 +42,7 @@ export default {
     },
     *getData(_, { call, put }) {
       // 机台列表
-      // let i = 0;
+      let i = 0;
       let { data: machineList } = yield call(db.getPrintCutMachine);
       // console.log(i++);
       // 工艺
@@ -53,27 +53,39 @@ export default {
       // console.log(i++);
       //
       let { data: produceProdList } = yield call(db.getViewCartfinder);
-      // console.log(i++);
+      // console.log(i++, "品种列表");
       // 锁车列表
-      let { data: lockList } = yield call(db.getVwWimWhitelist);
+      let { data: _lockList } = yield call(db.getVwWimWhitelist);
+      // console.log(i++, _lockList);
 
-      lockList = lockList.slice(0, 99).map((item) => {
-        item.lock_reason = item.lock_reason.replace('锁车', '');
-        return item;
-      });
-      // console.log(i++, lockList);
+      let lockInfo = {
+        incomplete: "未完成",
+        q_newProc: "四新",
+        q_abnormalProd: "异常品"
+      };
+      let lockList = _lockList
+        .filter(item => item.lock_reason)
+        .slice(0, 99)
+        .map(item => {
+          item.lock_reason = String(item.lock_reason).replace("锁车", "");
+          item.lock_reason = lockInfo[item.lock_reason] || item.lock_reason;
+          return item;
+        });
+      console.log(i++, lockList);
 
       // 未完工列表
       let { data: unCompleteList } = yield call(db.getVwWimWhitelistUncomplete);
 
-      // console.log(i++);
+      console.log(i++);
 
       // 品种阈值
       let { data: prodList } = yield call(db.getProductdata);
 
-      // console.log(i++);
+      console.log(i++);
 
       let params = yield call(db.getThreadByProdname, prodList);
+
+      console.log(i++);
 
       // 开包量超过设定值产品
       let { data: abnormalList } = yield call(
@@ -86,7 +98,7 @@ export default {
 
       // console.log(3);
       yield put({
-        type: 'setStore',
+        type: "setStore",
         payload: {
           machineList,
           procTypeList,
@@ -96,30 +108,30 @@ export default {
           prodResult,
           abnormalList: [
             {
-              prodname: '品种',
-              gh: '冠号',
-              carno: '大万号',
-              open_num: '开包量',
-              tech: '工艺'
+              prodname: "品种",
+              gh: "冠号",
+              carno: "大万号",
+              open_num: "开包量",
+              tech: "工艺"
             },
             ...abnormalList
           ],
           lockList: [
             {
-              prodname: '品种',
-              gh: '冠号',
-              carno: '大万号',
-              open_num: '开包量',
-              tech: '工艺',
-              lock_reason: '锁车原因'
+              prodname: "品种",
+              gh: "冠号",
+              carno: "大万号",
+              open_num: "开包量",
+              tech: "工艺",
+              lock_reason: "锁车原因"
             },
             ...lockList
           ],
           unCompleteList: [
             {
-              prodname: '品种',
-              carno: '大万号',
-              open_num: '开包量'
+              prodname: "品种",
+              carno: "大万号",
+              open_num: "开包量"
             },
             ...unCompleteList
           ]
@@ -130,10 +142,10 @@ export default {
   subscriptions: {
     setup({ dispatch, history }) {
       return history.listen(async ({ pathname, query }) => {
-        const match = pathToRegexp('/' + namespace).exec(pathname);
-        if (match && match[0] === '/' + namespace) {
+        const match = pathToRegexp("/" + namespace).exec(pathname);
+        if (match && match[0] === "/" + namespace) {
           dispatch({
-            type: 'getData'
+            type: "getData"
           });
         }
       });

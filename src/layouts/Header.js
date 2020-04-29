@@ -58,6 +58,12 @@ function HeaderMenu({ location, avatar }) {
               图像核查自动排产
             </Link>
           </Menu.Item>
+          <Menu.Item key="/verify">
+            <Link to="/verify">
+              <Icon type="exclamation-circle-o" />
+              判废图像人工审核
+            </Link>
+          </Menu.Item>
           <Menu.Item key="/addcart">
             <Link to="/addcart">
               <Icon type="exclamation-circle-o" />

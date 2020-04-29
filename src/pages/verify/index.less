@@ -1,0 +1,52 @@
+.verify {
+  .config {
+    display: flex;
+    flex-direction: row;
+    .item {
+      width: 300px;
+      margin-right: 20px;
+    }
+  }
+  .imgs {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    list-style-type: none;
+    margin-block-start: 0;
+    margin-block-end: 0;
+    padding-inline-start: 0;
+
+    @imgSize: 90px;
+    li {
+      margin: 5px;
+      border: 1px solid #aaa;
+      .img {
+        width: @imgSize*3;
+        height: @imgSize*2;
+      }
+      .detail {
+        display: flex;
+        flex-direction: row;
+        .info {
+          width: 160px;
+          .item {
+            display: flex;
+            flex-direction: row;
+            span {
+              &:first-child {
+                width: 80px;
+                text-align: right;
+              }
+              text-align: left;
+            }
+          }
+        }
+        .action {
+          display: flex;
+          flex-direction: column;
+        }
+      }
+    }
+  }
+}

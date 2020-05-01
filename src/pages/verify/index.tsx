@@ -64,6 +64,33 @@ let groupByKilo = data => {
   });
 };
 
+let groupByPiece = data => {
+  let dist = R.groupBy(item => item.code.slice(-4))(data);
+  return Object.entries(dist).map(([kilo, data]) => {
+    let res = R.clone(data);
+    res = res.sort((a, b) => a.code - b.code);
+
+    return {
+      name: `大张号：${kilo}(${res.length} 条)`,
+      data: res
+    };
+  });
+};
+let groupByPMacro = data => {
+  let dist = R.groupBy(item => item.macro_id)(data);
+  return Object.entries(dist)
+    .map(([kilo, data]) => {
+      let res = R.clone(data);
+      res = res.sort((a, b) => a.code - b.code);
+      res = res.sort((a, b) => a.camera.slice(0, 2) - b.camera.slice(0, 2));
+      return {
+        name: `宏区：${kilo}(${res.length} 条)`,
+        data: res
+      };
+    })
+    .sort((a, b) => b.data.length - a.data.length);
+};
+
 export default () => {
   const [cart, setCart] = useState("1980A234");
   const [disabled, setDisabled] = useState(false);
@@ -80,7 +107,7 @@ export default () => {
     setSilk([]);
     db.getQfmWipJobs(cart).then(res => {
       setMahou(res.data);
-      setMahouData(groupByKilo(res.data));
+      setMahouData(groupByPMacro(res.data));
     });
     db.getWipJobs(cart).then(res => {
       setSilk([
@@ -115,7 +142,16 @@ export default () => {
         <ImgList data={silk} />
       </Card>
 
-      <Card title="码后/涂后废">
+      <Card
+        title="码后/涂后废"
+        extra={
+          <div>
+            <Button type="default">按千位</Button>
+            <Button type="default">按大张</Button>
+            <Button type="default">按宏区</Button>
+          </div>
+        }
+      >
         <ImgList data={mahouData} />
       </Card>
     </div>

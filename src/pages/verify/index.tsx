@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Card, Input, Button } from "antd";
+import { Card, Input, Button, Radio, Spin } from "antd";
 import styles from "./index.less";
 import * as lib from "@/utils/lib";
 import * as db from "./db";
@@ -56,6 +56,7 @@ let groupByKilo = data => {
   return Object.entries(dist).map(([kilo, data]) => {
     let res = R.clone(data);
     res = res.sort((a, b) => a.code.substr(-4) - b.code.substr(-4));
+    res = res.sort((a, b) => a.camera.slice(0, 2) - b.camera.slice(0, 2));
 
     return {
       name: `第${kilo}千`,
@@ -69,6 +70,7 @@ let groupByPiece = data => {
   return Object.entries(dist).map(([kilo, data]) => {
     let res = R.clone(data);
     res = res.sort((a, b) => a.code - b.code);
+    res = res.sort((a, b) => a.camera.slice(0, 2) - b.camera.slice(0, 2));
 
     return {
       name: `大张号：${kilo}(${res.length} 条)`,
@@ -76,12 +78,12 @@ let groupByPiece = data => {
     };
   });
 };
-let groupByPMacro = data => {
+let groupByMacro = data => {
   let dist = R.groupBy(item => item.macro_id)(data);
   return Object.entries(dist)
     .map(([kilo, data]) => {
       let res = R.clone(data);
-      res = res.sort((a, b) => a.code - b.code);
+      res = res.sort((a, b) => a.code.substr(-4) - b.code.substr(-4));
       res = res.sort((a, b) => a.camera.slice(0, 2) - b.camera.slice(0, 2));
       return {
         name: `宏区：${kilo}(${res.length} 条)`,
@@ -91,6 +93,41 @@ let groupByPMacro = data => {
     .sort((a, b) => b.data.length - a.data.length);
 };
 
+let groupByPos = data => {
+  let dist = R.groupBy(item => item.pos)(data);
+  return Object.entries(dist)
+    .map(([kilo, data]) => {
+      let res = R.clone(data);
+      res = res.sort((a, b) => a.camera.slice(0, 2) - b.camera.slice(0, 2));
+      res = res.sort((a, b) => a.code.substr(-4) - b.code.substr(-4));
+      res = res.sort((a, b) => a.macro_id - b.macro_id);
+      return {
+        name: `开位：${kilo}(${res.length} 条)`,
+        data: res
+      };
+    })
+    .sort((a, b) => b.data.length - a.data.length);
+};
+
+let methods = {
+  macro: {
+    name: "宏区",
+    method: groupByMacro
+  },
+  pos: {
+    name: "开位",
+    method: groupByPos
+  },
+  piece: {
+    name: "大张",
+    method: groupByPiece
+  },
+  kilo: {
+    name: "千位",
+    method: groupByKilo
+  }
+};
+
 export default () => {
   const [cart, setCart] = useState("1980A234");
   const [disabled, setDisabled] = useState(false);
@@ -98,7 +135,7 @@ export default () => {
   const [mahouData, setMahouData] = useState([]);
 
   const [silk, setSilk] = useState([{ data: [], name: "丝印缺陷" }]);
-  const [mahou, setMahou] = useState([]);
+  const [mahou, setMahou] = useState({});
 
   const [filterPos, setFilterPos] = useState(0);
 
@@ -106,8 +143,7 @@ export default () => {
     setMahou([]);
     setSilk([]);
     db.getQfmWipJobs(cart).then(res => {
-      setMahou(res.data);
-      setMahouData(groupByPMacro(res.data));
+      setMahou(res);
     });
     db.getWipJobs(cart).then(res => {
       setSilk([
@@ -119,7 +155,19 @@ export default () => {
     });
   };
 
-  // console.log(filterPos);
+  const [loading, setLoading] = useState(false);
+
+  const [filterMethod, setFilterMethod] = useState("macro");
+
+  useEffect(() => {
+    if (!mahou.hash) {
+      return;
+    }
+    setLoading(true);
+    let dist = methods[filterMethod].method(mahou.data);
+    setMahouData(dist);
+    setLoading(false);
+  }, [filterMethod, mahou.hash]);
 
   return (
     <div className={styles.verify}>
@@ -144,11 +192,22 @@ export default () => {
 
       <Card
         title="码后/涂后废"
+        loading={loading}
         extra={
           <div>
-            <Button type="default">按千位</Button>
-            <Button type="default">按大张</Button>
-            <Button type="default">按宏区</Button>
+            <Radio.Group
+              defaultValue="macro"
+              onChange={e => {
+                setFilterMethod(e.target.value);
+              }}
+              buttonStyle="solid"
+            >
+              {Object.entries(methods).map(([key, item]) => (
+                <Radio.Button value={key} key={key}>
+                  {item.name}
+                </Radio.Button>
+              ))}
+            </Radio.Group>
           </div>
         }
       >

@@ -1,11 +1,14 @@
-import { axios, mock, DEV } from "@/utils/axios";
+import { axios, mock } from "@/utils/axios";
+
+let DEV = true;
+
 /**
  *   @database: { 全幅面 }
  *   @desc:     { 票面实废图像信息查询 }
  */
 export const getQfmWipJobs = cart =>
   DEV
-    ? mock("./qfmwipjob.json")
+    ? mock(require("./qfmwipjob.json"))
     : axios({
         url: "/438/49a52af747.json",
         params: {
@@ -20,7 +23,7 @@ export const getQfmWipJobs = cart =>
  */
 export const getWipJobs = cart =>
   DEV
-    ? mock("./wipjobs.json")
+    ? mock(require("./wipjobs.json"))
     : axios({
         url: "/439/e6ccdf08a7.json",
         params: {
@@ -29,3 +32,5 @@ export const getWipJobs = cart =>
           cache: 5
         }
       });
+
+export const getFormatpos = cart => mock(require("./row.json"));

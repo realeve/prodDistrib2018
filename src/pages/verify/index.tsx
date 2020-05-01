@@ -4,18 +4,20 @@ import styles from "./index.less";
 import * as lib from "@/utils/lib";
 import * as db from "./db";
 import * as R from "ramda";
-
+import Heatmap from "./heatmap";
 const prefix = "data:image/jpg;base64,";
 
 const ImgList = ({ data }) =>
-  data.map(_data => (
+  data.map((_data, i) => (
     <div key={_data.name} style={{ marginBottom: 20 }}>
-      <h4 style={{ fontSize: 22 }}>{_data.name}</h4>
+      <h4 style={{ fontSize: 22 }}>
+        {i + 1}.{_data.name}
+      </h4>
       <ul className={styles.imgs}>
         {_data.data.map((item, i) => (
           <li key={i}>
-            <img className={styles.img} src={prefix + item.image} alt="" />
-            <div className={styles.detail}>
+            <div className={styles.imgWrap}>
+              <img className={styles.img} src={prefix + item.image} alt="" />
               <div className={styles.info}>
                 <div className={styles.item}>
                   <span>号码：</span>
@@ -30,18 +32,18 @@ const ImgList = ({ data }) =>
                   <span>{item.camera}</span>
                 </div>
                 <div className={styles.item}>
-                  <span>缺陷位置：</span>
+                  <span>宏区：</span>
                   <span>{item.macro_id}</span>
                 </div>
               </div>
-              <div className={styles.action}>
-                <Button style={{ marginTop: 6 }} type="primary">
-                  标记
-                </Button>
-                <Button style={{ marginTop: 6 }} type="dashed">
-                  移除标记
-                </Button>
-              </div>
+            </div>
+            <div className={styles.action}>
+              <Button style={{ marginTop: 6 }} type="primary">
+                标记
+              </Button>
+              <Button style={{ marginTop: 6 }} type="dashed">
+                移除标记
+              </Button>
             </div>
           </li>
         ))}
@@ -63,13 +65,15 @@ let groupByKilo = data => {
 };
 
 export default () => {
-  const [cart, setCart] = useState("");
-  const [disabled, setDisabled] = useState(true);
+  const [cart, setCart] = useState("1980A234");
+  const [disabled, setDisabled] = useState(false);
 
   const [mahouData, setMahouData] = useState([]);
 
   const [silk, setSilk] = useState([{ data: [], name: "丝印缺陷" }]);
   const [mahou, setMahou] = useState([]);
+
+  const [filterPos, setFilterPos] = useState(0);
 
   const refreshImg = async () => {
     setMahou([]);
@@ -88,6 +92,8 @@ export default () => {
     });
   };
 
+  // console.log(filterPos);
+
   return (
     <div className={styles.verify}>
       <div className={styles.config}>
@@ -104,6 +110,7 @@ export default () => {
           查询缺陷图像
         </Button>
       </div>
+      {cart.length == 8 && <Heatmap cart={cart} onFilter={setFilterPos} />}
       <Card title="丝印废" style={{ margin: "20px 0" }}>
         <ImgList data={silk} />
       </Card>

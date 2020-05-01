@@ -17,35 +17,51 @@
     margin-block-end: 0;
     padding-inline-start: 0;
 
-    @imgSize: 90px;
+    @imgSize: 70px;
     li {
       margin: 5px;
       border: 1px solid #aaa;
-      .img {
-        width: @imgSize*3;
-        height: @imgSize*2;
-      }
-      .detail {
-        display: flex;
-        flex-direction: row;
+      .imgWrap {
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        .img {
+          width: @imgSize*3;
+          height: @imgSize*2;
+        }
+        &:hover {
+          .info {
+            top: 40px;
+            transition: top 0.3s linear;
+          }
+        }
+
         .info {
-          width: 160px;
+          background: rgba(0, 0, 0, 0.3);
+          padding: 10px;
+          height: 100px;
+          width: 100%;
+          color: #fff;
+          position: absolute;
+          top: @imgSize*2;
           .item {
             display: flex;
             flex-direction: row;
             span {
               &:first-child {
-                width: 80px;
                 text-align: right;
               }
               text-align: left;
             }
           }
         }
-        .action {
-          display: flex;
-          flex-direction: column;
-        }
+      }
+
+      .action {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly;
+        margin-bottom: 10px;
       }
     }
   }

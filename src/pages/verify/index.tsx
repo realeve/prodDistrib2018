@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Card, Input, Button, Radio, Spin } from "antd";
+import { Card, Input, Button, Radio } from "antd";
 import styles from "./index.less";
 import * as lib from "@/utils/lib";
 import * as db from "./db";
 import * as R from "ramda";
 import Heatmap from "./heatmap";
+// import { useSetState } from "react-use";
+
+// import classnames from "classname";
+
 const prefix = "data:image/jpg;base64,";
 
-const ImgList = ({ data }) =>
+const ImgList = ({ data, onAdd, onRemove, marked }) =>
   data.map((_data, i) => (
     <div key={_data.name} style={{ marginBottom: 20 }}>
       <h4 style={{ fontSize: 22 }}>
@@ -15,7 +19,10 @@ const ImgList = ({ data }) =>
       </h4>
       <ul className={styles.imgs}>
         {_data.data.map((item, i) => (
-          <li key={i}>
+          <li
+            key={i}
+            className={marked.includes(item.code) ? styles.marked : null}
+          >
             <div className={styles.imgWrap}>
               <img className={styles.img} src={prefix + item.image} alt="" />
               <div className={styles.info}>
@@ -38,10 +45,23 @@ const ImgList = ({ data }) =>
               </div>
             </div>
             <div className={styles.action}>
-              <Button style={{ marginTop: 6 }} type="primary">
+              <Button
+                style={{ marginTop: 6 }}
+                type="primary"
+                onClick={e => {
+                  onAdd(item.code);
+                }}
+                disabled={marked.includes(item.code)}
+              >
                 标记
               </Button>
-              <Button style={{ marginTop: 6 }} type="dashed">
+              <Button
+                style={{ marginTop: 6 }}
+                type="dashed"
+                onClick={e => {
+                  onRemove(item.code);
+                }}
+              >
                 移除标记
               </Button>
             </div>
@@ -169,6 +189,9 @@ export default () => {
     setLoading(false);
   }, [filterMethod, mahou.hash]);
 
+  const [markedSilk, setMarkedSilk] = useState([]);
+  const [markedMahou, setMarkedMahou] = useState([]);
+
   return (
     <div className={styles.verify}>
       <div className={styles.config}>
@@ -187,7 +210,19 @@ export default () => {
       </div>
       {cart.length == 8 && <Heatmap cart={cart} onFilter={setFilterPos} />}
       <Card title="丝印废" style={{ margin: "20px 0" }}>
-        <ImgList data={silk} />
+        <ImgList
+          data={silk}
+          onAdd={code => {
+            let nextState = R.clone(markedSilk);
+            nextState.push(code);
+            setMarkedSilk(nextState);
+          }}
+          onRemove={code => {
+            let nextState = R.reject(item => item == code)(markedSilk);
+            setMarkedSilk(nextState);
+          }}
+          marked={markedSilk}
+        />
       </Card>
 
       <Card
@@ -211,7 +246,19 @@ export default () => {
           </div>
         }
       >
-        <ImgList data={mahouData} />
+        <ImgList
+          data={mahouData}
+          onAdd={code => {
+            let nextState = R.clone(markedMahou);
+            nextState.push(code);
+            setMarkedMahou(nextState);
+          }}
+          onRemove={code => {
+            let nextState = R.reject(item => item == code)(markedMahou);
+            setMarkedMahou(nextState);
+          }}
+          marked={markedMahou}
+        />
       </Card>
     </div>
   );

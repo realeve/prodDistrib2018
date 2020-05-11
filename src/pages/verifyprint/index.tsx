@@ -89,7 +89,9 @@ export default () => {
           <Button
             type="primary"
             onClick={() => {
-              window.print();
+              db.setVerifyCarts(id).then(res => {
+                window.print();
+              });
             }}
           >
             打印

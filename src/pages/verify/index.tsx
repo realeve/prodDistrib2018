@@ -195,9 +195,12 @@ const Index = ({ user }) => {
 
   const [filterPos, setFilterPos] = useState(0);
 
+  const [list, setList] = useState([]);
+
   const refreshImg = async () => {
     setMahou({});
     setSilk([]);
+    setList([]);
     db.getQfmWipJobs(cart).then(res => {
       setMahou(res);
     });
@@ -208,6 +211,9 @@ const Index = ({ user }) => {
           name: "丝印缺陷"
         }
       ]);
+    });
+    db.getVerifyCartsList(cart).then(res => {
+      setList(res.data);
     });
   };
 
@@ -308,6 +314,35 @@ const Index = ({ user }) => {
               提交审核结果
             </Button>
           </div>
+          {list.length > 0 && (
+            <div className={styles.summary}>
+              <div className={styles.title}>历史审核结果</div>
+              {list.map(item => (
+                <div className={styles.content} key={item.id}>
+                  <div className={styles.row}>
+                    <div>审核人: </div>
+                    {item.operator}
+                  </div>
+                  <div className={styles.row}>
+                    <div>审核时间: </div>
+                    {item.rec_time}
+                  </div>
+                  <div className={styles.row}>
+                    <div>打印时间: </div>
+                    {item.print_time}
+                  </div>
+                  <Button
+                    type="default"
+                    onClick={() => {
+                      window.open("/verifyprint?id=" + item.id, "_blank");
+                    }}
+                  >
+                    查看通知单
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
           {cart.length == 8 && <Heatmap cart={cart} onFilter={setFilterPos} />}
         </div>
       </div>

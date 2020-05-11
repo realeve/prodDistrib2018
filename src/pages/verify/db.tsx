@@ -70,3 +70,15 @@ export const addVerifyLog = values =>
       nonce: "da27035b70"
     }
   });
+
+/**
+ *   @database: { 印码抽样及图像审核 }
+ *   @desc:     { 图像审核信息查询 }
+ */
+export const getVerifyCartsList = cart =>
+  axios({
+    url: "/980/83b01fd19f.json",
+    params: {
+      cart
+    }
+  });

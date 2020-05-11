@@ -63,8 +63,8 @@ export default () => {
           cart: row.cart,
           operator: row.operator
         });
+        document.title = `人工审核通知单(${row.cart})`;
         let data = handleData(res.data);
-
         setState(data);
       }
     });
@@ -82,6 +82,7 @@ export default () => {
           <div>审核人员:{info.operator}</div>
           <div>打印时间:{now()}</div>
         </div>
+        链接：{window.location.href}
         {Object.entries(state).map(([kilo, data]) => (
           <KiloItem kilo={kilo} data={data} key={kilo} />
         ))}

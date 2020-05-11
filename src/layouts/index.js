@@ -91,6 +91,10 @@ class Index extends Component {
       );
     }
 
+    if (location.pathname === "/verifyprint") {
+      return children;
+    }
+
     // timeout={500}
     return (
       <Layout className={styles.main}>

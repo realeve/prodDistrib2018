@@ -1,3 +1,5 @@
 import router from "umi/router";
 
-router.push("/verify");
+if (!window.location.href.includes("verifyprint")) {
+  router.push("/addcart/task");
+}

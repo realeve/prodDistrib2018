@@ -1,0 +1,57 @@
+.main {
+  width: 100%;
+  min-height: 100vh;
+  background: #f2f2f2;
+}
+.print {
+  font-size: 11pt;
+  width: 640px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #fff;
+  min-height: 100vh;
+  .title {
+    font-size: 20px;
+    text-align: center;
+  }
+  .row {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .kiloInfo {
+    padding: 10px 0;
+    .kilo {
+      font-size: 18px;
+      position: relative;
+      &::before {
+        content: "";
+        width: 4px;
+        height: 80%;
+        background: #444;
+        position: absolute;
+        left: -8px;
+        top: 3px;
+      }
+    }
+    .detail {
+      display: flex;
+      flex-wrap: wrap;
+
+      list-style-type: none;
+      margin-block-start: 0;
+      margin-block-end: 0;
+      padding-inline-start: 0;
+
+      .item {
+        width: 200px;
+      }
+    }
+  }
+}
+
+@media print {
+  .noprint {
+    display: none;
+  }
+}

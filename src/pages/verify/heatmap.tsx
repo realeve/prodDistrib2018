@@ -49,7 +49,7 @@ export default function HeatmapChart({ cart, onFilter, ...props }) {
   let [option, setOption] = useState({});
   const [data, setData] = useState({});
   useEffect(() => {
-    db.getFormatpos(cart).then(res => {
+    db.getQfmWipJobsPos(cart).then(res => {
       let param = getDrivedState({
         dataSrc: res,
         params: {

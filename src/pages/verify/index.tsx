@@ -12,15 +12,39 @@ import { connect } from "dva";
 
 const prefix = "data:image/jpg;base64,";
 
-const ImgList = ({ data, onAdd, onRemove, marked, isMahou = false }) =>
+// 按千位、开位快速选择的功能
+const QUICK_CHOOSE = true;
+
+const ImgList = ({
+  data,
+  onAdd,
+  onRemove,
+  marked,
+  isDuiyin = false,
+  isMahou = false
+}) =>
   data.map((_data, i) => (
     <div key={_data.name} style={{ marginBottom: 20 }}>
-      <h4 style={{ fontSize: 22 }}>
-        {i + 1}.{_data.name}
-      </h4>
+      {_data.name.length > 0 && (
+        <h4 style={{ fontSize: 22 }}>
+          {i + 1}.{_data.name}
+        </h4>
+      )}
       <ul className={styles.imgs}>
         {_data.data.map((item, i) => {
-          const isMarked = R.find(R.propEq("code", item.code))(marked);
+          let isMarked = false;
+
+          // 同一小包内，无需再次选择
+          if (QUICK_CHOOSE) {
+            let kilo = item.code[6],
+              pos = item.pos;
+            isMarked = R.find(
+              markedItem => markedItem.code[6] == kilo && markedItem.pos == pos
+            )(marked);
+          } else {
+            isMarked = R.find(R.propEq("code", item.code))(marked);
+          }
+
           return (
             <li key={i} className={isMarked ? styles.marked : null}>
               <div className={styles.imgWrap}>
@@ -61,7 +85,7 @@ const ImgList = ({ data, onAdd, onRemove, marked, isMahou = false }) =>
                   <>
                     <Button
                       style={{ marginTop: 6 }}
-                      type="primary"
+                      type={isDuiyin ? "default" : "primary"}
                       onClick={e => {
                         onAdd({
                           code: item.code,
@@ -78,10 +102,11 @@ const ImgList = ({ data, onAdd, onRemove, marked, isMahou = false }) =>
                       onClick={e => {
                         onAdd({
                           code: item.code,
-                          type: "胶印对印",
+                          type: "对印",
                           pos: item.pos
                         });
                       }}
+                      type={!isDuiyin ? "default" : "primary"}
                       disabled={isMarked}
                     >
                       对印
@@ -185,13 +210,15 @@ let methods = {
 };
 
 const Index = ({ user }) => {
-  const [cart, setCart] = useState("1980K382");
+  const [cart, setCart] = useState("1980K810");
   const [disabled, setDisabled] = useState(false);
 
   const [mahouData, setMahouData] = useState([]);
 
   const [silk, setSilk] = useState([{ data: [], name: "丝印缺陷" }]);
   const [mahou, setMahou] = useState({});
+
+  const [duiyin, setDuiyin] = useState([]);
 
   const [filterPos, setFilterPos] = useState(0);
 
@@ -201,8 +228,30 @@ const Index = ({ user }) => {
     setMahou({});
     setSilk([]);
     setList([]);
+    setDuiyin([]);
     db.getQfmWipJobs(cart).then(res => {
-      setMahou(res);
+      let data = R.clone(res.data);
+
+      let mahoudata = data.filter(
+        item =>
+          !(
+            (item.macro_id == 21 &&
+              ["101", "102", "103", "104", "105"].includes(item.camera)) ||
+            (item.macro_id == 17 &&
+              ["141", "142", "143", "144"].includes(item.camera))
+          )
+      );
+
+      let duiyindata = data.filter(
+        item =>
+          (item.macro_id == 21 &&
+            ["101", "102", "103", "104", "105"].includes(item.camera)) ||
+          (item.macro_id == 17 &&
+            ["141", "142", "143", "144"].includes(item.camera))
+      );
+
+      setMahou({ ...res, data: mahoudata });
+      setDuiyin(duiyindata);
     });
     db.getWipJobs(cart).then(res => {
       setSilk([
@@ -237,7 +286,8 @@ const Index = ({ user }) => {
   const onSubmit = async () => {
     let res = await db.addVerifyCarts({
       cart: cart,
-      operator: user
+      operator: user,
+      remark
     });
     if (res.rows === 0) {
       notification.error({
@@ -261,6 +311,7 @@ const Index = ({ user }) => {
     });
   };
 
+  const [remark, setRemark] = useState("无");
   const onReset = () => {
     setMarkedSilk([]);
     setMarkedMahou([]);
@@ -269,6 +320,8 @@ const Index = ({ user }) => {
     setMahouData([]);
     setCart("");
     setDisabled(true);
+    setDuiyin([]);
+    setRemark("无");
   };
 
   return (
@@ -301,8 +354,20 @@ const Index = ({ user }) => {
                 {R.filter(R.propEq("type", "道子"))(markedMahou).length}
               </div>
               <div className={styles.row}>
-                <div>胶印对印：</div>
-                {R.filter(R.propEq("type", "胶印对印"))(markedMahou).length}
+                <div>对印：</div>
+                {R.filter(R.propEq("type", "对印"))(markedMahou).length}
+              </div>
+
+              <div className={styles.row}>
+                <div>备注信息：</div>
+                <Input.TextArea
+                  placeholder="在此输入备注信息"
+                  style={{ maxWidth: 300 }}
+                  value={remark}
+                  onChange={e => {
+                    setRemark(e.target.value);
+                  }}
+                />
               </div>
             </div>
             <Button
@@ -331,8 +396,13 @@ const Index = ({ user }) => {
                     <div>打印时间: </div>
                     {item.print_time}
                   </div>
+                  <div className={styles.row}>
+                    <div>备注: </div>
+                    {item.remark}
+                  </div>
                   <Button
                     type="default"
+                    style={{ marginTop: 20 }}
                     onClick={() => {
                       window.open("/verifyprint?id=" + item.id, "_blank");
                     }}
@@ -362,6 +432,34 @@ const Index = ({ user }) => {
         />
       </Card>
 
+      {duiyin.length > 0 && (
+        <Card
+          title="对印区域作废"
+          loading={loading}
+          style={{ marginBottom: 20 }}
+        >
+          <ImgList
+            data={[
+              {
+                name: "",
+                data: duiyin
+              }
+            ]}
+            isMahou
+            isDuiyin
+            onAdd={code => {
+              let nextState = R.clone(markedMahou);
+              nextState.push(code);
+              setMarkedMahou(nextState);
+            }}
+            onRemove={code => {
+              let nextState = R.reject(item => item.code == code)(markedMahou);
+              setMarkedMahou(nextState);
+            }}
+            marked={markedMahou}
+          />
+        </Card>
+      )}
       <Card
         title="码后/涂后废"
         loading={loading}

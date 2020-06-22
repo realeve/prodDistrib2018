@@ -47,7 +47,7 @@ function Tables({ dispatch, tid, dateRange, dataSrc, loading }) {
       <VTable
         dataSrc={dataSrc}
         loading={loading}
-        cartLinkPrefix="//10.8.2.133/search/image/#"
+        cartLinkPrefix="//10.8.2.133:8000/search/image/#"
       />
     </>
   );

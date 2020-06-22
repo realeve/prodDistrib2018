@@ -1,14 +1,14 @@
-import React from 'react';
-import { connect } from 'dva';
-import { DatePicker } from 'antd';
-import styles from './index.less';
-import VTable from '../../components/Table';
-import dateRanges from '../../utils/ranges';
-import moment from 'moment';
-import { namespace } from './models/';
+import React from "react";
+import { connect } from "dva";
+import { DatePicker } from "antd";
+import styles from "./index.less";
+import VTable from "../../components/Table";
+import dateRanges from "../../utils/ranges";
+import moment from "moment";
+import { namespace } from "./models/";
 
-import 'moment/locale/zh-cn';
-moment.locale('zh-cn');
+import "moment/locale/zh-cn";
+moment.locale("zh-cn");
 
 const RangePicker = DatePicker.RangePicker;
 
@@ -34,7 +34,7 @@ function Tables({ dispatch, dateRange, loading, dataSrc }) {
           onChange={onDateChange}
           defaultValue={[moment(dateRange[0]), moment(dateRange[1])]}
           locale={{
-            rangePlaceholder: ['开始日期', '结束日期']
+            rangePlaceholder: ["开始日期", "结束日期"]
           }}
         />
       </div>
@@ -42,7 +42,7 @@ function Tables({ dispatch, dateRange, loading, dataSrc }) {
       <VTable
         dataSrc={dataSrc}
         loading={loading}
-        cartLinkPrefix="//10.8.2.133/search/image/#"
+        cartLinkPrefix="//10.8.2.133:8000/search/image/#"
       />
     </>
   );

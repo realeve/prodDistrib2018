@@ -40,7 +40,7 @@ function Addcart({ dispatch, dataSource, loading, dateRange, abnormalWMS }) {
       <VTable
         loading={loading}
         dataSrc={dataSource}
-        cartLinkPrefix="//10.8.2.133/search/image/#"
+        cartLinkPrefix="//10.8.2.133:8000/search:8000/image/#"
       />
       <VTable dataSrc={abnormalWMS} loading={loading} />
     </>

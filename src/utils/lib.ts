@@ -3,8 +3,8 @@ import { host, uploadHost } from "./axios";
 import http from "axios";
 const R = require("ramda");
 
-export const searchUrl: string = "http://10.8.2.133/search#";
-export const imgUrl: string = "http://10.8.2.133/search/image#";
+export const searchUrl: string = "http://10.8.2.133:8000/search#";
+export const imgUrl: string = "http://10.8.2.133:8000/search/image#";
 export const adminUserList: Array<string> = ["钟鸣", "李宾"];
 export const imgAdmin: Array<string> = ["邓玉红"];
 
@@ -88,6 +88,8 @@ export const handleGZInfo: hdGZInfo = ({ code, prod }) => {
   if (prod.includes("9602") || prod.includes("9603")) {
     kInfo = 40;
   }
+
+  console.log(code);
 
   let alphaInfo: Array<string> = code.match(/[A-Z]/g);
   let numInfo: string = code.match(/\d/g).join("");

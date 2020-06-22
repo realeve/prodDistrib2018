@@ -72,7 +72,7 @@ export default class ImgList extends Component {
                 车号:
                 <a
                   target="_blank"
-                  href={"http://10.8.2.133/search/image/#" + cart_number}
+                  href={"http://10.8.2.133:8000/search/image/#" + cart_number}
                 >
                   {cart_number}
                 </a>

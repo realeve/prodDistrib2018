@@ -352,7 +352,7 @@ Tables.defaultProps = {
     header: []
   },
   loading: false,
-  cartLinkPrefix: "//10.8.2.133/search#",
+  cartLinkPrefix: "//10.8.2.133:8000/search#",
   actions: false
 };
 

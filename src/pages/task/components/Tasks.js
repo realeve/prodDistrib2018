@@ -78,12 +78,12 @@ function Tasks({
       <VTable
         loading={loading}
         dataSrc={dataSrcNewproc}
-        cartLinkPrefix="//10.8.2.133/search/image/#"
+        cartLinkPrefix="//10.8.2.133:8000/search/image/#"
       />
       <VTable
         loading={loading}
         dataSrc={dataComplete}
-        cartLinkPrefix="//10.8.2.133/search/image/#"
+        cartLinkPrefix="//10.8.2.133:8000/search/image/#"
       />
     </>
   );

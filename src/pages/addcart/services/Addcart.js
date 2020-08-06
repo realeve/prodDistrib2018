@@ -173,7 +173,10 @@ export const getQfmWipProdLogs = (params) =>
     ? mock(require('@/mock/186_9a8e4c9d74.json'))
     : axios({
         url: '/186/9a8e4c9d74.json',
-        params
+        params:{
+          ...params,
+          cache:5
+        }
       });
 
 export const getVCbpcCartlist = (params) =>

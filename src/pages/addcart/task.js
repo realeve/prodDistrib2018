@@ -1,9 +1,9 @@
-import TaskSetting from './components/TaskSetting';
-import TaskList from './components/TaskList';
-import UnhandleInfo from './components/UnhandleInfo';
+import TaskSetting from "./base";
+import TaskList from "./components/TaskList";
+import UnhandleInfo from "./components/UnhandleInfo";
 
-import * as lib from '../../utils/lib';
-import userLib from '../../utils/users';
+import * as lib from "../../utils/lib";
+import userLib from "../../utils/users";
 
 let { data, success } = userLib.getUserSetting();
 // 一般人员不再显示图像异常品添加列表

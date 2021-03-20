@@ -175,6 +175,10 @@ const BaseSetting = props => {
     curWorkLongTime: 1
   });
 
+  const [totalnum, setTotalnum] = useState(20000);
+  const [limit, setLimit] = useState(20000);
+  const [precision, setPrecision] = useState(100);
+
   const editOperator = idx => {
     const { curUserIdx } = operator;
     let user = operatorDetail[curUserIdx];
@@ -368,6 +372,53 @@ const BaseSetting = props => {
                 ))}
               </FormItem>
             </Col>
+
+            <Col span={12}>
+              <FormItem
+                {...formItemLayout}
+                label="有效缺陷数"
+                extra="超过此数值时不判废"
+              >
+                <Input
+                  placeholder="请输入有效缺陷条数"
+                  value={limit}
+                  onChange={e => {
+                    setLimit(e.target.value);
+                  }}
+                />
+              </FormItem>
+            </Col>
+            <Col span={12}>
+              <FormItem
+                {...formItemLayout}
+                label="平均每人判废数"
+                extra="系统按此信息排产"
+              >
+                <Input
+                  placeholder="请输入平均每人判废数"
+                  value={totalnum}
+                  onChange={e => {
+                    setTotalnum(e.target.value);
+                  }}
+                />
+              </FormItem>
+            </Col>
+            <Col span={12}>
+              <FormItem
+                {...formItemLayout}
+                label="排产精度"
+                extra="排产任务间缺陷条数不超过此值"
+              >
+                <Input
+                  placeholder="请输入排产精度"
+                  value={precision}
+                  onChange={e => {
+                    setPrecision(e.target.value);
+                  }}
+                />
+              </FormItem>
+            </Col>
+
             <Col span={24}>
               <FormItem {...formTailLayout}>
                 <Button type="primary" onClick={submit}>

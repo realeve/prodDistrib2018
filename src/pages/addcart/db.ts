@@ -14,10 +14,24 @@ export interface ICartItem {
 export const getCompleteCarts: (params: {
   tstart: string;
   tend: string;
-}) => Promise<ICartItem[]> = ({ tstart, tend }) =>
+}) => Promise<string[]> = ({ tstart, tend }) =>
   axios({
     url: DEV
       ? "http://localhost:8000/data/1259_44f5fc8933.json"
       : "1259/44f5fc8933",
     params: { tstart, tend }
   }).then(res => res.data);
+
+// 判废人员名单信息存储
+const KEY_OPERATOR = "image_check_operator";
+export const saveOperatorList = users => {
+  window.localStorage.setItem(KEY_OPERATOR, JSON.stringify(users));
+};
+
+export const loadOperatorList = () => {
+  let users = window.localStorage.getItem(KEY_OPERATOR);
+  if (users == null) {
+    return [];
+  }
+  return JSON.parse(users);
+};

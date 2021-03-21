@@ -50,7 +50,7 @@ const MachineItem = ({ label, machines, value, onChange, cartsNum }) => (
         mode="multiple"
         onChange={onChange}
         value={value}
-        style={{ width: 300 }}
+        style={{ width: "100%" }}
       >
         {machines.map(item => (
           <Option value={item[3]} key={item[3]}>
@@ -108,9 +108,11 @@ const BaseSetting = props => {
     tubu: []
   });
 
-  const [userList, setUserList] = useState([]);
-  const [userIgnore, setUserIgnore] = useState([]);
-  const [operatorDetail, setOperatorDetail] = useState([]);
+  const [users, setUsers] = useSetState({
+    user_list: [],
+    user_ignore: [],
+    operator_detail: []
+  });
 
   useEffect(() => {
     let cart = getCartsByMachine(carts, machineConfig);
@@ -122,9 +124,7 @@ const BaseSetting = props => {
     props.operatorList.find(item => item.user_name == user);
 
   const removeUserIgnore = user => {
-    const user_list = R.clone(userList),
-      user_ignore = R.clone(userIgnore),
-      operator_detail = R.clone(operatorDetail);
+    const { user_list, user_ignore, operator_detail } = R.clone(users);
 
     let newIgnore = R.reject(R.equals(user))(user_ignore);
 
@@ -134,10 +134,11 @@ const BaseSetting = props => {
 
     user_list.push(user);
     db.saveOperatorList(user_list);
-
-    setUserList(user_list);
-    setUserIgnore(newIgnore);
-    setOperatorDetail(operator_detail);
+    setUsers({
+      user_list,
+      user_ignore: newIgnore,
+      operator_detail
+    });
   };
 
   // 计算参与判废人员，不参与判废人员
@@ -145,7 +146,7 @@ const BaseSetting = props => {
     let operators = props.operatorList.map(({ user_name }) => user_name);
     let user_ignore = R.difference(operators, user_list);
 
-    let operator_detail = R.clone(operatorDetail);
+    let { operator_detail } = R.clone(users);
     let operatorDetailList = operator_detail.map(({ user_name }) => user_name);
 
     let removeUser = R.difference(operatorDetailList, user_list);
@@ -158,9 +159,11 @@ const BaseSetting = props => {
     let newUserDetail = newUser.map(getUserInfoByName);
     operator_detail = [...operator_detail, ...newUserDetail];
 
-    setUserList(user_list);
-    setUserIgnore(user_ignore);
-    setOperatorDetail(operator_detail);
+    setUsers({
+      user_list,
+      user_ignore,
+      operator_detail
+    });
   };
 
   // 动态存储用户信息
@@ -186,7 +189,7 @@ const BaseSetting = props => {
 
   const editOperator = idx => {
     const { curUserIdx } = operator;
-    let user = operatorDetail[curUserIdx];
+    let user = users.operator_detail[curUserIdx];
     setOperator({
       visible: true,
       curUserIdx: idx,
@@ -196,8 +199,8 @@ const BaseSetting = props => {
 
   const getOperatorDetail = curWorkLongTime => {
     const { curUserIdx } = operator;
-    let operator_detail = R.clone(operatorDetail);
-    let user = R.nth(curUserIdx)(operatorDetail);
+    let operator_detail = R.clone(users.operator_detail);
+    let user = R.nth(curUserIdx)(users.operator_detail);
 
     user.work_long_time = curWorkLongTime;
     operator_detail[curUserIdx] = user;
@@ -210,12 +213,8 @@ const BaseSetting = props => {
     setOperator({
       curWorkLongTime
     });
-    setOperatorDetail(operator_detail);
+    setUsers({ operator_detail });
   };
-
-  let curUser = operatorDetail.length
-    ? operatorDetail[operator.curUserIdx]
-    : operator.curUserInfo;
 
   // 编辑工作时长
   const handleOk = () => {
@@ -301,7 +300,7 @@ const BaseSetting = props => {
       need_convert: 0,
       tstart,
       tend,
-      user_list: operatorDetail,
+      user_list: users.operator_detail,
       limit,
       precision,
       totalnum
@@ -315,6 +314,10 @@ const BaseSetting = props => {
       carts: cartsConfig
     });
   };
+
+  let curUser = users.operator_detail.length
+    ? users.operator_detail[operator.curUserIdx]
+    : operator.curUserInfo;
 
   return (
     <Card
@@ -417,14 +420,14 @@ const BaseSetting = props => {
                     <p>
                       今日共
                       <span className={styles["user-tips"]}>
-                        {userList.length}
+                        {users.user_list.length}
                       </span>
                       人判废
                     </p>
-                    {userIgnore && (
+                    {users.user_ignore && (
                       <>
                         <p>以下人员不参与判废(点击姓名加入判废人员列表)：</p>
-                        {userIgnore.map(user => (
+                        {users.user_ignore.map(user => (
                           <Button
                             type="danger"
                             key={user}
@@ -444,7 +447,7 @@ const BaseSetting = props => {
                   mode="multiple"
                   onChange={operatorsChange}
                   style={{ width: "100%" }}
-                  value={userList}
+                  value={users.user_list}
                 >
                   {props.operatorList.map(({ user_name, user_no }) => (
                     <Option value={user_name} key={user_no}>
@@ -461,16 +464,18 @@ const BaseSetting = props => {
                 label="工作时长(小时)"
                 extra="点击单独编辑请假人员信息"
               >
-                {operatorDetail.map(({ user_name, work_long_time }, idx) => (
-                  <Button
-                    type={work_long_time < 1 ? "danger" : "default"}
-                    key={user_name}
-                    style={{ marginRight: 5 }}
-                    onClick={() => editOperator(idx)}
-                  >
-                    {user_name}({work_long_time * 8})
-                  </Button>
-                ))}
+                {users.operator_detail.map(
+                  ({ user_name, work_long_time }, idx) => (
+                    <Button
+                      type={work_long_time < 1 ? "danger" : "default"}
+                      key={user_name}
+                      style={{ marginRight: 5 }}
+                      onClick={() => editOperator(idx)}
+                    >
+                      {user_name}({work_long_time * 8})
+                    </Button>
+                  )
+                )}
               </FormItem>
             </Col>
 

@@ -112,10 +112,6 @@ const BaseSetting = props => {
   const [userIgnore, setUserIgnore] = useState([]);
   const [operatorDetail, setOperatorDetail] = useState([]);
 
-  const submit = () => {
-    console.log(cartsConfig);
-  };
-
   useEffect(() => {
     let cart = getCartsByMachine(carts, machineConfig);
     setCartsConfig(cart);
@@ -269,8 +265,63 @@ const BaseSetting = props => {
     });
   };
 
+  const onDateChange = (dates, daterange) => {
+    props.dispatch({
+      type: "addcart/updateAllCheckList",
+      payload: { daterange }
+    });
+    setDates(dates);
+  };
+
+  // 排产
+  const dispatchTasks = params => {
+    console.log("排产任务设置：", params);
+
+    props
+      .dispatch({
+        type: "addcart/getHechaTask",
+        payload: {
+          params
+        }
+      })
+      .then(() => {
+        notification.open({
+          message: "系统提示",
+          description: "排产完毕",
+          icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+        });
+      });
+  };
+
+  const getParams = () => {
+    let tstart = moment(dates[0]).format("YYYYMMDD");
+    let tend = moment(dates[1]).format("YYYYMMDD");
+
+    return {
+      need_convert: 0,
+      tstart,
+      tend,
+      user_list: operatorDetail,
+      limit,
+      precision,
+      totalnum
+    };
+  };
+
+  const submit = () => {
+    let param = getParams();
+    dispatchTasks({
+      ...param,
+      carts: cartsConfig
+    });
+  };
+
   return (
-    <div className={styles.base}>
+    <Card
+      className={styles.base}
+      title="图核排产设置"
+      style={{ width: "100%" }}
+    >
       <Modal
         title={`${curUser.user_name}(${curUser.user_no})工作时长调整`}
         visible={operator.visible}
@@ -290,12 +341,13 @@ const BaseSetting = props => {
             min={0}
             max={1}
             step={0.0625}
-            formatter={value => value * 8}
+            formatter={(value: number) => String(value * 8)}
             onChange={onWorkLongTimeChange}
           />
           小时
         </div>
       </Modal>
+
       <h2>1.任务起始时间</h2>
       <Row gutter={16}>
         <Col span={12}>
@@ -304,7 +356,7 @@ const BaseSetting = props => {
               value={dates}
               ranges={dateRanges}
               format="YYYYMMDD"
-              onChange={setDates}
+              onChange={onDateChange}
               locale={{
                 rangePlaceholder: ["开始日期", "结束日期"]
               }}
@@ -319,6 +371,11 @@ const BaseSetting = props => {
           </FormItem>
         </Col>
       </Row>
+
+      {/* <Skeleton loading={props.operatorList.length == 0 } active>
+        
+      </Skeleton> */}
+
       {!!machineList.length && (
         <>
           <h2 style={{ marginTop: 20 }}>2.任务配置</h2>
@@ -427,7 +484,7 @@ const BaseSetting = props => {
                   placeholder="请输入有效缺陷条数"
                   value={limit}
                   onChange={e => {
-                    setLimit(e.target.value);
+                    setLimit(+e.target.value);
                   }}
                 />
               </FormItem>
@@ -442,7 +499,7 @@ const BaseSetting = props => {
                   placeholder="请输入平均每人判废数"
                   value={totalnum}
                   onChange={e => {
-                    setTotalnum(e.target.value);
+                    setTotalnum(+e.target.value);
                   }}
                 />
               </FormItem>
@@ -457,7 +514,7 @@ const BaseSetting = props => {
                   placeholder="请输入排产精度"
                   value={precision}
                   onChange={e => {
-                    setPrecision(e.target.value);
+                    setPrecision(+e.target.value);
                   }}
                 />
               </FormItem>
@@ -481,7 +538,7 @@ const BaseSetting = props => {
           </Row>
         </>
       )}
-    </div>
+    </Card>
   );
 };
 

@@ -21,8 +21,7 @@ import dateRanges from "@/utils/ranges";
 import * as lib from "@/utils/lib";
 import moment from "moment";
 import * as db from "./db";
-import { ICartItem } from "./db";
-import { formItemLayout, formTailLayout } from "./components/Addcart";
+
 import "moment/locale/zh-cn";
 const RangePicker = DatePicker.RangePicker;
 moment.locale("zh-cn");
@@ -32,6 +31,16 @@ import { useSetState } from "react-use";
 const FormItem = Form.Item;
 const Option = Select.Option;
 const R = require("ramda");
+
+export const formItemLayout = {
+  labelCol: { span: 6 },
+  wrapperCol: { span: 18 }
+};
+
+export const formTailLayout = {
+  labelCol: { span: 6 },
+  wrapperCol: { span: 6, offset: 18 }
+};
 
 const MachineItem = ({ label, machines, value, onChange, cartsNum }) => (
   <Col span={8}>
@@ -222,6 +231,41 @@ const BaseSetting = props => {
   const handleCancel = () => {
     setOperator({
       visible: false
+    });
+  };
+
+  const publishTask = () => {
+    // 处理抽检任务
+    let task_info = JSON.stringify(props.hechaTask);
+
+    Modal.confirm({
+      title: "提示",
+      content: `是否要发布本次排产任务？`,
+      maskClosable: true,
+      cancelText: "取消",
+      okText: "确定",
+      onOk: async () => {
+        let params = {
+          task_info,
+          rec_time: lib.now()
+        };
+        let { data } = await db.addPrintHechatask(params);
+        let success = data[0].affected_rows > 0;
+        if (success) {
+          props.dispatch({
+            type: "addcart/setStore",
+            payload: {
+              rec_time: params.rec_time
+            }
+          });
+        }
+
+        notification.open({
+          message: "系统提示",
+          description: "任务发布" + (success ? "成功" : "失败"),
+          icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+        });
+      }
     });
   };
 
@@ -422,7 +466,15 @@ const BaseSetting = props => {
             <Col span={24}>
               <FormItem {...formTailLayout}>
                 <Button type="primary" onClick={submit}>
-                  排产
+                  排产计算
+                </Button>
+                <Button
+                  type="danger"
+                  disabled={props.hechaTask.task_list.length == 0}
+                  style={{ marginLeft: 20 }}
+                  onClick={publishTask}
+                >
+                  发布排产任务
                 </Button>
               </FormItem>
             </Col>

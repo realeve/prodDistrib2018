@@ -35,3 +35,20 @@ export const loadOperatorList = () => {
   }
   return JSON.parse(users);
 };
+
+/**
+*   @database: { 质量信息系统 }
+*   @desc:     { 记录核查任务信息 } 
+    const { task_info, rec_time } = params;
+*/
+export const addPrintHechatask = params =>
+  DEV
+    ? mock(_commonData)
+    : axios({
+        method: "post",
+        data: {
+          ...params,
+          id: 366,
+          nonce: "f34a198b23"
+        }
+      });

@@ -13,7 +13,8 @@ import {
   Col,
   DatePicker,
   Skeleton,
-  Modal
+  Modal,
+  message
 } from "antd";
 
 import styles from "./base.less";
@@ -27,6 +28,7 @@ const RangePicker = DatePicker.RangePicker;
 moment.locale("zh-cn");
 
 import { useSetState } from "react-use";
+import { handleTasklist, handleCarts } from "./models/addcart";
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -76,15 +78,17 @@ const getCartsByMachine = (carts: string[], machine: IMachineProp) => {
   return { siyin, mahou, tubu };
 };
 
-const BaseSetting = (props: {
+interface IBaseProps {
   operatorList: {
     user_name: string;
     user_no: string;
-    work_long_time: string;
+    work_long_time: number;
   }[];
   hechaTask: { task_list: string | any[] };
   dispatch: Dispatch;
-}) => {
+}
+
+const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
   const [dates, setDates] = useState(dateRanges["昨天"]);
   const [carts, setCarts] = useState<string[]>([]);
   const [machineList, setMachineList] = useState([]);
@@ -147,7 +151,7 @@ const BaseSetting = (props: {
   }, [machineConfig, carts]);
 
   const getUserInfoByName = user =>
-    props.operatorList.find(item => item.user_name == user);
+    operatorList.find(item => item.user_name == user);
 
   const removeUserIgnore = user => {
     const { user_list, user_ignore, operator_detail } = R.clone(users);
@@ -168,7 +172,7 @@ const BaseSetting = (props: {
 
   // 计算参与判废人员，不参与判废人员
   const refreshUsers = (user_list = []) => {
-    let operators = props.operatorList.map(({ user_name }) => user_name);
+    let operators = operatorList.map(({ user_name }) => user_name);
     let user_ignore = R.difference(operators, user_list);
 
     let { operator_detail } = R.clone(users);
@@ -250,7 +254,7 @@ const BaseSetting = (props: {
 
   const publishTask = () => {
     // 处理抽检任务
-    let task_info = JSON.stringify(props.hechaTask);
+    let task_info = JSON.stringify(hechaTask);
 
     Modal.confirm({
       title: "提示",
@@ -266,7 +270,7 @@ const BaseSetting = (props: {
         let { data } = await db.addPrintHechatask(params);
         let success = data[0].affected_rows > 0;
         if (success) {
-          props.dispatch({
+          dispatch({
             type: "addcart/setStore",
             payload: {
               rec_time: params.rec_time
@@ -284,7 +288,7 @@ const BaseSetting = (props: {
   };
 
   const onDateChange = (dates, daterange) => {
-    props.dispatch({
+    dispatch({
       type: "addcart/updateAllCheckList",
       payload: { daterange }
     });
@@ -292,27 +296,42 @@ const BaseSetting = (props: {
   };
 
   // 排产
-  const dispatchTasks = params => {
-    console.log(props.dispatch);
-
-    props.dispatch({
-      type: "addcart/test"
+  const dispatchTasks = async params => {
+    // 重置
+    dispatch({
+      type: "setStore",
+      payload: {
+        hechaLoading: true,
+        hechaTask: { task_list: [], unhandle_carts: [], unupload_carts: [] }
+      }
     });
 
-    props
-      .dispatch({
-        type: "addcart/getHechaTask",
-        payload: {
-          params
-        }
-      })
-      .then(() => {
-        notification.open({
-          message: "系统提示",
-          description: "排产完毕",
-          icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
-        });
-      });
+    let hechaTask = await db.getHechaTasks(params).catch(e => {
+      return null;
+    });
+    if (!hechaTask) {
+      message.error("排产失败，请稍后重试");
+      return;
+    }
+
+    hechaTask = handleTasklist(hechaTask);
+    let printCartList = await handleCarts(hechaTask.task_list);
+
+    // console.log(hechaTask);
+    dispatch({
+      type: "setStore",
+      payload: {
+        hechaTask,
+        printCartList,
+        hechaLoading: false
+      }
+    });
+
+    notification.open({
+      message: "系统提示",
+      description: "排产完毕",
+      icon: <Icon type="info-circle-o" style={{ color: "#108ee9" }} />
+    });
   };
 
   const getParams = () => {
@@ -398,7 +417,7 @@ const BaseSetting = (props: {
         </Col>
       </Row>
 
-      {/* <Skeleton loading={props.operatorList.length == 0 } active>
+      {/* <Skeleton loading={operatorList.length == 0 } active>
         
       </Skeleton> */}
 
@@ -474,7 +493,7 @@ const BaseSetting = (props: {
                   style={{ width: "100%" }}
                   value={users.user_list}
                 >
-                  {props.operatorList.map(({ user_name, user_no }) => (
+                  {operatorList.map(({ user_name, user_no }) => (
                     <Option value={user_name} key={user_no}>
                       {user_name}
                     </Option>
@@ -565,7 +584,7 @@ const BaseSetting = (props: {
                 </Button>
                 <Button
                   type="danger"
-                  disabled={props.hechaTask.task_list.length == 0}
+                  disabled={hechaTask.task_list.length == 0}
                   style={{ marginLeft: 20 }}
                   onClick={publishTask}
                 >

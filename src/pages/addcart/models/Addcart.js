@@ -56,7 +56,57 @@ function* getCarts(task_list, call) {
   return printCartList;
 }
 
-const handleTasklist = hechaTask => {
+export const handleCarts = async task_list => {
+  const printCartList = {
+    data: [],
+    rows: 0,
+    time: "",
+    title: "图核判废确认单",
+    header: [
+      "序号",
+      "车号",
+      "冠字",
+      "类型",
+      "品种",
+      "判废量",
+      "判废人员",
+      "确认签字"
+    ]
+  };
+
+  let idx = 1;
+  task_list.forEach(({ user_name, data }) => {
+    let res = data.map(({ type, cart_number, product_name, pf_num }) => [
+      idx++,
+      cart_number,
+      "",
+      type == 0 ? "码后" : "丝印",
+      product_name,
+      pf_num,
+      user_name,
+      "  "
+    ]);
+    printCartList.data = [...printCartList.data, ...res];
+  });
+  printCartList.rows = printCartList.data.length;
+
+  // 获取冠字信息
+  let carts = R.pluck(1)(printCartList.data);
+
+  let { data: cartInfo } = await db.getVCbpcCartLite(carts);
+  printCartList.data = printCartList.data.map(item => {
+    let cart = item[1];
+    let res = R.find(R.propEq("cart", cart))(cartInfo);
+    if (res) {
+      item[2] = res.gz;
+    }
+    return item;
+  });
+
+  return printCartList;
+};
+
+export const handleTasklist = hechaTask => {
   let taskList = hechaTask.task_list;
   let sum = 0,
     prodList = [];
@@ -361,9 +411,6 @@ export default {
         type: "setStore",
         payload: { allCheckList }
       });
-    },
-    *test() {
-      console.log("test");
     },
     // 核查排产
     *getHechaTask(

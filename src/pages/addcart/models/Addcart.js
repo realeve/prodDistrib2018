@@ -362,6 +362,9 @@ export default {
         payload: { allCheckList }
       });
     },
+    *test() {
+      console.log("test");
+    },
     // 核查排产
     *getHechaTask(
       {
@@ -369,6 +372,7 @@ export default {
       },
       { put, call }
     ) {
+      console.log("start now", params);
       yield put({
         type: "setStore",
         payload: {

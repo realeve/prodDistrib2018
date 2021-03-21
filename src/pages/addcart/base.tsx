@@ -77,7 +77,11 @@ const getCartsByMachine = (carts: string[], machine: IMachineProp) => {
 };
 
 const BaseSetting = (props: {
-  operatorList: any[];
+  operatorList: {
+    user_name: string;
+    user_no: string;
+    work_long_time: string;
+  }[];
   hechaTask: { task_list: string | any[] };
   dispatch: Dispatch;
 }) => {
@@ -140,7 +144,7 @@ const BaseSetting = (props: {
     let cart = getCartsByMachine(carts, machineConfig);
     setCartsConfig(cart);
     db.saveMachineList(machineConfig);
-  }, [machineConfig]);
+  }, [machineConfig, carts]);
 
   const getUserInfoByName = user =>
     props.operatorList.find(item => item.user_name == user);
@@ -289,7 +293,11 @@ const BaseSetting = (props: {
 
   // 排产
   const dispatchTasks = params => {
-    console.log("排产任务设置：", params);
+    console.log(props.dispatch);
+
+    props.dispatch({
+      type: "addcart/test"
+    });
 
     props
       .dispatch({
@@ -572,12 +580,9 @@ const BaseSetting = (props: {
   );
 };
 
-function mapStateToProps(state) {
+export default connect(({ addcart }) => {
   return {
-    loading: state.loading.models.addcart,
-    ...state.addcart,
-    ...state.common
+    operatorList: addcart.operatorList,
+    hechaTask: addcart.hechaTask
   };
-}
-
-export default connect(mapStateToProps)(BaseSetting);
+})(BaseSetting);

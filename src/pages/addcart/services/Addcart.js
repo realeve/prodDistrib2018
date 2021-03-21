@@ -111,15 +111,14 @@ export const loadOperatorList = () => {
   return JSON.parse(users);
 };
 
-// 图核排产
+// DEV? mock(require("@/mock/addcart_task.js").data):
+// 开始图核排产
 export const getHechaTasks = data =>
-  DEV
-    ? mock(require("@/mock/addcart_task.js").data)
-    : http({
-        url: "http://10.8.1.27:4000/api/hecha/task", // 'http://localhost:3000/api/hecha/task', //
-        method: "post",
-        data
-      }).then(({ data }) => data);
+  http({
+    url: "http://localhost:3000/api/hecha/task", //"http://10.8.1.27:4000/api/hecha/task", // 'http://localhost:3000/api/hecha/task', //
+    method: "post",
+    data
+  }).then(({ data }) => data);
 
 /**
 *   @database: { 质量信息系统 }

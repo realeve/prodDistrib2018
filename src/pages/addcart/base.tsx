@@ -21,7 +21,7 @@ import dateRanges from "@/utils/ranges";
 import * as lib from "@/utils/lib";
 import moment from "moment";
 import * as db from "./db";
-
+import { Dispatch } from "react-redux";
 import "moment/locale/zh-cn";
 const RangePicker = DatePicker.RangePicker;
 moment.locale("zh-cn");
@@ -76,7 +76,11 @@ const getCartsByMachine = (carts: string[], machine: IMachineProp) => {
   return { siyin, mahou, tubu };
 };
 
-const BaseSetting = props => {
+const BaseSetting = (props: {
+  operatorList: any[];
+  hechaTask: { task_list: string | any[] };
+  dispatch: Dispatch;
+}) => {
   const [dates, setDates] = useState(dateRanges["昨天"]);
   const [carts, setCarts] = useState<string[]>([]);
   const [machineList, setMachineList] = useState([]);
@@ -130,12 +134,11 @@ const BaseSetting = props => {
   }, [users]);
 
   useEffect(() => {
+    /**
+     * 根据所选择的设备过滤出车号列表，传到后端后以此列表作为生产记录；
+     */
     let cart = getCartsByMachine(carts, machineConfig);
     setCartsConfig(cart);
-    console.log(cart);
-  }, [machineConfig]);
-
-  useEffect(() => {
     db.saveMachineList(machineConfig);
   }, [machineConfig]);
 

@@ -1,5 +1,5 @@
-import { axios, DEV, mock, _commonData } from '@/utils/axios';
-import http from 'axios';
+import { axios, DEV, mock, _commonData } from "@/utils/axios";
+import http from "axios";
 /**
 *   @database: { 质量信息系统 }
 *   @desc:     { 异常产品原因列表 } 
@@ -7,7 +7,7 @@ import http from 'axios';
 */
 export const getPrintAbnormalProd = () =>
   axios({
-    url: '/72/2b853fe9ed.json'
+    url: "/72/2b853fe9ed.json"
   });
 
 /**
@@ -16,9 +16,9 @@ export const getPrintAbnormalProd = () =>
   
     const { tstart, tend } = params;
 */
-export const getViewPrintAbnormalProd = (params) =>
+export const getViewPrintAbnormalProd = params =>
   axios({
-    url: '/73/2dcf6571e6/array.json',
+    url: "/73/2dcf6571e6/array.json",
     params
   });
 
@@ -28,9 +28,9 @@ export const getViewPrintAbnormalProd = (params) =>
   
     const { prod_id, cart_number, rec_date, machine_name, reason, proc_stream, proc_name, captain_name, prod_date, problem_type } = params;
 */
-export const addPrintAbnormalProd = (params) =>
+export const addPrintAbnormalProd = params =>
   axios({
-    url: '/77/d9072e2900.json',
+    url: "/77/d9072e2900.json",
     params
   });
 
@@ -51,13 +51,13 @@ export const addPrintAbnormalProd = (params) =>
  *   @desc:     { 根据车号查询生产信息 } 
     const { cart } = params;
  */
-export const getViewCartfinder = (params) =>
+export const getViewCartfinder = params =>
   axios({
-    url: '/350/e20e9bbe6e.json',
+    url: "/350/e20e9bbe6e.json",
     params
   });
 
-export const getTbstock = (carnos) =>
+export const getTbstock = carnos =>
   getTbbaseCarTechnologHistory({
     carnos
   });
@@ -67,9 +67,9 @@ export const getTbstock = (carnos) =>
 *   @desc:     { 查询批次状态 } 
     const { carnos1, carnos2, carnos3 } = params;
 */
-const getTbbaseCarTechnologHistory = (params) =>
+const getTbbaseCarTechnologHistory = params =>
   axios({
-    url: '/334/f47b05f146/array.json',
+    url: "/334/f47b05f146/array.json",
     params
   });
 
@@ -78,9 +78,9 @@ const getTbbaseCarTechnologHistory = (params) =>
 *   @desc:     { 人工拉号车号万数汇总 } 
     const { tstart, tend, tstart2, tend2 } = params;
 */
-export const getPrintSampleCartlist = (params) =>
+export const getPrintSampleCartlist = params =>
   axios({
-    url: '/124/cd6e54e7e3.json',
+    url: "/124/cd6e54e7e3.json",
     params
   });
 
@@ -90,16 +90,16 @@ export const getPrintSampleCartlist = (params) =>
  */
 export const getUserList = () =>
   DEV
-    ? mock(require('@/mock/365_2f288db095.json'))
+    ? mock(require("@/mock/365_2f288db095.json"))
     : axios({
-        url: '/365/2f288db095.json'
+        url: "/365/2f288db095.json"
       });
 
 // export const getUserList = () => mock(require('../../../../mock/userList.js'));
 
 // 判废人员名单信息存储
-const KEY_OPERATOR = 'image_check_operator';
-export const saveOperatorList = (users) => {
+const KEY_OPERATOR = "imagecheck_operator";
+export const saveOperatorList = users => {
   window.localStorage.setItem(KEY_OPERATOR, JSON.stringify(users));
 };
 
@@ -112,12 +112,12 @@ export const loadOperatorList = () => {
 };
 
 // 图核排产
-export const getHechaTasks = (data) =>
+export const getHechaTasks = data =>
   DEV
-    ? mock(require('@/mock/addcart_task.js').data)
+    ? mock(require("@/mock/addcart_task.js").data)
     : http({
-        url: 'http://10.8.1.27:4000/api/hecha/task', // 'http://localhost:3000/api/hecha/task', //
-        method: 'post',
+        url: "http://10.8.1.27:4000/api/hecha/task", // 'http://localhost:3000/api/hecha/task', //
+        method: "post",
         data
       }).then(({ data }) => data);
 
@@ -126,15 +126,15 @@ export const getHechaTasks = (data) =>
 *   @desc:     { 记录核查任务信息 } 
     const { task_info, rec_time } = params;
 */
-export const addPrintHechatask = (params) =>
+export const addPrintHechatask = params =>
   DEV
     ? mock(_commonData)
     : axios({
-        method: 'post',
+        method: "post",
         data: {
           ...params,
           id: 366,
-          nonce: 'f34a198b23'
+          nonce: "f34a198b23"
         }
       });
 
@@ -144,9 +144,9 @@ export const addPrintHechatask = (params) =>
  */
 export const getPrintHechatask = () =>
   DEV
-    ? mock(require('@/mock/367_ffd6916add.json'))
+    ? mock(require("@/mock/367_ffd6916add.json"))
     : axios({
-        url: '/367/ffd6916add.json'
+        url: "/367/ffd6916add.json"
       });
 
 /**
@@ -154,12 +154,12 @@ export const getPrintHechatask = () =>
 *   @desc:     { 图像判废日均产量原始记录 } 
     const { tstart, tend, tstart2, tend2, tstart3, tend3, tstart4, tend4 } = params;
 */
-export const getWipProdLogs = (params) =>
+export const getWipProdLogs = params =>
   // DEV
   //   ? mock(require('@/mock/383_7f95a2c2a7.json'))
   //   :
   axios({
-    url: '/383/7f95a2c2a7/array.json',
+    url: "/383/7f95a2c2a7/array.json",
     params
   });
 
@@ -168,25 +168,25 @@ export const getWipProdLogs = (params) =>
 *   @desc:     { 图像判废月度产量汇总 } 
     const { tstart, tend } = params;
 */
-export const getQfmWipProdLogs = (params) =>
+export const getQfmWipProdLogs = params =>
   DEV
-    ? mock(require('@/mock/186_9a8e4c9d74.json'))
+    ? mock(require("@/mock/186_9a8e4c9d74.json"))
     : axios({
-        url: '/186/9a8e4c9d74.json',
-        params:{
+        url: "/186/9a8e4c9d74.json",
+        params: {
           ...params,
-          cache:5
+          cache: 5
         }
       });
 
-export const getVCbpcCartlist = (params) =>
+export const getVCbpcCartlist = params =>
   DEV
-    ? mock(require('@/mock/373_c990d890b4.json')).then((res) => {
-        res.data = res.data.map((item) => Object.values(item));
+    ? mock(require("@/mock/373_c990d890b4.json")).then(res => {
+        res.data = res.data.map(item => Object.values(item));
         return res;
       })
     : axios({
-        url: '/373/c990d890b4/array.json',
+        url: "/373/c990d890b4/array.json",
         params
       });
 
@@ -195,11 +195,11 @@ export const getVCbpcCartlist = (params) =>
 *   @desc:     { 号码判废量原始记录 } 
     const { tstart, tend } = params;
 */
-export const getWipProdLogsCode = (params) =>
+export const getWipProdLogsCode = params =>
   DEV
-    ? mock(require('@/mock/385_29fd5573a4.json'))
+    ? mock(require("@/mock/385_29fd5573a4.json"))
     : axios({
-        url: '/385/29fd5573a4/array.json',
+        url: "/385/29fd5573a4/array.json",
         params
       });
 
@@ -208,11 +208,11 @@ export const getWipProdLogsCode = (params) =>
 *   @desc:     { 号码判废量汇总 } 
     const { tstart, tend } = params;
 */
-export const getWipProdLogsCodeCount = (params) =>
+export const getWipProdLogsCodeCount = params =>
   DEV
-    ? mock(require('@/mock/386_666b98f1d1.json'))
+    ? mock(require("@/mock/386_666b98f1d1.json"))
     : axios({
-        url: '/386/666b98f1d1.json',
+        url: "/386/666b98f1d1.json",
         params
       });
 
@@ -221,11 +221,11 @@ export const getWipProdLogsCodeCount = (params) =>
 *   @desc:     { 图核判废用户关注信息 } 
     const { tstart, tend } = params;
 */
-export const getVCbpcCartcare = (params) =>
+export const getVCbpcCartcare = params =>
   DEV
-    ? mock(require('@/mock/481_77013f03b6.json'))
+    ? mock(require("@/mock/481_77013f03b6.json"))
     : axios({
-        url: '/481/77013f03b6/array.json',
+        url: "/481/77013f03b6/array.json",
         params
       });
 
@@ -233,11 +233,11 @@ export const getVCbpcCartcare = (params) =>
  *   @database: { MES系统_生产环境 }
  *   @desc:     { 指定车号冠字信息查询 }
  */
-export const getVCbpcCartLite = (carts) =>
+export const getVCbpcCartLite = carts =>
   DEV
-    ? mock(require('@/mock/588_9f836c859a.json'))
+    ? mock(require("@/mock/588_9f836c859a.json"))
     : axios({
-        url: '/588/9f836c859a.json',
+        url: "/588/9f836c859a.json",
         params: {
           carts
         }

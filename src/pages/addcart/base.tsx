@@ -50,7 +50,7 @@ const MachineItem = ({ label, machines, value, onChange, cartsNum }) => (
         mode="multiple"
         onChange={onChange}
         value={value}
-        style={{ width: "100%" }}
+        style={{ width: "100%", minHeight: 60 }}
       >
         {machines.map(item => (
           <Option value={item[3]} key={item[3]}>
@@ -114,10 +114,29 @@ const BaseSetting = props => {
     operator_detail: []
   });
 
+  // 初始数据载入
+  useEffect(() => {
+    // 用户设置
+    let res = db.loadOperatorList();
+    setUsers(res);
+
+    // 设备设置
+    let machine = db.loadMachineList();
+    setMachineConfig(machine);
+  }, []);
+
+  useEffect(() => {
+    db.saveOperatorList(users);
+  }, [users]);
+
   useEffect(() => {
     let cart = getCartsByMachine(carts, machineConfig);
     setCartsConfig(cart);
     console.log(cart);
+  }, [machineConfig]);
+
+  useEffect(() => {
+    db.saveMachineList(machineConfig);
   }, [machineConfig]);
 
   const getUserInfoByName = user =>
@@ -133,7 +152,6 @@ const BaseSetting = props => {
     operator_detail.push(newUser);
 
     user_list.push(user);
-    db.saveOperatorList(user_list);
     setUsers({
       user_list,
       user_ignore: newIgnore,
@@ -164,12 +182,6 @@ const BaseSetting = props => {
       user_ignore,
       operator_detail
     });
-  };
-
-  // 动态存储用户信息
-  const operatorsChange = user_list => {
-    db.saveOperatorList(user_list);
-    refreshUsers(user_list);
   };
 
   const [operator, setOperator] = useSetState({
@@ -381,7 +393,7 @@ const BaseSetting = props => {
 
       {!!machineList.length && (
         <>
-          <h2 style={{ marginTop: 20 }}>2.任务配置</h2>
+          <h2>2.任务配置</h2>
           <Row gutter={16}>
             <MachineItem
               machines={machineList}
@@ -410,7 +422,9 @@ const BaseSetting = props => {
               }}
               cartsNum={cartsConfig.tubu.length}
             />
+          </Row>
 
+          <Row gutter={16}>
             <Col span={12}>
               <FormItem
                 {...formItemLayout}
@@ -445,7 +459,7 @@ const BaseSetting = props => {
                 <Select
                   placeholder="请选择判废人员"
                   mode="multiple"
-                  onChange={operatorsChange}
+                  onChange={refreshUsers}
                   style={{ width: "100%" }}
                   value={users.user_list}
                 >
@@ -459,74 +473,82 @@ const BaseSetting = props => {
             </Col>
 
             <Col span={12}>
-              <FormItem
-                {...formItemLayout}
-                label="工作时长(小时)"
-                extra="点击单独编辑请假人员信息"
-              >
-                {users.operator_detail.map(
-                  ({ user_name, work_long_time }, idx) => (
-                    <Button
-                      type={work_long_time < 1 ? "danger" : "default"}
-                      key={user_name}
-                      style={{ marginRight: 5 }}
-                      onClick={() => editOperator(idx)}
-                    >
-                      {user_name}({work_long_time * 8})
-                    </Button>
-                  )
-                )}
-              </FormItem>
-            </Col>
-
-            <Col span={12}>
-              <FormItem
-                {...formItemLayout}
-                label="有效缺陷数"
-                extra="超过此数值时不判废"
-              >
-                <Input
-                  placeholder="请输入有效缺陷条数"
-                  value={limit}
-                  onChange={e => {
-                    setLimit(+e.target.value);
-                  }}
-                />
-              </FormItem>
-            </Col>
-            <Col span={12}>
-              <FormItem
-                {...formItemLayout}
-                label="平均每人判废数"
-                extra="系统按此信息排产"
-              >
-                <Input
-                  placeholder="请输入平均每人判废数"
-                  value={totalnum}
-                  onChange={e => {
-                    setTotalnum(+e.target.value);
-                  }}
-                />
-              </FormItem>
-            </Col>
-            <Col span={12}>
-              <FormItem
-                {...formItemLayout}
-                label="排产精度"
-                extra="排产任务间缺陷条数不超过此值"
-              >
-                <Input
-                  placeholder="请输入排产精度"
-                  value={precision}
-                  onChange={e => {
-                    setPrecision(+e.target.value);
-                  }}
-                />
-              </FormItem>
+              <Row gutter={16}>
+                <Col span={24}>
+                  <FormItem
+                    {...formItemLayout}
+                    label="工作时长(小时)"
+                    extra="点击单独编辑请假人员信息"
+                  >
+                    {users.operator_detail.map(
+                      ({ user_name, work_long_time }, idx) => (
+                        <Button
+                          type={work_long_time < 1 ? "danger" : "default"}
+                          key={user_name}
+                          style={{ marginRight: 5 }}
+                          onClick={() => editOperator(idx)}
+                        >
+                          {user_name}({work_long_time * 8})
+                        </Button>
+                      )
+                    )}
+                  </FormItem>
+                </Col>
+                <Col span={8}>
+                  <FormItem
+                    {...{ labelCol: { span: 12 }, wrapperCol: { span: 12 } }}
+                    label="有效缺陷数"
+                    extra="超过此数值时不判废"
+                  >
+                    <Input
+                      placeholder="请输入有效缺陷条数"
+                      value={limit}
+                      onChange={e => {
+                        setLimit(+e.target.value);
+                      }}
+                    />
+                  </FormItem>
+                </Col>
+                <Col span={8}>
+                  <FormItem
+                    {...{ labelCol: { span: 12 }, wrapperCol: { span: 12 } }}
+                    label="平均每人判废数"
+                    extra="系统按此信息排产"
+                  >
+                    <Input
+                      placeholder="请输入平均每人判废数"
+                      value={totalnum}
+                      onChange={e => {
+                        setTotalnum(+e.target.value);
+                      }}
+                    />
+                  </FormItem>
+                </Col>
+                <Col span={8}>
+                  <FormItem
+                    {...{ labelCol: { span: 12 }, wrapperCol: { span: 12 } }}
+                    label="排产精度"
+                    extra="排产任务间缺陷条数不超过此值"
+                  >
+                    <Input
+                      placeholder="请输入排产精度"
+                      value={precision}
+                      onChange={e => {
+                        setPrecision(+e.target.value);
+                      }}
+                    />
+                  </FormItem>
+                </Col>
+              </Row>
             </Col>
 
             <Col span={24}>
-              <FormItem {...formTailLayout}>
+              <FormItem
+                {...{
+                  labelCol: { span: 4 },
+                  wrapperCol: { span: 4, offset: 20 }
+                }}
+              >
                 <Button type="primary" onClick={submit}>
                   排产计算
                 </Button>

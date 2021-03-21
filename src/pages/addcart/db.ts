@@ -23,18 +23,23 @@ export const getCompleteCarts: (params: {
   }).then(res => res.data);
 
 // 判废人员名单信息存储
-const KEY_OPERATOR = "image_check_operator";
-export const saveOperatorList = users => {
-  window.localStorage.setItem(KEY_OPERATOR, JSON.stringify(users));
+const KEY_OPERATOR = "imagecheck_operator";
+export const saveOperatorList = (users, key = KEY_OPERATOR) => {
+  window.localStorage.setItem(key, JSON.stringify(users));
 };
 
-export const loadOperatorList = () => {
-  let users = window.localStorage.getItem(KEY_OPERATOR);
+export const loadOperatorList = (key = KEY_OPERATOR) => {
+  let users = window.localStorage.getItem(key);
   if (users == null) {
-    return [];
+    return {};
   }
   return JSON.parse(users);
 };
+
+export const saveMachineList = machines =>
+  saveOperatorList(machines, "imagecheck_machine");
+
+export const loadMachineList = () => loadOperatorList("imagecheck_machine");
 
 /**
 *   @database: { 质量信息系统 }

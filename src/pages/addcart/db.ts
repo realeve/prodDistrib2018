@@ -18,7 +18,7 @@ export const getCompleteCarts: (params: {
   axios({
     url: DEV
       ? "http://localhost:8000/data/1259_44f5fc8933.json"
-      : "1259/44f5fc8933",
+      : "1259/44f5fc8933.array",
     params: { tstart, tend }
   }).then(res => res.data);
 
@@ -62,7 +62,9 @@ export const addPrintHechatask = params =>
 // 开始图核排产
 export const getHechaTasks = data =>
   http({
-    url: "http://localhost:3000/api/hecha/task", //"http://10.8.1.27:4000/api/hecha/task", // 'http://localhost:3000/api/hecha/task', //
+    url: DEV
+      ? "http://localhost:3000/api/hecha/task"
+      : "http://10.8.1.27:4000/api/hecha/task", // 'http://localhost:3000/api/hecha/task', //
     method: "post",
     data
   }).then(({ data }) => data);

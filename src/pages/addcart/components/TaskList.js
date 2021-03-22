@@ -1,8 +1,8 @@
-import React from 'react';
-import { connect } from 'dva';
-import { Row, Col, Card, Empty, Skeleton } from 'antd';
-import VTable from '@/components/Table';
-import styles from './Report.less';
+import React from "react";
+import { connect } from "dva";
+import { Row, Col, Card, Empty, Skeleton } from "antd";
+import VTable from "@/components/Table";
+import styles from "./Report.less";
 
 const taskList = ({
   task_list,
@@ -13,6 +13,24 @@ const taskList = ({
 }) => {
   const result = (
     <Row gutter={10}>
+      <Col span={24} lg={24} md={24} sm={24} style={{ margin: "10px 0" }}>
+        <span>期望条数：{task_list[0]?.expect_num}</span>
+        <span style={{ marginLeft: 10 }}>
+          期望万数：{task_list[0]?.expect_carts}
+        </span>
+        <span style={{ marginLeft: 10 }}>
+          总条数：{task_list[0]?.validTotal}
+        </span>
+        <span style={{ marginLeft: 10 }}>
+          最少判废人数：{task_list[0]?.needUsers}(实际{task_list.length})
+        </span>
+        <span style={{ marginLeft: 10 }}>
+          预计人均判废数：
+          {!task_list[0]
+            ? 0
+            : task_list[0]?.validTotal / task_list[0]?.needUsers}
+        </span>
+      </Col>
       {task_list.map(
         ({
           user_name,
@@ -42,7 +60,8 @@ const taskList = ({
                 marginTop: 10,
                 minHeight: 700,
                 fontSize: 15
-              }}>
+              }}
+            >
               <ul className={styles.detailInfo}>
                 {/* <li>
                   <span>本月判废数:</span>
@@ -50,18 +69,18 @@ const taskList = ({
                     {month.pf_num}条/{month.cart_nums}万
                   </span>
                 </li> */}
-                <li>
+                {/* <li>
                   <span>期望万数:</span>
                   <span>{expect_carts}</span>
-                </li>
+                </li> */}
                 <li>
                   <span>实际万数:</span>
                   <span>{carts_num}</span>
                 </li>
-                <li>
+                {/* <li>
                   <span>期望条数:</span>
                   <span>{expect_num}</span>
-                </li>
+                </li> */}
                 <li>
                   <span>实际条数:</span>
                   <span>{real_num}</span>
@@ -93,22 +112,23 @@ const taskList = ({
                     <span>生产日期</span>
                   </li>
                   {data.map((item, i) => (
-                    <li key={item.cart_number+i}>
+                    <li key={item.cart_number + i}>
                       <span>{i + 1}</span>
                       <span
                         style={
                           item.is_check
-                            ? { background: '#93f29b' }
-                            : item.product_name === '9607T' && item.type == 0
-                            ? { background: '#f2939b' }
+                            ? { background: "#93f29b" }
+                            : item.product_name === "9607T" && item.type == 0
+                            ? { background: "#f2939b" }
                             : null
-                        }>
+                        }
+                      >
                         {item.cart_number}
-                        {item.is_check && '(抽检品)'}
+                        {item.is_check && "(抽检品)"}
                       </span>
                       <span>{item.pf_num}</span>
                       <span>{item.product_name}</span>
-                      <span>{item.type == 0 ? '码后' : '丝印'}</span>
+                      <span>{["码后", "丝印", "涂布"][item.type]}</span>
                       <span>{item.start_date.substr(5, 5)}</span>
                     </li>
                   ))}
@@ -129,7 +149,8 @@ const taskList = ({
         bordered={false}
         bodyStyle={{
           padding: 0
-        }}>
+        }}
+      >
         {loading ? (
           <Skeleton active />
         ) : task_list.length == 0 ? (
@@ -145,7 +166,7 @@ const taskList = ({
   );
 };
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
   task_list: state.addcart.hechaTask.task_list,
   loading: state.addcart.hechaLoading,
   allCheckList: state.addcart.allCheckList,

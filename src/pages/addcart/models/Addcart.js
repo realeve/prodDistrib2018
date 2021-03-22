@@ -114,13 +114,15 @@ export const handleTasklist = hechaTask => {
   // 求和
   taskList.forEach(item => {
     item.data.forEach(detail => {
-      if (detail.type == 0) {
+      if (detail.type == 0 || detail.type == 2) {
         prodList.push(detail.product_name);
         sum += detail.pf_num;
       }
     });
   });
   prodList = R.uniq(prodList);
+
+  console.log(prodList);
   // 抽检比5%;
   sum = sum * 0.05;
   if (prodList.length == 0) {
@@ -131,7 +133,7 @@ export const handleTasklist = hechaTask => {
   let avg = sum / prodList.length;
   taskList.forEach(item => {
     item.data.forEach(detail => {
-      if (detail.type == 0) {
+      if (detail.type == 0 || detail.type == 2) {
         if (typeof srcList[detail.product_name] == "undefined") {
           srcList[detail.product_name] = [detail];
         } else {

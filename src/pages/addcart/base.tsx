@@ -299,7 +299,7 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
   const dispatchTasks = async params => {
     // 重置
     dispatch({
-      type: "setStore",
+      type: "addcart/setStore",
       payload: {
         hechaLoading: true,
         hechaTask: { task_list: [], unhandle_carts: [], unupload_carts: [] }
@@ -317,9 +317,8 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
     hechaTask = handleTasklist(hechaTask);
     let printCartList = await handleCarts(hechaTask.task_list);
 
-    // console.log(hechaTask);
     dispatch({
-      type: "setStore",
+      type: "addcart/setStore",
       payload: {
         hechaTask,
         printCartList,

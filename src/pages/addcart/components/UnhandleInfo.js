@@ -1,18 +1,18 @@
-import React from 'react';
-import { Row, Col, Card, Empty, Skeleton, DatePicker } from 'antd';
-import styles from './Report.less';
-import { connect } from 'dva';
+import React from "react";
+import { Row, Col, Card, Empty, Skeleton, DatePicker } from "antd";
+import styles from "./Report.less";
+import { connect } from "dva";
 
-import moment from 'moment';
-import 'moment/locale/zh-cn';
-import dateRanges from '@/utils/ranges';
+import moment from "moment";
+import "moment/locale/zh-cn";
+import dateRanges from "@/utils/ranges";
 
-import VTable from '@/components/Table';
+import VTable from "@/components/Table";
 
-const R = require('ramda');
+const R = require("ramda");
 
 const RangePicker = DatePicker.RangePicker;
-moment.locale('zh-cn');
+moment.locale("zh-cn");
 
 function UnhandleInfo({
   unhandle_carts,
@@ -24,6 +24,7 @@ function UnhandleInfo({
   pfList,
   dispatch
 }) {
+  // console.log(unhandle_carts, unupload_carts);
   const unhandle = loading ? (
     <Skeleton />
   ) : unhandle_carts.length == 0 ? (
@@ -47,12 +48,12 @@ function UnhandleInfo({
     <Empty />
   ) : (
     unupload_carts.map((item, i) => (
-      <li key={item.cart_number}>
+      <li key={item}>
         <span>{i + 1}</span>
-        <span>{item.cart_number}</span>
-        <span>{item.prod_name}</span>
+        <span>{item}</span>
+        {/* <span>{item.prod_name}</span>
         <span>{item.machine_name}</span>
-        <span>{item.proc_name}</span>
+        <span>{item.proc_name}</span> */}
       </li>
     ))
   );
@@ -67,9 +68,9 @@ function UnhandleInfo({
         <span>{i + 1}</span>
         <span>{item.operator_name}</span>
         <span>{item.cart_nums}</span>
-        <span>{item.pf_num == 0 ? '' : item.pf_num}</span>
-        <span>{item.check_num == 0 ? '' : item.check_num}</span>
-        <span>{item.code_num == 0 ? '' : item.code_num}</span>
+        <span>{item.pf_num == 0 ? "" : item.pf_num}</span>
+        <span>{item.check_num == 0 ? "" : item.check_num}</span>
+        <span>{item.code_num == 0 ? "" : item.code_num}</span>
         <span>{item.total_num}</span>
       </li>
     ))
@@ -77,17 +78,17 @@ function UnhandleInfo({
 
   const onDateChange = async (_, dateRange) => {
     await dispatch({
-      type: 'addcart/setStore',
+      type: "addcart/setStore",
       payload: {
         dateRange
       }
     });
     dispatch({
-      type: 'addcart/loadPfNums'
+      type: "addcart/loadPfNums"
     });
 
     dispatch({
-      type: 'addcart/getRemarkData'
+      type: "addcart/getRemarkData"
     });
   };
 
@@ -128,9 +129,9 @@ function UnhandleInfo({
                   <li>
                     <span>序号</span>
                     <span>车号</span>
-                    <span>品种</span>
+                    {/* <span>品种</span>
                     <span>机台</span>
-                    <span>工艺</span>
+                    <span>工艺</span> */}
                   </li>
                   {unupload}
                 </ul>
@@ -141,7 +142,7 @@ function UnhandleInfo({
         <Col span={12} md={12} sm={24} style={{ marginTop: 10 }}>
           <Card hoverable>
             <div>
-              <div className={styles['pf-board']}>
+              <div className={styles["pf-board"]}>
                 <span className={styles.title}>图核月度判废</span>
                 <RangePicker
                   ranges={dateRanges}
@@ -149,7 +150,7 @@ function UnhandleInfo({
                   onChange={onDateChange}
                   defaultValue={[moment(dateRange[0]), moment(dateRange[1])]}
                   locale={{
-                    rangePlaceholder: ['开始日期', '结束日期']
+                    rangePlaceholder: ["开始日期", "结束日期"]
                   }}
                 />
               </div>
@@ -176,8 +177,8 @@ function UnhandleInfo({
   );
 }
 
-const mapStateToProps = (state) => ({
-  ...R.pick(['unhandle_carts', 'unupload_carts'], state.addcart.hechaTask),
+const mapStateToProps = state => ({
+  ...R.pick(["unhandle_carts", "unupload_carts"], state.addcart.hechaTask),
   rec_time: state.addcart.rec_time,
   pfNums: state.addcart.pfNums,
   loading: state.addcart.hechaLoading,

@@ -122,7 +122,6 @@ export const handleTasklist = hechaTask => {
   });
   prodList = R.uniq(prodList);
 
-  console.log(prodList);
   // 抽检比5%;
   sum = sum * 0.05;
   if (prodList.length == 0) {

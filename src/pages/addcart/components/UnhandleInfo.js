@@ -48,12 +48,13 @@ function UnhandleInfo({
     <Empty />
   ) : (
     unupload_carts.map((item, i) => (
-      <li key={item}>
+      <li key={item.cart_number}>
         <span>{i + 1}</span>
-        <span>{item}</span>
-        {/* <span>{item.prod_name}</span>
-        <span>{item.machine_name}</span>
-        <span>{item.proc_name}</span> */}
+        <span>{item.cart_number}</span>
+        <span>{item.prod_name}</span>
+        <span>{item.机台}</span>
+        <span>{moment(item.完成时间).format("MM-DD HH:mm")}</span>
+        <span>{item.零头产品 == 0 ? "否" : "是"}</span>
       </li>
     ))
   );
@@ -129,9 +130,10 @@ function UnhandleInfo({
                   <li>
                     <span>序号</span>
                     <span>车号</span>
-                    {/* <span>品种</span>
+                    <span>品种</span>
                     <span>机台</span>
-                    <span>工艺</span> */}
+                    <span>完工时间</span>
+                    <span>零头产品</span>
                   </li>
                   {unupload}
                 </ul>

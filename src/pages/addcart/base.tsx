@@ -92,20 +92,26 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
   const [dates, setDates] = useState(dateRanges["昨天"]);
   const [carts, setCarts] = useState<string[]>([]);
   const [machineList, setMachineList] = useState([]);
+  const [loading, setLoading] = useState(false);
   const init = () => {
     let tstart = moment(dates[0]).format("YYYYMMDD");
     let tend = moment(dates[1]).format("YYYYMMDD");
     setCarts([]);
     setMachineList([]);
+    setLoading(true);
 
-    db.getCompleteCarts({ tstart, tend }).then(res => {
-      setCarts(res);
+    db.getCompleteCarts({ tstart, tend })
+      .then(res => {
+        setCarts(res);
 
-      // 机台列表
-      let machine = R.uniq(R.map(R.pick([0, 2, 3]), res));
-      machine = machine.sort((a, b) => a[2].localeCompare(b[2]));
-      setMachineList(machine);
-    });
+        // 机台列表
+        let machine = R.uniq(R.map(R.pick([0, 2, 3]), res));
+        machine = machine.sort((a, b) => a[2].localeCompare(b[2]));
+        setMachineList(machine);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const [machineConfig, setMachineConfig] = useSetState<IMachineProp>({
@@ -313,8 +319,12 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
       message.error("排产失败，请稍后重试");
       return;
     }
-
-    hechaTask = handleTasklist(hechaTask);
+    try {
+      hechaTask = handleTasklist(hechaTask);
+    } catch (e) {
+      message.error("排产失败，请稍后重试");
+      return;
+    }
     let printCartList = await handleCarts(hechaTask.task_list);
 
     dispatch({
@@ -416,184 +426,182 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
         </Col>
       </Row>
 
-      {/* <Skeleton loading={operatorList.length == 0 } active>
-        
-      </Skeleton> */}
-
-      {!!machineList.length && (
-        <>
-          <h2>2.任务配置</h2>
-          <Row gutter={16}>
-            <MachineItem
-              machines={machineList}
-              label="丝印"
-              value={machineConfig.siyin}
-              onChange={siyin => {
-                setMachineConfig({ siyin });
-              }}
-              cartsNum={cartsConfig.siyin.length}
-            />
-            <MachineItem
-              machines={machineList}
-              label="码后核查"
-              value={machineConfig.mahou}
-              onChange={mahou => {
-                setMachineConfig({ mahou });
-              }}
-              cartsNum={cartsConfig.mahou.length}
-            />
-            <MachineItem
-              machines={machineList}
-              label="涂后核查"
-              value={machineConfig.tubu}
-              onChange={tubu => {
-                setMachineConfig({ tubu });
-              }}
-              cartsNum={cartsConfig.tubu.length}
-            />
-          </Row>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <FormItem
-                {...formItemLayout}
-                label="判废人员"
-                extra={
-                  <div>
-                    <p>
-                      今日共
-                      <span className={styles["user-tips"]}>
-                        {users.user_list.length}
-                      </span>
-                      人判废
-                    </p>
-                    {users.user_ignore && (
-                      <>
-                        <p>以下人员不参与判废(点击姓名加入判废人员列表)：</p>
-                        {users.user_ignore.map(user => (
-                          <Button
-                            type="danger"
-                            key={user}
-                            style={{ marginRight: 5 }}
-                            onClick={() => removeUserIgnore(user)}
-                          >
-                            {user}
-                          </Button>
-                        ))}
-                      </>
-                    )}
-                  </div>
-                }
-              >
-                <Select
-                  placeholder="请选择判废人员"
-                  mode="multiple"
-                  onChange={refreshUsers}
-                  style={{ width: "100%" }}
-                  value={users.user_list}
-                >
-                  {operatorList.map(({ user_name, user_no }) => (
-                    <Option value={user_name} key={user_no}>
-                      {user_name}
-                    </Option>
-                  ))}
-                </Select>
-              </FormItem>
-            </Col>
-
-            <Col span={12}>
-              <Row gutter={16}>
-                <Col span={24}>
-                  <FormItem
-                    {...formItemLayout}
-                    label="工作时长(小时)"
-                    extra="点击单独编辑请假人员信息"
-                  >
-                    {users.operator_detail.map(
-                      ({ user_name, work_long_time }, idx) => (
-                        <Button
-                          type={work_long_time < 1 ? "danger" : "default"}
-                          key={user_name}
-                          style={{ marginRight: 5 }}
-                          onClick={() => editOperator(idx)}
-                        >
-                          {user_name}({work_long_time * 8})
-                        </Button>
-                      )
-                    )}
-                  </FormItem>
-                </Col>
-                <Col span={8}>
-                  <FormItem
-                    {...{ labelCol: { span: 12 }, wrapperCol: { span: 12 } }}
-                    label="有效缺陷数"
-                    extra="超过此数值时不判废"
-                  >
-                    <Input
-                      placeholder="请输入有效缺陷条数"
-                      value={limit}
-                      onChange={e => {
-                        setLimit(+e.target.value);
-                      }}
-                    />
-                  </FormItem>
-                </Col>
-                <Col span={8}>
-                  <FormItem
-                    {...{ labelCol: { span: 12 }, wrapperCol: { span: 12 } }}
-                    label="平均每人判废数"
-                    extra="系统按此信息排产"
-                  >
-                    <Input
-                      placeholder="请输入平均每人判废数"
-                      value={totalnum}
-                      onChange={e => {
-                        setTotalnum(+e.target.value);
-                      }}
-                    />
-                  </FormItem>
-                </Col>
-                <Col span={8}>
-                  <FormItem
-                    {...{ labelCol: { span: 12 }, wrapperCol: { span: 12 } }}
-                    label="排产精度"
-                    extra="排产任务间缺陷条数不超过此值"
-                  >
-                    <Input
-                      placeholder="请输入排产精度"
-                      value={precision}
-                      onChange={e => {
-                        setPrecision(+e.target.value);
-                      }}
-                    />
-                  </FormItem>
-                </Col>
-              </Row>
-            </Col>
-
-            <Col span={24}>
-              <FormItem
-                {...{
-                  labelCol: { span: 4 },
-                  wrapperCol: { span: 4, offset: 20 }
+      <Skeleton loading={loading} active>
+        {!!machineList.length && (
+          <h2>
+            <h2>2.任务配置</h2>
+            <Row gutter={16}>
+              <MachineItem
+                machines={machineList}
+                label="丝印"
+                value={machineConfig.siyin}
+                onChange={siyin => {
+                  setMachineConfig({ siyin });
                 }}
-              >
-                <Button type="primary" onClick={submit}>
-                  排产计算
-                </Button>
-                <Button
-                  type="danger"
-                  disabled={hechaTask.task_list.length == 0}
-                  style={{ marginLeft: 20 }}
-                  onClick={publishTask}
+                cartsNum={cartsConfig.siyin.length}
+              />
+              <MachineItem
+                machines={machineList}
+                label="码后核查"
+                value={machineConfig.mahou}
+                onChange={mahou => {
+                  setMachineConfig({ mahou });
+                }}
+                cartsNum={cartsConfig.mahou.length}
+              />
+              <MachineItem
+                machines={machineList}
+                label="涂后核查"
+                value={machineConfig.tubu}
+                onChange={tubu => {
+                  setMachineConfig({ tubu });
+                }}
+                cartsNum={cartsConfig.tubu.length}
+              />
+            </Row>
+
+            <Row gutter={16}>
+              <Col span={12}>
+                <FormItem
+                  {...formItemLayout}
+                  label="判废人员"
+                  extra={
+                    <div>
+                      <p>
+                        今日共
+                        <span className={styles["user-tips"]}>
+                          {users.user_list.length}
+                        </span>
+                        人判废
+                      </p>
+                      {users.user_ignore && (
+                        <>
+                          <p>以下人员不参与判废(点击姓名加入判废人员列表)：</p>
+                          {users.user_ignore.map(user => (
+                            <Button
+                              type="danger"
+                              key={user}
+                              style={{ marginRight: 5 }}
+                              onClick={() => removeUserIgnore(user)}
+                            >
+                              {user}
+                            </Button>
+                          ))}
+                        </>
+                      )}
+                    </div>
+                  }
                 >
-                  发布排产任务
-                </Button>
-              </FormItem>
-            </Col>
-          </Row>
-        </>
-      )}
+                  <Select
+                    placeholder="请选择判废人员"
+                    mode="multiple"
+                    onChange={refreshUsers}
+                    style={{ width: "100%" }}
+                    value={users.user_list}
+                  >
+                    {operatorList.map(({ user_name, user_no }) => (
+                      <Option value={user_name} key={user_no}>
+                        {user_name}
+                      </Option>
+                    ))}
+                  </Select>
+                </FormItem>
+              </Col>
+
+              <Col span={12}>
+                <Row gutter={16}>
+                  <Col span={24}>
+                    <FormItem
+                      {...formItemLayout}
+                      label="工作时长(小时)"
+                      extra="点击单独编辑请假人员信息"
+                    >
+                      {users.operator_detail.map(
+                        ({ user_name, work_long_time }, idx) => (
+                          <Button
+                            type={work_long_time < 1 ? "danger" : "default"}
+                            key={user_name}
+                            style={{ marginRight: 5 }}
+                            onClick={() => editOperator(idx)}
+                          >
+                            {user_name}({work_long_time * 8})
+                          </Button>
+                        )
+                      )}
+                    </FormItem>
+                  </Col>
+                  <Col span={8}>
+                    <FormItem
+                      {...{ labelCol: { span: 12 }, wrapperCol: { span: 12 } }}
+                      label="有效缺陷数"
+                      extra="超过此数值时不判废"
+                    >
+                      <Input
+                        placeholder="请输入有效缺陷条数"
+                        value={limit}
+                        onChange={e => {
+                          setLimit(+e.target.value);
+                        }}
+                      />
+                    </FormItem>
+                  </Col>
+                  <Col span={8}>
+                    <FormItem
+                      {...{ labelCol: { span: 12 }, wrapperCol: { span: 12 } }}
+                      label="平均每人判废数"
+                      extra="系统按此信息排产"
+                    >
+                      <Input
+                        placeholder="请输入平均每人判废数"
+                        value={totalnum}
+                        onChange={e => {
+                          setTotalnum(+e.target.value);
+                        }}
+                      />
+                    </FormItem>
+                  </Col>
+                  <Col span={8}>
+                    <FormItem
+                      {...{ labelCol: { span: 12 }, wrapperCol: { span: 12 } }}
+                      label="排产精度"
+                      extra="排产任务间缺陷条数不超过此值"
+                    >
+                      <Input
+                        placeholder="请输入排产精度"
+                        value={precision}
+                        onChange={e => {
+                          setPrecision(+e.target.value);
+                        }}
+                      />
+                    </FormItem>
+                  </Col>
+                </Row>
+              </Col>
+
+              <Col span={24}>
+                <FormItem
+                  {...{
+                    labelCol: { span: 4 },
+                    wrapperCol: { span: 4, offset: 20 }
+                  }}
+                >
+                  <Button type="primary" onClick={submit}>
+                    排产计算
+                  </Button>
+                  <Button
+                    type="danger"
+                    disabled={hechaTask.task_list.length == 0}
+                    style={{ marginLeft: 20 }}
+                    onClick={publishTask}
+                  >
+                    发布排产任务
+                  </Button>
+                </FormItem>
+              </Col>
+            </Row>
+          </h2>
+        )}
+      </Skeleton>
     </Card>
   );
 };

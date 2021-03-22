@@ -216,6 +216,17 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
   const [limit, setLimit] = useState(20000);
   const [precision, setPrecision] = useState(100);
 
+  useEffect(() => {
+    let num = Number(window.localStorage.getItem("total_num") || "20000");
+    setTotalnum(num);
+
+    num = Number(window.localStorage.getItem("limit_num") || "20000");
+    setLimit(num);
+
+    num = Number(window.localStorage.getItem("precision_num") || "100");
+    setPrecision(num);
+  }, []);
+
   const editOperator = idx => {
     const { curUserIdx } = operator;
     let user = users.operator_detail[curUserIdx];
@@ -541,6 +552,10 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
                         value={limit}
                         onChange={e => {
                           setLimit(+e.target.value);
+                          window.localStorage.setItem(
+                            "limit_num",
+                            e.target.value
+                          );
                         }}
                       />
                     </FormItem>
@@ -556,6 +571,10 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
                         value={totalnum}
                         onChange={e => {
                           setTotalnum(+e.target.value);
+                          window.localStorage.setItem(
+                            "total_num",
+                            e.target.value
+                          );
                         }}
                       />
                     </FormItem>
@@ -571,6 +590,10 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
                         value={precision}
                         onChange={e => {
                           setPrecision(+e.target.value);
+                          window.localStorage.setItem(
+                            "precision_num",
+                            e.target.value
+                          );
                         }}
                       />
                     </FormItem>

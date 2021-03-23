@@ -28,7 +28,7 @@ const RangePicker = DatePicker.RangePicker;
 moment.locale("zh-cn");
 
 import { useSetState } from "react-use";
-import { handleTasklist, handleCarts } from "./models/addcart";
+import { handleTasklist } from "./models/addcart";
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -305,10 +305,6 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
   };
 
   const onDateChange = (dates, daterange) => {
-    dispatch({
-      type: "addcart/updateAllCheckList",
-      payload: { daterange }
-    });
     setDates(dates);
   };
 
@@ -336,13 +332,11 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
       message.error("排产失败，请稍后重试");
       return;
     }
-    let printCartList = await handleCarts(hechaTask.task_list);
 
     dispatch({
       type: "addcart/setStore",
       payload: {
         hechaTask,
-        printCartList,
         hechaLoading: false
       }
     });

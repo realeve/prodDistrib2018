@@ -6,10 +6,24 @@ import { setStore } from "@/utils/lib";
 
 import * as R from "ramda";
 
+const sortCarts = arr => {
+  let res = arr.sort((a, b) => {
+    let res = a[3].localeCompare(b[3]);
+    if (res === 0) {
+      res = a[4].localeCompare(b[4]);
+      if (res === 0) {
+        res = a[2].localeCompare(b[2]);
+      }
+    }
+    return res;
+  });
+  res = res.map(([idx, ...item], i) => [i + 1, ...item]);
+  return res;
+};
 function* getCarts(task_list, call) {
   const printCartList = {
     data: [],
-    rows: 0,
+    rows: task_list.length,
     time: "",
     title: "图核判废确认单",
     header: [
@@ -20,25 +34,31 @@ function* getCarts(task_list, call) {
       "品种",
       "判废量",
       "判废人员",
+      "判废日期",
       "确认签字"
     ]
   };
-
-  let idx = 1;
-  task_list.forEach(({ user_name, data }) => {
-    let res = data.map(({ type, cart_number, product_name, pf_num }) => [
+  let idx = 0;
+  printCartList.data = task_list.map(
+    ({
+      proc_name,
+      user_name,
+      cart_number,
+      product_name,
+      pf_num,
+      operate_date
+    }) => [
       idx++,
       cart_number,
       "",
-      type == 0 ? "码后" : "丝印",
+      proc_name,
       product_name,
       pf_num,
       user_name,
+      operate_date,
       "  "
-    ]);
-    printCartList.data = [...printCartList.data, ...res];
-  });
-  printCartList.rows = printCartList.data.length;
+    ]
+  );
 
   // 获取冠字信息
   let carts = R.pluck(1)(printCartList.data);
@@ -53,68 +73,77 @@ function* getCarts(task_list, call) {
     return item;
   });
 
+  printCartList.data = sortCarts(printCartList.data);
+
   return printCartList;
 }
 
-export const handleCarts = async task_list => {
-  const printCartList = {
-    data: [],
-    rows: 0,
-    time: "",
-    title: "图核判废确认单",
-    header: [
-      "序号",
-      "车号",
-      "冠字",
-      "类型",
-      "品种",
-      "判废量",
-      "判废人员",
-      "确认签字"
-    ]
-  };
+// export const handleCarts = async task_list => {
+//   const printCartList = {
+//     data: [],
+//     rows: 0,
+//     time: "",
+//     title: "图核判废确认单",
+//     header: [
+//       "序号",
+//       "车号",
+//       "冠字",
+//       "类型",
+//       "品种",
+//       "判废量",
+//       "判废人员",
+//       "确认签字"
+//     ]
+//   };
 
-  let idx = 1;
-  task_list.forEach(({ user_name, data }) => {
-    let res = data.map(({ type, cart_number, product_name, pf_num }) => [
-      idx++,
-      cart_number,
-      "",
-      type == 0 ? "码后" : "丝印",
-      product_name,
-      pf_num,
-      user_name,
-      "  "
-    ]);
-    printCartList.data = [...printCartList.data, ...res];
-  });
-  printCartList.rows = printCartList.data.length;
+//   let idx = 1;
+//   task_list.forEach(({ user_name, data }) => {
+//     let res = data.map(({ type, cart_number, product_name, pf_num }) => [
+//       idx++,
+//       cart_number,
+//       "",
+//       ["码后", "丝印", "涂布"][type],
+//       product_name,
+//       pf_num,
+//       user_name,
+//       "  "
+//     ]);
+//     printCartList.data = [...printCartList.data, ...res];
+//   });
+//   printCartList.rows = printCartList.data.length;
 
-  // 获取冠字信息
-  let carts = R.pluck(1)(printCartList.data);
+//   // 获取冠字信息
+//   let carts = R.pluck(1)(printCartList.data);
 
-  let { data: cartInfo } = await db.getVCbpcCartLite(carts);
-  printCartList.data = printCartList.data.map(item => {
-    let cart = item[1];
-    let res = R.find(R.propEq("cart", cart))(cartInfo);
-    if (res) {
-      item[2] = res.gz;
-    }
-    return item;
-  });
+//   let { data: cartInfo } = await db.getVCbpcCartLite(carts);
 
-  return printCartList;
-};
+//   printCartList.data = printCartList.data.map(item => {
+//     let cart = item[1];
+//     let res = R.find(R.propEq("cart", cart))(cartInfo);
+//     if (res) {
+//       item[2] = res.gz;
+//     }
+//     return item;
+//   });
+//   printCartList.data = sortCarts(printCartList.data);
+
+//   return printCartList;
+// };
 
 export const handleTasklist = hechaTask => {
   let taskList = hechaTask.task_list;
   let sum = 0,
     prodList = [];
   let srcList = {};
+
+  // 7T码后及涂布抽检，其它不抽检
+  let needCheck = detail =>
+    (detail.type == 0 && detail.product_name == "9607T") || detail.type == 2;
+
   // 求和
   taskList.forEach(item => {
     item.data.forEach(detail => {
-      if (detail.type == 0 || detail.type == 2) {
+      if (needCheck(detail)) {
         prodList.push(detail.product_name);
         sum += detail.pf_num;
       }
@@ -132,7 +161,7 @@ export const handleTasklist = hechaTask => {
   let avg = sum / prodList.length;
   taskList.forEach(item => {
     item.data.forEach(detail => {
-      if (detail.type == 0 || detail.type == 2) {
+      if (needCheck(detail)) {
         if (typeof srcList[detail.product_name] == "undefined") {
           srcList[detail.product_name] = [detail];
         } else {
@@ -401,6 +430,7 @@ export default {
         }
       });
 
+      // TODO 获取M97打印车号列表对应的车号名单
       let allCheckList = yield call(db.getVCbpcCartlist, {
         tstart,
         tend,
@@ -408,9 +438,14 @@ export default {
         tend2: tend
       });
 
+      // TODO 需要优化查询语句，只处理当天判废的
+      let printCartList = yield call(db.getPFLogs, { tstart, tend });
+
+      // let printCartList = yield getCarts(details, call);
+
       yield put({
         type: "setStore",
-        payload: { allCheckList }
+        payload: { allCheckList, printCartList }
       });
     },
     // 核查排产
@@ -430,14 +465,12 @@ export default {
       });
       let hechaTask = yield call(db.getHechaTasks, params);
       hechaTask = handleTasklist(hechaTask);
-      let printCartList = yield getCarts(hechaTask.task_list, call);
 
       // console.log(hechaTask);
       yield put({
         type: "setStore",
         payload: {
           hechaTask,
-          printCartList,
           hechaLoading: false
         }
       });
@@ -454,15 +487,12 @@ export default {
       } = yield call(db.getPrintHechatask);
       let hechaTask = JSON.parse(task_info);
 
-      let printCartList = yield getCarts(hechaTask.task_list, call);
-
       yield put({
         type: "setStore",
         payload: {
           hechaTask,
           hechaLoading: false,
-          rec_time,
-          printCartList
+          rec_time
         }
       });
     },
@@ -537,12 +567,23 @@ export default {
       codeList.data = [...res.data, ...codeList.data];
       codeList.rows = codeList.data.length;
 
+      let allCheckList = yield call(db.getVCbpcCartlist, {
+        tstart,
+        tend,
+        tstart2: tstart,
+        tend2: tend
+      });
+
+      let printCartList = yield call(db.getPFLogs, { tstart, tend });
+
       yield put({
         type: "setStore",
         payload: {
           pfNums,
           pfList: codeList,
-          hechaLoading: false
+          hechaLoading: false,
+          printCartList,
+          allCheckList
         }
       });
     }

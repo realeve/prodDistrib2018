@@ -187,9 +187,19 @@ export const getVCbpcCartlist = params =>
         return res;
       })
     : axios({
-        url: "/373/c990d890b4/array.json",
+        url: "/1263/53a08bed25/array.json",
         params
       });
+
+/**
+ *   @database: { 全幅面 }
+ *   @desc:     { 指定时间范围判活原始记录 }
+ */
+export const getPFLogs = params =>
+  axios({
+    url: DEV ? "@/mock/1262_ad0e9174ae.json" : "/1262/ad0e9174ae.array",
+    params
+  });
 
 /**
 *   @database: { 号码三合一 }

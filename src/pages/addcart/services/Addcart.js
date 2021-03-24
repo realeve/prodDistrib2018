@@ -87,13 +87,14 @@ export const getPrintSampleCartlist = params =>
 /**
  *   @database: { MES_MAIN }
  *   @desc:     { 图核排产_人员列表 }
+ *   DEV
+    ? mock(require("@/mock/365_2f288db095.json"))
+    :
  */
 export const getUserList = () =>
-  DEV
-    ? mock(require("@/mock/365_2f288db095.json"))
-    : axios({
-        url: "/365/2f288db095.json"
-      });
+  axios({
+    url: `${window.location.origin}/data/user_list.json` // "/365/2f288db095.json"
+  });
 
 // export const getUserList = () => mock(require('../../../../mock/userList.js'));
 

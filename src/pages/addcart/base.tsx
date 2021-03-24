@@ -410,7 +410,7 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
 
       <h2>1.任务起始时间</h2>
       <Row gutter={16}>
-        <Col span={12}>
+        <Col span={6}>
           <FormItem {...formItemLayout} label="生产日期">
             <RangePicker
               value={dates}
@@ -423,6 +423,128 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
             />
           </FormItem>
         </Col>
+        <Col span={18}>
+          <Col span={8}>
+            <FormItem
+              {...{ labelCol: { span: 12 }, wrapperCol: { span: 12 } }}
+              label="有效缺陷数"
+              extra="超过此数值时不判废"
+            >
+              <Input
+                placeholder="请输入有效缺陷条数"
+                value={limit}
+                onChange={e => {
+                  setLimit(+e.target.value);
+                  window.localStorage.setItem("limit_num", e.target.value);
+                }}
+              />
+            </FormItem>
+          </Col>
+          <Col span={8}>
+            <FormItem
+              {...{ labelCol: { span: 12 }, wrapperCol: { span: 12 } }}
+              label="平均每人判废数"
+              extra="系统按此信息排产"
+            >
+              <Input
+                placeholder="请输入平均每人判废数"
+                value={totalnum}
+                onChange={e => {
+                  setTotalnum(+e.target.value);
+                  window.localStorage.setItem("total_num", e.target.value);
+                }}
+              />
+            </FormItem>
+          </Col>
+          <Col span={8}>
+            <FormItem
+              {...{ labelCol: { span: 12 }, wrapperCol: { span: 12 } }}
+              label="排产精度"
+              extra="排产任务间缺陷条数不超过此值"
+            >
+              <Input
+                placeholder="请输入排产精度"
+                value={precision}
+                onChange={e => {
+                  setPrecision(+e.target.value);
+                  window.localStorage.setItem("precision_num", e.target.value);
+                }}
+              />
+            </FormItem>
+          </Col>
+        </Col>
+        <Col span={12}>
+          <FormItem
+            {...formItemLayout}
+            label="判废人员"
+            extra={
+              <div>
+                <p>
+                  今日共
+                  <span className={styles["user-tips"]}>
+                    {users.user_list.length}
+                  </span>
+                  人判废
+                </p>
+                {users.user_ignore && (
+                  <>
+                    <p>以下人员不参与判废(点击姓名加入判废人员列表)：</p>
+                    {users.user_ignore.map(user => (
+                      <Button
+                        type="danger"
+                        key={user}
+                        style={{ marginRight: 5 }}
+                        onClick={() => removeUserIgnore(user)}
+                      >
+                        {user}
+                      </Button>
+                    ))}
+                  </>
+                )}
+              </div>
+            }
+          >
+            <Select
+              placeholder="请选择判废人员"
+              mode="multiple"
+              onChange={refreshUsers}
+              style={{ width: "100%" }}
+              value={users.user_list}
+            >
+              {operatorList.map(({ user_name, user_no }) => (
+                <Option value={user_name} key={user_no}>
+                  {user_name}
+                </Option>
+              ))}
+            </Select>
+          </FormItem>
+        </Col>
+
+        <Col span={12}>
+          <Row gutter={16}>
+            <Col span={24}>
+              <FormItem
+                {...formItemLayout}
+                label="工作时长(小时)"
+                extra="点击单独编辑请假人员信息"
+              >
+                {users.operator_detail.map(
+                  ({ user_name, work_long_time }, idx) => (
+                    <Button
+                      type={work_long_time < 1 ? "danger" : "default"}
+                      key={user_name}
+                      style={{ marginRight: 5 }}
+                      onClick={() => editOperator(idx)}
+                    >
+                      {user_name}({work_long_time * 8})
+                    </Button>
+                  )
+                )}
+              </FormItem>
+            </Col>
+          </Row>
+        </Col>
+
         <Col span={12}>
           <FormItem {...formTailLayout}>
             <Button type="primary" onClick={init}>
@@ -467,135 +589,6 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
             </Row>
 
             <Row gutter={16}>
-              <Col span={12}>
-                <FormItem
-                  {...formItemLayout}
-                  label="判废人员"
-                  extra={
-                    <div>
-                      <p>
-                        今日共
-                        <span className={styles["user-tips"]}>
-                          {users.user_list.length}
-                        </span>
-                        人判废
-                      </p>
-                      {users.user_ignore && (
-                        <>
-                          <p>以下人员不参与判废(点击姓名加入判废人员列表)：</p>
-                          {users.user_ignore.map(user => (
-                            <Button
-                              type="danger"
-                              key={user}
-                              style={{ marginRight: 5 }}
-                              onClick={() => removeUserIgnore(user)}
-                            >
-                              {user}
-                            </Button>
-                          ))}
-                        </>
-                      )}
-                    </div>
-                  }
-                >
-                  <Select
-                    placeholder="请选择判废人员"
-                    mode="multiple"
-                    onChange={refreshUsers}
-                    style={{ width: "100%" }}
-                    value={users.user_list}
-                  >
-                    {operatorList.map(({ user_name, user_no }) => (
-                      <Option value={user_name} key={user_no}>
-                        {user_name}
-                      </Option>
-                    ))}
-                  </Select>
-                </FormItem>
-              </Col>
-
-              <Col span={12}>
-                <Row gutter={16}>
-                  <Col span={24}>
-                    <FormItem
-                      {...formItemLayout}
-                      label="工作时长(小时)"
-                      extra="点击单独编辑请假人员信息"
-                    >
-                      {users.operator_detail.map(
-                        ({ user_name, work_long_time }, idx) => (
-                          <Button
-                            type={work_long_time < 1 ? "danger" : "default"}
-                            key={user_name}
-                            style={{ marginRight: 5 }}
-                            onClick={() => editOperator(idx)}
-                          >
-                            {user_name}({work_long_time * 8})
-                          </Button>
-                        )
-                      )}
-                    </FormItem>
-                  </Col>
-                  <Col span={8}>
-                    <FormItem
-                      {...{ labelCol: { span: 12 }, wrapperCol: { span: 12 } }}
-                      label="有效缺陷数"
-                      extra="超过此数值时不判废"
-                    >
-                      <Input
-                        placeholder="请输入有效缺陷条数"
-                        value={limit}
-                        onChange={e => {
-                          setLimit(+e.target.value);
-                          window.localStorage.setItem(
-                            "limit_num",
-                            e.target.value
-                          );
-                        }}
-                      />
-                    </FormItem>
-                  </Col>
-                  <Col span={8}>
-                    <FormItem
-                      {...{ labelCol: { span: 12 }, wrapperCol: { span: 12 } }}
-                      label="平均每人判废数"
-                      extra="系统按此信息排产"
-                    >
-                      <Input
-                        placeholder="请输入平均每人判废数"
-                        value={totalnum}
-                        onChange={e => {
-                          setTotalnum(+e.target.value);
-                          window.localStorage.setItem(
-                            "total_num",
-                            e.target.value
-                          );
-                        }}
-                      />
-                    </FormItem>
-                  </Col>
-                  <Col span={8}>
-                    <FormItem
-                      {...{ labelCol: { span: 12 }, wrapperCol: { span: 12 } }}
-                      label="排产精度"
-                      extra="排产任务间缺陷条数不超过此值"
-                    >
-                      <Input
-                        placeholder="请输入排产精度"
-                        value={precision}
-                        onChange={e => {
-                          setPrecision(+e.target.value);
-                          window.localStorage.setItem(
-                            "precision_num",
-                            e.target.value
-                          );
-                        }}
-                      />
-                    </FormItem>
-                  </Col>
-                </Row>
-              </Col>
-
               <Col span={24}>
                 <FormItem
                   {...{

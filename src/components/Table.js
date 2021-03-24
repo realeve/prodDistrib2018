@@ -31,7 +31,7 @@ class Tables extends Component {
       dataSource: [],
       total: 10,
       page: 1,
-      pageSize: 10,
+      pageSize: props.pageSize || 10,
       columns: [],
       source: "",
       timing: "",
@@ -282,7 +282,7 @@ class Tables extends Component {
           pagination={false}
           size="medium"
           onChange={this.handleChange}
-          footer={() => `${source} (共耗时${timing})`}
+          // footer={() => `${source} (共耗时${timing})`}
         />
         <Pagination
           className="ant-table-pagination"

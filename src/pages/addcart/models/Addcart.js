@@ -6,130 +6,6 @@ import { setStore } from "@/utils/lib";
 
 import * as R from "ramda";
 
-const sortCarts = arr => {
-  let res = arr.sort((a, b) => {
-    let res = a[3].localeCompare(b[3]);
-    if (res === 0) {
-      res = a[4].localeCompare(b[4]);
-      if (res === 0) {
-        res = a[2].localeCompare(b[2]);
-      }
-    }
-    return res;
-  });
-  res = res.map(([idx, ...item], i) => [i + 1, ...item]);
-  return res;
-};
-function* getCarts(task_list, call) {
-  const printCartList = {
-    data: [],
-    rows: task_list.length,
-    time: "",
-    title: "图核判废确认单",
-    header: [
-      "序号",
-      "车号",
-      "冠字",
-      "类型",
-      "品种",
-      "判废量",
-      "判废人员",
-      "判废日期",
-      "确认签字"
-    ]
-  };
-  let idx = 0;
-  printCartList.data = task_list.map(
-    ({
-      proc_name,
-      user_name,
-      cart_number,
-      product_name,
-      pf_num,
-      operate_date
-    }) => [
-      idx++,
-      cart_number,
-      "",
-      proc_name,
-      product_name,
-      pf_num,
-      user_name,
-      operate_date,
-      "  "
-    ]
-  );
-
-  // 获取冠字信息
-  let carts = R.pluck(1)(printCartList.data);
-
-  let { data: cartInfo } = yield call(db.getVCbpcCartLite, carts);
-  printCartList.data = printCartList.data.map(item => {
-    let cart = item[1];
-    let res = R.find(R.propEq("cart", cart))(cartInfo);
-    if (res) {
-      item[2] = res.gz;
-    }
-    return item;
-  });
-
-  printCartList.data = sortCarts(printCartList.data);
-
-  return printCartList;
-}
-
-// export const handleCarts = async task_list => {
-//   const printCartList = {
-//     data: [],
-//     rows: 0,
-//     time: "",
-//     title: "图核判废确认单",
-//     header: [
-//       "序号",
-//       "车号",
-//       "冠字",
-//       "类型",
-//       "品种",
-//       "判废量",
-//       "判废人员",
-//       "确认签字"
-//     ]
-//   };
-
-//   let idx = 1;
-//   task_list.forEach(({ user_name, data }) => {
-//     let res = data.map(({ type, cart_number, product_name, pf_num }) => [
-//       idx++,
-//       cart_number,
-//       "",
-//       ["码后", "丝印", "涂布"][type],
-//       product_name,
-//       pf_num,
-//       user_name,
-//       "  "
-//     ]);
-//     printCartList.data = [...printCartList.data, ...res];
-//   });
-//   printCartList.rows = printCartList.data.length;
-
-//   // 获取冠字信息
-//   let carts = R.pluck(1)(printCartList.data);
-
-//   let { data: cartInfo } = await db.getVCbpcCartLite(carts);
-
-//   printCartList.data = printCartList.data.map(item => {
-//     let cart = item[1];
-//     let res = R.find(R.propEq("cart", cart))(cartInfo);
-//     if (res) {
-//       item[2] = res.gz;
-//     }
-//     return item;
-//   });
-//   printCartList.data = sortCarts(printCartList.data);
-
-//   return printCartList;
-// };
-
 export const handleTasklist = hechaTask => {
   let taskList = hechaTask.task_list;
   let sum = 0,
@@ -216,7 +92,12 @@ export default {
       abnormal: 0
     },
     operatorList: [],
-    hechaTask: { task_list: [], unhandle_carts: [], unupload_carts: [] },
+    hechaTask: {
+      task_list: [],
+      unhandle_carts: [],
+      unupload_carts: [],
+      uncomplete: []
+    },
     hechaLoading: false,
     rec_time: "",
     pfNums: [],
@@ -441,8 +322,6 @@ export default {
       // TODO 需要优化查询语句，只处理当天判废的
       let printCartList = yield call(db.getPFLogs, { tstart, tend });
 
-      // let printCartList = yield getCarts(details, call);
-
       yield put({
         type: "setStore",
         payload: { allCheckList, printCartList }
@@ -617,7 +496,7 @@ export default {
         }
 
         // 自动排产载入人员信息
-        if (pathname === `/${namespace}/task`) {
+        if ([`/${namespace}/task`, `/${namespace}/code`].includes(pathname)) {
           const [tstart, tend] = dateRanges["今天"];
           const [ts, te] = [tstart.format("YYYYMMDD"), tend.format("YYYYMMDD")];
           await dispatch({

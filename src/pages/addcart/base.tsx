@@ -304,10 +304,6 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
     });
   };
 
-  const onDateChange = (dates, daterange) => {
-    setDates(dates);
-  };
-
   // 排产
   const dispatchTasks = async params => {
     // 重置
@@ -315,7 +311,12 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
       type: "addcart/setStore",
       payload: {
         hechaLoading: true,
-        hechaTask: { task_list: [], unhandle_carts: [], unupload_carts: [] }
+        hechaTask: {
+          task_list: [],
+          unhandle_carts: [],
+          unupload_carts: [],
+          uncomplete: []
+        }
       }
     });
 
@@ -415,7 +416,7 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
               value={dates}
               ranges={dateRanges}
               format="YYYYMMDD"
-              onChange={onDateChange}
+              onChange={setDates}
               locale={{
                 rangePlaceholder: ["开始日期", "结束日期"]
               }}

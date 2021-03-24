@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Row, Col, Card, Empty, Skeleton, DatePicker } from "antd";
 import styles from "./Report.less";
 import { connect } from "dva";
@@ -22,9 +22,35 @@ function UnhandleInfo({
   pfNums,
   dateRange,
   pfList,
-  dispatch
+  dispatch,
+  uncomplete
 }) {
-  // console.log(unhandle_carts, unupload_carts);
+  let [state, setState] = useState({
+    rows: 0,
+    title: "已领取车号列表",
+    data: [],
+    header: ["车号", "判废状态", "判废量", "开始时间", "品种", "工序"]
+  });
+  useEffect(() => {
+    let nextState = {
+      rows: uncomplete.length,
+      title: "已领取车号列表",
+      data: uncomplete.map(item => [
+        item.cart_number,
+        item.item_flag == 2
+          ? "判废中"
+          : item.item_flag == 3
+          ? "已完成"
+          : "未判废",
+        item.pf_num,
+        item.start_date,
+        item.product_name,
+        ["码后", "丝印", "涂后"][item.type]
+      ]),
+      header: ["车号", "判废状态", "判废量", "开始时间", "品种", "工序"]
+    };
+    setState(nextState);
+  }, [uncomplete]);
   const unhandle = loading ? (
     <Skeleton />
   ) : unhandle_carts.length == 0 ? (
@@ -140,6 +166,16 @@ function UnhandleInfo({
               </div>
             </Card>
           </Col>
+          <Col span={12} md={12} sm={24} style={{ marginTop: 10 }}>
+            <Card hoverable>
+              <div>
+                <div className={styles.cartListTitle}>
+                  <span className={styles.title}>已领取车号</span>
+                </div>
+                <VTable pageSize={5} dataSrc={state} loading={loading} />
+              </div>
+            </Card>
+          </Col>
         </Col>
         <Col span={12} md={12} sm={24} style={{ marginTop: 10 }}>
           <Card hoverable>
@@ -180,7 +216,10 @@ function UnhandleInfo({
 }
 
 const mapStateToProps = state => ({
-  ...R.pick(["unhandle_carts", "unupload_carts"], state.addcart.hechaTask),
+  ...R.pick(
+    ["unhandle_carts", "unupload_carts", "uncomplete"],
+    state.addcart.hechaTask
+  ),
   rec_time: state.addcart.rec_time,
   pfNums: state.addcart.pfNums,
   loading: state.addcart.hechaLoading,

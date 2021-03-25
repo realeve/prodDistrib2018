@@ -22,6 +22,16 @@ export const getCompleteCarts: (params: {
     params: { tstart, tend }
   }).then(res => res.data);
 
+/**
+ *   @database: { MES系统_生产环境 }
+ *   @desc:     { 图核排产_号码完工产品列表 }
+ */
+export const getCodeCompleteCarts = params =>
+  axios({
+    url: DEV ? "@/mock/1265_6fd7879f29.json" : "/1265/6fd7879f29.array",
+    params
+  }).then(res => res.data);
+
 // 判废人员名单信息存储
 const KEY_OPERATOR = "imagecheck_operator";
 export const saveOperatorList = (users, key = KEY_OPERATOR) => {
@@ -36,10 +46,11 @@ export const loadOperatorList = (key = KEY_OPERATOR) => {
   return JSON.parse(users);
 };
 
-export const saveMachineList = machines =>
-  saveOperatorList(machines, "imagecheck_machine");
+export const saveMachineList = (machines, key = "imagecheck_machine") =>
+  saveOperatorList(machines, key);
 
-export const loadMachineList = () => loadOperatorList("imagecheck_machine");
+export const loadMachineList = (key = "imagecheck_machine") =>
+  loadOperatorList(key);
 
 /**
 *   @database: { 质量信息系统 }
@@ -62,9 +73,18 @@ export const addPrintHechatask = params =>
 // 开始图核排产
 export const getHechaTasks = data =>
   http({
-    url: DEV
+    url: !DEV
       ? "http://localhost:3000/api/hecha/task"
       : "http://10.8.1.27:4000/api/hecha/task", // 'http://localhost:3000/api/hecha/task', //
+    method: "post",
+    data
+  }).then(({ data }) => data);
+
+export const getCodeTasks = data =>
+  http({
+    url: !DEV
+      ? "http://localhost:3000/api/hecha/code"
+      : "http://10.8.1.27:4000/api/hecha/code", // 'http://localhost:3000/api/hecha/task', //
     method: "post",
     data
   }).then(({ data }) => data);

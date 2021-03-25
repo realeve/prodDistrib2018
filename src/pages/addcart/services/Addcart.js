@@ -116,7 +116,7 @@ export const loadOperatorList = () => {
 // 开始图核排产
 export const getHechaTasks = data =>
   http({
-    url: DEV
+    url: !DEV
       ? "http://localhost:3000/api/hecha/task"
       : "http://10.8.1.27:4000/api/hecha/task", //"http://10.8.1.27:4000/api/hecha/task", // 'http://localhost:3000/api/hecha/task', //
     method: "post",
@@ -144,11 +144,14 @@ export const addPrintHechatask = params =>
  *   @database: { 质量信息系统 }
  *   @desc:     { 读取最近排产任务 }
  */
-export const getPrintHechatask = () =>
+export const getPrintHechatask = (tasktype = "piaomian") =>
   DEV
     ? mock(require("@/mock/367_ffd6916add.json"))
     : axios({
-        url: "/367/ffd6916add.json"
+        url: "/367/ffd6916add.json",
+        params: {
+          tasktype
+        }
       });
 
 /**

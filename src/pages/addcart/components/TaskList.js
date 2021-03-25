@@ -84,7 +84,7 @@ const taskList = ({ task_list, loading, allCheckList, printCartList }) => {
                   <span>{delta_num}</span>
                 </li>
                 <li>
-                  <span>码后7T大万数:</span>
+                  <span>码后7T/涂布2T大万数:</span>
                   <span>{prod7}</span>
                 </li>
                 <li>
@@ -112,7 +112,9 @@ const taskList = ({ task_list, loading, allCheckList, printCartList }) => {
                         style={
                           item.is_check
                             ? { background: "#93f29b" }
-                            : item.product_name === "9607T" && item.type == 0
+                            : (item.product_name === "9607T" &&
+                                item.type == 0) ||
+                              (item.product_name === "9602T" && item.type == 2)
                             ? { background: "#f2939b" }
                             : null
                         }

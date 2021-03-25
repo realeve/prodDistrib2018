@@ -3,7 +3,6 @@ import { connect } from "dva";
 import {
   Card,
   Form,
-  Input,
   InputNumber,
   Button,
   Select,
@@ -65,17 +64,14 @@ const MachineItem = ({ label, machines, value, onChange, cartsNum }) => (
 );
 
 interface IMachineProp {
-  siyin: string[];
-  mahou: string[];
-  tubu: string[];
+  code: string[];
 }
 const getCartsByMachine = (carts: string[], machine: IMachineProp) => {
   const getCarts = (key: keyof IMachineProp) =>
     carts.filter(item => machine[key].includes(item[3])).map(item => item[1]);
-  let siyin = getCarts("siyin");
-  let mahou = getCarts("mahou");
-  let tubu = getCarts("tubu");
-  return { siyin, mahou, tubu };
+
+  let code = getCarts("code");
+  return { code };
 };
 
 interface IBaseProps {
@@ -100,13 +96,14 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
     setMachineList([]);
     setLoading(true);
 
-    db.getCompleteCarts({ tstart, tend })
+    db.getCodeCompleteCarts({ tstart, tend })
       .then(res => {
         setCarts(res);
 
         // 机台列表
         let machine = R.uniq(R.map(R.pick([0, 2, 3]), res));
         machine = machine.sort((a, b) => a[2].localeCompare(b[2]));
+
         setMachineList(machine);
       })
       .finally(() => {
@@ -115,15 +112,11 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
   };
 
   const [machineConfig, setMachineConfig] = useSetState<IMachineProp>({
-    siyin: [],
-    mahou: [],
-    tubu: []
+    code: []
   });
 
   const [cartsConfig, setCartsConfig] = useSetState<IMachineProp>({
-    siyin: [],
-    mahou: [],
-    tubu: []
+    code: []
   });
 
   const [users, setUsers] = useSetState({
@@ -135,16 +128,16 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
   // 初始数据载入
   useEffect(() => {
     // 用户设置
-    let res = db.loadOperatorList();
+    let res = db.loadOperatorList("code_operator");
     setUsers(res);
 
     // 设备设置
-    let machine = db.loadMachineList();
+    let machine = db.loadMachineList("code_machine");
     setMachineConfig(machine);
   }, []);
 
   useEffect(() => {
-    db.saveOperatorList(users);
+    db.saveOperatorList(users, "code_operator");
   }, [users]);
 
   useEffect(() => {
@@ -153,7 +146,7 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
      */
     let cart = getCartsByMachine(carts, machineConfig);
     setCartsConfig(cart);
-    db.saveMachineList(machineConfig);
+    db.saveMachineList(machineConfig, "code_machine");
   }, [machineConfig, carts]);
 
   const getUserInfoByName = user =>
@@ -212,21 +205,6 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
     curWorkLongTime: 1
   });
 
-  const [totalnum, setTotalnum] = useState(20000);
-  const [limit, setLimit] = useState(20000);
-  const [precision, setPrecision] = useState(100);
-
-  useEffect(() => {
-    let num = Number(window.localStorage.getItem("total_num") || "20000");
-    setTotalnum(num);
-
-    num = Number(window.localStorage.getItem("limit_num") || "20000");
-    setLimit(num);
-
-    num = Number(window.localStorage.getItem("precision_num") || "100");
-    setPrecision(num);
-  }, []);
-
   const editOperator = idx => {
     const { curUserIdx } = operator;
     let user = users.operator_detail[curUserIdx];
@@ -283,7 +261,7 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
         let params = {
           task_info,
           rec_time: lib.now(),
-          type: "piaomian"
+          type: "code"
         };
         let { data } = await db.addPrintHechatask(params);
         let success = data[0].affected_rows > 0;
@@ -321,7 +299,7 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
       }
     });
 
-    let hechaTask = await db.getHechaTasks(params).catch(e => {
+    let hechaTask = await db.getCodeTasks(params).catch(e => {
       return null;
     });
     if (!hechaTask) {
@@ -358,10 +336,7 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
       need_convert: 0,
       tstart,
       tend,
-      user_list: users.operator_detail,
-      limit,
-      precision,
-      totalnum
+      user_list: users.operator_detail
     };
   };
 
@@ -424,55 +399,12 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
             />
           </FormItem>
         </Col>
-        <Col span={18}>
-          <Col span={8}>
-            <FormItem
-              {...{ labelCol: { span: 12 }, wrapperCol: { span: 12 } }}
-              label="有效缺陷数"
-              extra="超过此数值时不判废"
-            >
-              <Input
-                placeholder="请输入有效缺陷条数"
-                value={limit}
-                onChange={e => {
-                  setLimit(+e.target.value);
-                  window.localStorage.setItem("limit_num", e.target.value);
-                }}
-              />
-            </FormItem>
-          </Col>
-          <Col span={8}>
-            <FormItem
-              {...{ labelCol: { span: 12 }, wrapperCol: { span: 12 } }}
-              label="平均每人判废数"
-              extra="系统按此信息排产"
-            >
-              <Input
-                placeholder="请输入平均每人判废数"
-                value={totalnum}
-                onChange={e => {
-                  setTotalnum(+e.target.value);
-                  window.localStorage.setItem("total_num", e.target.value);
-                }}
-              />
-            </FormItem>
-          </Col>
-          <Col span={8}>
-            <FormItem
-              {...{ labelCol: { span: 12 }, wrapperCol: { span: 12 } }}
-              label="排产精度"
-              extra="排产任务间缺陷条数不超过此值"
-            >
-              <Input
-                placeholder="请输入排产精度"
-                value={precision}
-                onChange={e => {
-                  setPrecision(+e.target.value);
-                  window.localStorage.setItem("precision_num", e.target.value);
-                }}
-              />
-            </FormItem>
-          </Col>
+        <Col span={12}>
+          <FormItem {...formTailLayout}>
+            <Button type="primary" onClick={init}>
+              查询生产信息
+            </Button>
+          </FormItem>
         </Col>
         <Col span={12}>
           <FormItem
@@ -545,14 +477,6 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
             </Col>
           </Row>
         </Col>
-
-        <Col span={12}>
-          <FormItem {...formTailLayout}>
-            <Button type="primary" onClick={init}>
-              查询生产信息
-            </Button>
-          </FormItem>
-        </Col>
       </Row>
 
       <Skeleton loading={loading} active>
@@ -562,30 +486,12 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
             <Row gutter={16}>
               <MachineItem
                 machines={machineList}
-                label="丝印"
-                value={machineConfig.siyin}
-                onChange={siyin => {
-                  setMachineConfig({ siyin });
+                label="印码"
+                value={machineConfig.code}
+                onChange={code => {
+                  setMachineConfig({ code });
                 }}
-                cartsNum={cartsConfig.siyin.length}
-              />
-              <MachineItem
-                machines={machineList}
-                label="码后核查"
-                value={machineConfig.mahou}
-                onChange={mahou => {
-                  setMachineConfig({ mahou });
-                }}
-                cartsNum={cartsConfig.mahou.length}
-              />
-              <MachineItem
-                machines={machineList}
-                label="涂后核查"
-                value={machineConfig.tubu}
-                onChange={tubu => {
-                  setMachineConfig({ tubu });
-                }}
-                cartsNum={cartsConfig.tubu.length}
+                cartsNum={cartsConfig.code.length}
               />
             </Row>
 

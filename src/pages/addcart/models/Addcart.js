@@ -98,6 +98,12 @@ export default {
       unupload_carts: [],
       uncomplete: []
     },
+    codeTask: {
+      task_list: [],
+      unhandle_carts: [],
+      unupload_carts: [],
+      uncomplete: []
+    },
     hechaLoading: false,
     rec_time: "",
     pfNums: [],
@@ -363,7 +369,10 @@ export default {
       });
       let {
         data: [{ task_info, rec_time }]
-      } = yield call(db.getPrintHechatask);
+      } = yield call(
+        db.getPrintHechatask,
+        window.location.href.includes("/code") ? "code" : "piaomian"
+      );
       let hechaTask = JSON.parse(task_info);
 
       yield put({

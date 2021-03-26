@@ -29,7 +29,7 @@ moment.locale("zh-cn");
 
 import { useSetState } from "react-use";
 import { handleTasklist } from "./models/addcart";
-
+import router from "umi/router";
 const FormItem = Form.Item;
 const Option = Select.Option;
 const R = require("ramda");
@@ -547,9 +547,22 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
         </Col>
 
         <Col span={12}>
-          <FormItem {...formTailLayout}>
+          <FormItem
+            {...{
+              labelCol: { span: 6 },
+              wrapperCol: { span: 12, offset: 12 }
+            }}
+          >
             <Button type="primary" onClick={init}>
               查询生产信息
+            </Button>
+            <Button
+              onClick={() => {
+                router.push("/addcart/code");
+              }}
+              style={{ marginLeft: 20 }}
+            >
+              进入号码排产
             </Button>
           </FormItem>
         </Col>

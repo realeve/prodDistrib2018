@@ -8,7 +8,8 @@ import * as R from "ramda";
 
 export const handleTasklist = hechaTask => {
   let taskList = hechaTask.task_list;
-  let sum = 0,
+  // 分品种按比例抽
+  let sum = {},
     prodList = [];
   let srcList = {};
 
@@ -21,20 +22,29 @@ export const handleTasklist = hechaTask => {
     item.data.forEach(detail => {
       if (needCheck(detail)) {
         prodList.push(detail.product_name);
-        sum += detail.pf_num;
+
+        // 7T按4%，其它3.5%抽检
+        let pfnum =
+          detail.pf_num * (detail.product_name == "9607T" ? 0.04 : 0.035);
+
+        if (sum[detail.product_name]) {
+          sum[detail.product_name] += pfnum;
+        } else {
+          sum[detail.product_name] = pfnum;
+        }
       }
     });
   });
   prodList = R.uniq(prodList);
 
-  // 抽检比5%;
-  sum = sum * 0.05;
+  // 抽检比4%;
+
   if (prodList.length == 0) {
     return hechaTask;
   }
 
   // 平均条数
-  let avg = sum / prodList.length;
+
   taskList.forEach(item => {
     item.data.forEach(detail => {
       if (needCheck(detail)) {
@@ -52,7 +62,7 @@ export const handleTasklist = hechaTask => {
     let status = false;
     let result = "";
     srcList[key].forEach(item => {
-      if (!status && item.pf_num > avg) {
+      if (!status && item.pf_num > sum[item.product_name]) {
         status = true;
         result = item.cart_number;
       }

@@ -73,7 +73,7 @@ export const addPrintHechatask = params =>
 // 开始图核排产
 export const getHechaTasks = data =>
   http({
-    url: !DEV
+    url: DEV
       ? "http://localhost:3000/api/hecha/task"
       : "http://10.8.1.27:4000/api/hecha/task", // 'http://localhost:3000/api/hecha/task', //
     method: "post",
@@ -82,7 +82,7 @@ export const getHechaTasks = data =>
 
 export const getCodeTasks = data =>
   http({
-    url: !DEV
+    url: DEV
       ? "http://localhost:3000/api/hecha/code"
       : "http://10.8.1.27:4000/api/hecha/code", // 'http://localhost:3000/api/hecha/task', //
     method: "post",

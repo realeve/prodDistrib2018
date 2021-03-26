@@ -1,10 +1,32 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "dva";
 import { Row, Col, Card, Empty, Skeleton } from "antd";
 import VTable from "@/components/Table";
 import styles from "./Report.less";
+import * as R from "ramda";
 
 const taskList = ({ task_list, loading, allCheckList, printCartList }) => {
+  const [prodState, setProdState] = useState([]);
+  useEffect(() => {
+    let res = R.flatten(task_list.map(item => item.data));
+    // 7T以及涂布
+    res = R.filter(
+      item =>
+        item.type == "2" || (item.type == "0" && item.product_name == "9607T")
+    )(res);
+
+    let sum = {};
+    res.forEach(item => {
+      let prod = item.product_name;
+      if (sum[prod]) {
+        sum[prod] += item.pf_num;
+      } else {
+        sum[prod] = item.pf_num;
+      }
+    });
+    let arr = Object.entries(sum).map(([prod, num]) => ({ prod, num }));
+    setProdState(arr);
+  }, [task_list]);
   const result = (
     <Row gutter={10}>
       <Col span={24} lg={24} md={24} sm={24} style={{ margin: "10px 0" }}>
@@ -154,6 +176,43 @@ const taskList = ({ task_list, loading, allCheckList, printCartList }) => {
         ) : (
           result
         )}
+      </Card>
+      <Card
+        title="各品种抽检量汇总"
+        hoverable
+        bodyStyle={{
+          padding: 15
+        }}
+        style={{
+          marginTop: 10,
+          minHeight: 250,
+          fontSize: 15
+        }}
+      >
+        <div className={styles.styles}>
+          <ul className={styles.cartList}>
+            <li>
+              <span>#</span>
+              <span>品种</span>
+              <span>总条数</span>
+              <span>抽检比例</span>
+              <span>抽检条数</span>
+            </li>
+            {prodState.map((item, i) => (
+              <li key={item.prod}>
+                <span>{i + 1}</span>
+                <span>{item.prod}</span>
+                <span>{item.num}</span>
+                <span>{item.prod == "9607T" ? "4%" : "3.5%"}</span>
+                <span>
+                  {(item.num * (item.prod == "9607T" ? 0.04 : 0.035)).toFixed(
+                    0
+                  )}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </Card>
       <VTable dataSrc={printCartList} />
       <VTable dataSrc={allCheckList} loading={loading} />

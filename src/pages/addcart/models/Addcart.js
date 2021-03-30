@@ -335,12 +335,16 @@ export default {
         tend2: tend
       });
 
+      yield put({
+        type: "setStore",
+        payload: { allCheckList }
+      });
       // TODO 需要优化查询语句，只处理当天判废的
       let printCartList = yield call(db.getPFLogs, { tstart, tend });
 
       yield put({
         type: "setStore",
-        payload: { allCheckList, printCartList }
+        payload: { printCartList }
       });
     },
     // 核查排产

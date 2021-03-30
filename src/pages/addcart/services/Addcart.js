@@ -203,6 +203,8 @@ export const getPFLogs = params =>
   axios({
     url: DEV ? "@/mock/1262_ad0e9174ae.json" : "/1262/ad0e9174ae.array",
     params
+  }).catch(e => {
+    return { data: [], title: "判废信息读取失败", rows: 0 };
   });
 
 /**

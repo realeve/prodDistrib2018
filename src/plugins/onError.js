@@ -4,8 +4,9 @@ import router from "umi/router";
 export default {
   onError(err, dispatch) {
     err.preventDefault();
-    let { data } = err.response;
-    data.url = err.config.url;
+    console.log(err);
+    let { data = {} } = err.response || { data: {} };
+    data.url = err.config?.url;
     notification.open({
       message: "错误提示",
       description: `${

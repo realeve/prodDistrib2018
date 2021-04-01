@@ -14,6 +14,7 @@ const taskList = ({ task_list, loading, allCheckList, printCartList }) => {
       item =>
         item.type == "2" || (item.type == "0" && item.product_name == "9607T")
     )(res);
+    let checkList = R.filter(item => item.is_check)(res);
 
     let sum = {};
     res.forEach(item => {
@@ -24,7 +25,14 @@ const taskList = ({ task_list, loading, allCheckList, printCartList }) => {
         sum[prod] = item.pf_num;
       }
     });
-    let arr = Object.entries(sum).map(([prod, num]) => ({ prod, num }));
+    let arr = Object.entries(sum).map(([prod, num]) => {
+      let item = checkList.find(item => item.product_name === prod);
+      return {
+        prod,
+        num,
+        cart: item ? `${item.cart_number} ( ${item.pf_num} 条 )` : ""
+      };
+    });
     setProdState(arr);
   }, [task_list]);
   const result = (
@@ -197,6 +205,7 @@ const taskList = ({ task_list, loading, allCheckList, printCartList }) => {
               <span>总条数</span>
               <span>抽检比例</span>
               <span>抽检条数</span>
+              <span>抽检大万</span>
             </li>
             {prodState.map((item, i) => (
               <li key={item.prod}>
@@ -209,6 +218,7 @@ const taskList = ({ task_list, loading, allCheckList, printCartList }) => {
                     0
                   )}
                 </span>
+                <span>{item.cart}</span>
               </li>
             ))}
           </ul>

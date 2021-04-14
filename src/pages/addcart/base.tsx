@@ -549,11 +549,17 @@ const BaseSetting = ({ operatorList, hechaTask, dispatch }: IBaseProps) => {
         <Col span={12}>
           <FormItem
             {...{
-              labelCol: { span: 6 },
+              labelCol: { span: 3 },
               wrapperCol: { span: 12, offset: 12 }
             }}
           >
-            <Button type="primary" onClick={init}>
+            <a
+              href="http://10.8.2.133:8000/table#id=1259/44f5fc8933&daterange=13"
+              target="_blank"
+            >
+              MES完工列表
+            </a>
+            <Button type="primary" onClick={init} style={{ marginLeft: 20 }}>
               查询生产信息
             </Button>
             <Button

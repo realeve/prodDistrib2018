@@ -23,7 +23,8 @@ function UnhandleInfo({
   dateRange,
   pfList,
   dispatch,
-  uncomplete
+  uncomplete,
+  task_list
 }) {
   let [state, setState] = useState({
     rows: 0,
@@ -119,6 +120,30 @@ function UnhandleInfo({
     });
   };
 
+  const [taskData, setTaskData] = useState({
+    title: "当前任务所有车号详情",
+    data: [],
+    rows: 0,
+    header: ["车号", "品种", "工序", "判废量", "生产时间"]
+  });
+
+  useEffect(() => {
+    let data = task_list.map(item => item.data);
+    data = R.flatten(data);
+    let nextData = data.map(item => [
+      item.cart_number,
+      item.product_name,
+      ["码后", "丝印", "涂布"][item.type],
+      item.pf_num,
+      item.start_date
+    ]);
+    setTaskData({
+      ...taskData,
+      data: nextData,
+      rows: nextData.length
+    });
+  }, [task_list]);
+
   return (
     <div>
       <Row gutter={10}>
@@ -145,9 +170,7 @@ function UnhandleInfo({
                 </ul>
               </div>
             </Card>
-          </Col>
-          <Col span={12} md={12} sm={24} style={{ marginTop: 10 }}>
-            <Card hoverable>
+            <Card hoverable style={{ marginTop: 20 }}>
               <div>
                 <div className={styles.cartListTitle}>
                   <span className={styles.title}>未上传车号列表</span>
@@ -176,6 +199,11 @@ function UnhandleInfo({
               </div>
             </Card>
           </Col>
+        </Col>
+        <Col span={24} md={24} sm={24} style={{ marginTop: 10 }}>
+          <Card hoverable>
+            <VTable pageSize={5} dataSrc={taskData} loading={loading} />
+          </Card>
         </Col>
         <Col span={12} md={12} sm={24} style={{ marginTop: 10 }}>
           <Card hoverable>
@@ -224,7 +252,8 @@ const mapStateToProps = state => ({
   pfNums: state.addcart.pfNums,
   loading: state.addcart.hechaLoading,
   dateRange: state.addcart.dateRange,
-  pfList: state.addcart.pfList
+  pfList: state.addcart.pfList,
+  task_list: state.addcart.hechaTask.task_list
 });
 
 export default connect(mapStateToProps)(UnhandleInfo);

@@ -16,7 +16,7 @@
     "jstat": "^1.9.3",
     "jszip": "^3.1.5",
     "lodash": "^4.17.5",
-    "moment": "^2.21.0",
+    "moment": "^2.29.4",
     "path-to-regexp": "^2.2.0",
     "pdfmake": "^0.1.38",
     "ramda": "^0.25.0",
